@@ -11,7 +11,6 @@ const invoiceRoutes = require("./routes/invoiceRoutes");
 const app = express();
 app.use(cors());
 app.use(express.json());
-// schedular.schedular();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
