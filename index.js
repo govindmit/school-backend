@@ -25,7 +25,7 @@ app.listen(PORT, () => {
 });
 
 //require database file connect db
-require("./database/conn.js");
+require("./DB/db.config.connection");
 
 //require routes file
 const router = require("./Routers/Routers");

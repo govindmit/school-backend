@@ -1,10 +1,6 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const express = require("express");
 const app = express();
-const cookieParser = require("cookie-parser");
 const mysqlconnection = require("../../DB/db.config.connection");
-app.use(cookieParser());
 
 module.exports = {
   // add role controller
@@ -14,12 +10,18 @@ module.exports = {
     if (!name) {
       return res.status(400).send({ message: "all feild is required" });
     }
-    var sql = "INSERT INTO roles (name) VALUES ('user')";
-    mysqlconnection.query(sql, function (err, result) {
-      if (err) throw err;
-      //console.log("record inserted");
-      //console.log(result);
-      res.status(201).json({ message: "data inserted", data: result });
+    const check_query = `select * from roles where name = "${name}"`;
+    mysqlconnection.query(check_query, function (err, result) {
+      //console.log(result.length);
+      if (result.length == 0) {
+        const sql = `INSERT INTO roles (name) VALUES ("${name}")`;
+        mysqlconnection.query(sql, function (err, result) {
+          if (err) throw err;
+          res.status(201).send({ message: "Data inserted", data: result });
+        });
+      } else {
+        res.status(409).send({ message: "Role Name Allready Registred" });
+      }
     });
   },
 };

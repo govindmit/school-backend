@@ -1,27 +1,29 @@
 const express = require("express");
 const router = express.Router();
 
-//####################################    REQUIRE MIDDLEWARES  ##########################
+//#####################################################################################
+//##                               REQUIRE MIDDLEWARES                                #
+//#####################################################################################
 //authorization middlewar
 const { verifyAuthToken } = require("../Middlewares/auth");
-// //aunthontication middleware
+//aunthontication middleware
 // const { verifyLoginAuthToken } = require("../Middlewares/loginauthtoken");
-// //upload image
+//upload image
 const uploads = require("../Middlewares/uploadmulter");
 
-//##########################################################################################
-//#                                    REQUIRE CONTROLLERS                                 #
-//##########################################################################################
+//######################################################################################
+//#                                REQUIRE CONTROLLERS                                 #
+//######################################################################################
 
-//#####################################  get auth controller   #######################
+//#############  Get auth controller   #######################
 const { getauthtoken } = require("../Controllers/GetAuthtoken/getauthtoken");
 
-//####################################  Roles controllers  #######################
+//#############  Roles controllers  ##########################
 const {
   addrolecontroller,
 } = require("../Controllers/RoleController/rolecontroller");
 
-// //################################  User controllers  ############################
+//#############  User controllers  ###########################
 const {
   addusercontroller,
   getusercontroller,
@@ -30,41 +32,41 @@ const {
   editusercontroller,
 } = require("../Controllers/UserController/usercontroller");
 
-//##############################    Student controller  #######################
+//############  Student controller  ##########################
 const {
   addstudentcontroller,
 } = require("../Controllers/StudentController/studentcontroller");
 
-//################################## user login reset forgot pass controller  ############
+//############  User login reset forgot pass controller  ############
 const {
   userlogincontroller,
   forgotpasswordcontroller,
   resetpasswordcontroller,
 } = require("../Controllers/AuthController/authcontroller");
 
-//##########################################################################################
-//#                                    ROUTERS                                             #
-//##########################################################################################
+//#######################################################################################
+//#                                    ROUTERS                                          #
+//#######################################################################################
 
 //get  authorization token
 router.get("/get_authorization_token", getauthtoken);
 
-// //############################## role routers    #########################
+//############################## role routers    ###############################
 router.post("/addrole", verifyAuthToken, addrolecontroller);
 
-// //#############################  user routers ################################
+//#############################  user routers ##################################
 router.post("/adduser", verifyAuthToken, addusercontroller);
 router.get("/getuser", verifyAuthToken, getusercontroller);
 router.get("/getuserdetails/:id", verifyAuthToken, getuserdetailscontroller);
 router.put("/edituser/:id", verifyAuthToken, editusercontroller);
 router.delete("/deleteuser/:id", verifyAuthToken, deleteusercontroller);
 
-// //##############################  students routes   ####################
+//##############################  students routes   ############################
 router.post("/addstudent", addstudentcontroller);
 
-// //#############################  Auth login reset forgot pas router  ###################################
+//#############################  Auth login reset forgot pas router  ###########
 router.post("/userlogin", verifyAuthToken, userlogincontroller);
 router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
-router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
+router.post("/resetpassword/:id", verifyAuthToken, resetpasswordcontroller);
 
 module.exports = router;

@@ -2,17 +2,15 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const express = require("express");
 const app = express();
-const cookieParser = require("cookie-parser");
 const mysqlconnection = require("../../DB/db.config.connection");
-app.use(cookieParser());
 
 module.exports = {
   // add student controller
   addstudentcontroller: (req, res) => {
     //console.log(req.body);
     const { firstName, lastName, user_id } = req.body;
-    if (!firstName && !lastName) {
-      return res.status(400).send({ message: "all feild is required" });
+    if (!firstName || !lastName || !user_id) {
+      return res.status(400).send({ message: "All feild is required" });
     }
     var sql = `INSERT INTO students (firstName,lastName,user_id)VALUES("${firstName}","${lastName}",${user_id})`;
     //console.log(sql);
@@ -24,7 +22,7 @@ module.exports = {
     });
   },
 
-  //get users controller
+  //get students controller
   getusercontroller: (req, res) => {
     var sql = `select users.firstname, users.lastname, users.email, users.contact, roles.name as "role" from users inner join roles on roles.id = users.role_id`;
     //console.log(sql);
@@ -35,7 +33,7 @@ module.exports = {
     });
   },
 
-  //get user details controller
+  //get student details controller
   getuserdetailscontroller: (req, res) => {
     const id = req.params.id;
     var sql = `select users.firstname, users.lastname, users.email, users.contact, roles.name as "role" from users inner join roles on roles.id = users.role_id where users.id = ${id}`;
@@ -47,7 +45,7 @@ module.exports = {
     });
   },
 
-  //edit user controller
+  //edit student controller
   editusercontroller: (req, res) => {
     console.log(req.body);
     const { firstName, lastName, email, password, contact, status, role_id } =
@@ -61,7 +59,7 @@ module.exports = {
     // });
   },
 
-  //delete user controller
+  //delete student controller
   deleteusercontroller: (req, res) => {
     const id = req.params.id;
     var sql = `delete from users where id = ${id}`;
