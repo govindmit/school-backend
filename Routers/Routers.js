@@ -44,6 +44,15 @@ const {
   resetpasswordcontroller,
 } = require("../Controllers/AuthController/authcontroller");
 
+//################        activities controllers      #########
+const {
+  addactivitycontroller,
+  getactivitycontroller,
+  getactivitydetailscontroller,
+  editactivitycontroller,
+  deleteactivitycontroller,
+} = require("../Controllers/Activities/activitiescontrollers");
+
 //#######################################################################################
 //#                                    ROUTERS                                          #
 //#######################################################################################
@@ -68,5 +77,26 @@ router.post("/addstudent", addstudentcontroller);
 router.post("/userlogin", verifyAuthToken, userlogincontroller);
 router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
 router.post("/resetpassword/:id", verifyAuthToken, resetpasswordcontroller);
+
+//#############################  activities routers  ###########################
+router.post(
+  "/addactivity",
+  verifyAuthToken,
+  uploads.single("image"),
+  addactivitycontroller
+);
+router.get("/getactivity", verifyAuthToken, getactivitycontroller);
+router.get(
+  "/getactivitydetails/:id",
+  verifyAuthToken,
+  getactivitydetailscontroller
+);
+router.put(
+  "/editactivity/:id",
+  verifyAuthToken,
+  uploads.single("image"),
+  editactivitycontroller
+);
+router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);
 
 module.exports = router;

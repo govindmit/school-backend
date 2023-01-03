@@ -13,7 +13,7 @@ app.use(express.static(__dirname + "/public"));
 app.use("/uploads", express.static("uploads"));
 
 const HOSTNAME = process.env.HOSTNAME;
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
   res.send("working fine..");
