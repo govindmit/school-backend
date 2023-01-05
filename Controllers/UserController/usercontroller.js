@@ -44,8 +44,9 @@ module.exports = {
   getusercontroller: (req, res) => {
     // const { offset, limit } = req.body;
     //console.log(offset, limit);
-    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, roles.name as "role", students.firstname as "student firstname", students.lastname as "student lastname" from users inner join roles on roles.id = users.role_id inner join students on students.user_id = users.id `;
-    console.log(sql);
+    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, roles.name as "role", students.firstName as SfirstName, students.lastName as SlastName from users inner join roles on roles.id = users.role_id  inner join students on students.user_id = users.id`;
+
+    console.log(sql, "pppppppppppppppppppppppppp");
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       //console.log(result);
