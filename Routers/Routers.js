@@ -35,6 +35,7 @@ const {
 //############  Student controller  ##########################
 const {
   addstudentcontroller,
+  getstudentcontroller,
 } = require("../Controllers/StudentController/studentcontroller");
 
 //############  User login reset forgot pass controller  ############
@@ -61,9 +62,6 @@ const {
   updateInvoice,
 } = require("../Controllers/InvoiceController/invoiceController");
 
-
-
-
 //#######################################################################################
 //#                                    ROUTERS                                          #
 //#######################################################################################
@@ -83,6 +81,7 @@ router.delete("/deleteuser/:id", verifyAuthToken, deleteusercontroller);
 
 //##############################  students routes   ############################
 router.post("/addstudent", addstudentcontroller);
+router.get("/getstudentbyuser/:id", getstudentcontroller);
 
 //#############################  Auth login reset forgot pas router  ###########
 router.post("/userlogin", verifyAuthToken, userlogincontroller);
@@ -110,9 +109,7 @@ router.put(
 );
 router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);
 
-
 //#############################  invoice routers  ###########################
-
 
 router.post("/createInvoice", CreateInvoice);
 router.get("/getInvoiceByUserId/:id?", getInvoice);
