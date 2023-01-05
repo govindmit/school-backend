@@ -53,6 +53,17 @@ const {
   deleteactivitycontroller,
 } = require("../Controllers/Activities/activitiescontrollers");
 
+//################        invoice controllers      #########
+const {
+  CreateInvoice,
+  getInvoice,
+  DeleteInvoice,
+  updateInvoice,
+} = require("../Controllers/InvoiceController/invoiceController");
+
+
+
+
 //#######################################################################################
 //#                                    ROUTERS                                          #
 //#######################################################################################
@@ -98,5 +109,14 @@ router.put(
   editactivitycontroller
 );
 router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);
+
+
+//#############################  invoice routers  ###########################
+
+
+router.post("/createInvoice", CreateInvoice);
+router.get("/getInvoiceByUserId/:id?", getInvoice);
+router.delete("/deleteInvoice/:id", DeleteInvoice);
+router.put("/updateInvoice/:id", updateInvoice);
 
 module.exports = router;
