@@ -56,11 +56,7 @@ module.exports = {
   //get user details controller
   getuserdetailscontroller: (req, res) => {
     const id = req.params.id;
-<<<<<<< HEAD
     var sql = `select users.id, users.firstname,students.firstName,students.lastName, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id where users.id = ${id}`;
-=======
-    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, roles.name as "role", students.firstName as SfirstName, students.lastName as SlastName from users inner join roles on roles.id = users.role_id inner join students on students.user_id = users.id where users.id = ${id}`;
->>>>>>> 962794a5758e1cfdefd3c6be5c142c573ee2fc54
     //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
