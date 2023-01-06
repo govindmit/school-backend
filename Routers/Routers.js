@@ -36,6 +36,7 @@ const {
 const {
   addstudentcontroller,
   getstudentcontroller,
+  editstudentcontroller,
 } = require("../Controllers/StudentController/studentcontroller");
 
 //############  User login reset forgot pass controller  ############
@@ -82,6 +83,7 @@ router.delete("/deleteuser/:id", verifyAuthToken, deleteusercontroller);
 //##############################  students routes   ############################
 router.post("/addstudent", addstudentcontroller);
 router.get("/getstudentbyuser/:id", getstudentcontroller);
+router.put("/updatestudent/:id", editstudentcontroller);
 
 //#############################  Auth login reset forgot pas router  ###########
 router.post("/userlogin", verifyAuthToken, userlogincontroller);
