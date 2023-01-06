@@ -7,7 +7,7 @@ module.exports = {
   //add activity controller
   addactivitycontroller: (req, res) => {
     //console.log(req.body, req.file);
-    //console.log("image file", req.file);
+    console.log("image file", req.file);
     //console.log("data", req.body);
     if (!req.file) {
       return res.status(400).send({ message: "Image feild is required" });
