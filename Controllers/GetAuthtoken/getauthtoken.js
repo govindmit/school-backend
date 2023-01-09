@@ -7,7 +7,7 @@ const getauthtoken = async (req, res) => {
     );
     //console.log(token);
     if (token) {
-      res.status(200).json({ message: "ok", token: token });
+      res.status(200).json({ message: "ok pipeline testing ", token: token });
     }
   } catch (error) {
     res.status(500).send({ message: error.message });

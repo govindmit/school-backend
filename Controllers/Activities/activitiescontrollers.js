@@ -7,7 +7,7 @@ module.exports = {
   //add activity controller
   addactivitycontroller: (req, res) => {
     //console.log(req.body, req.file);
-    //console.log("image file", req.file);
+    console.log("image file", req.file);
     //console.log("data", req.body);
     if (!req.file) {
       return res.status(400).send({ message: "Image feild is required" });
@@ -60,9 +60,9 @@ module.exports = {
 
   //get activity controller
   getactivitycontroller: (req, res) => {
-    const { offset, limit } = req.body;
+    // const { offset, limit } = req.body;
     //console.log(offset, limit);
-    var sql = `select * from activites limit ${offset}, ${limit}`;
+    var sql = `select * from activites`;
     //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;

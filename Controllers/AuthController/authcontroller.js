@@ -7,7 +7,7 @@ const mysqlconnection = require("../../DB/db.config.connection");
 module.exports = {
   // user login controller
   userlogincontroller: (req, res) => {
-    //console.log(req.body);
+    console.log(req.body);
     const { email, password } = req.body;
     if (!email || !password) {
       return res
@@ -40,13 +40,14 @@ module.exports = {
   //forgot password controller
   forgotpasswordcontroller: (req, res) => {
     //console.log(req.body);
-    const { email, forgot_pass_page_link } = req.body;
+    const { email, reset_password_page_url } = req.body;
     if (!email) {
       return res.status(400).send({ message: "Email feild is required" });
     }
     var check_email = `select *from users where email = "${email}"`;
     //console.log(check_email);
     mysqlconnection.query(check_email, function (err, result) {
+      console.log(result);
       if (result.length > 0) {
         let transporter = nodemailer.createTransport({
           host: "smtp.ethereal.email",
@@ -62,7 +63,7 @@ module.exports = {
           from: "sj2585097@gmail.com",
           to: "infoocean8454@gmail.com",
           subject: "Reset Password Link From Educorp✔",
-          text: `Hello, ${result[0].firstname}`,
+          text: `Hello, ${result[0].firstName}`,
           html: `<body
                 marginheight="0"
                 topmargin="0"
@@ -116,7 +117,7 @@ module.exports = {
                             instructions.
                           </p>
                           <a
-                            href=${forgot_pass_page_link}/${result[0].id}
+                            href=${reset_password_page_url}/${result[0].id}
                             style="background:#057035;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;"
                           >
                             Reset Password
@@ -168,6 +169,9 @@ module.exports = {
   resetpasswordcontroller: async (req, res) => {
     const id = req.params.id;
     const { password } = req.body;
+    if (!password) {
+      return res.status(400).send({ message: "Password Required" });
+    }
     const secure_pass = await bcrypt.hash(password, 12);
     const sql = `update users set password ="${secure_pass}" where id = ${id}`;
     //console.log(sql);

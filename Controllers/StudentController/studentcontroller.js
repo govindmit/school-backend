@@ -37,16 +37,16 @@ module.exports = {
 
   editstudentcontroller: (req, res) => {
     const id = req.params.id;
-    //console.log(id);
-    //console.log(req.body);
     const { firstName, lastName, user_id } = req.body;
-    const updt_query = `update students set firstName = "${firstName}", lastName = "${lastName}", user_id = "${user_id}" where students.id = ${id}`;
+    const updt_query = `update students set firstName = "${firstName}", lastName = "${lastName}", user_id = ${user_id} where id = ${id}`;
     console.log(updt_query);
     mysqlconnection.query(updt_query, function (err, result) {
       //console.log(result);
       if (err) throw err;
       //console.log(result);
-      res.status(200).json({ message: "data successfully", data: result });
+      res
+        .status(200)
+        .json({ message: "data updated successfully", data: result });
     });
   },
 };

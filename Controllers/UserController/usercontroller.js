@@ -6,27 +6,33 @@ const mysqlconnection = require("../../DB/db.config.connection");
 module.exports = {
   //add user controller
   addusercontroller: async (req, res) => {
-    //console.log(req.body);
+    console.log(req.body);
+    console.log(req.file);
     const { firstName, lastName, email, password, contact, status, role_id } =
       req.body;
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !password ||
-      !contact ||
-      !status ||
-      !role_id
-    ) {
+    console.log(req.body, "lklk");
+    if (!req.file) {
+      return res.status(400).send({ message: "Image feild is required" });
+    }
+    // if (
+    //   req.file.originalname.split(".").pop() !== "png" &&
+    //   req.file.originalname.split(".").pop() !== "jpeg"
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .send({ message: "Please upload png and jpeg image formats " });
+    // }
+    if (!firstName || !lastName || !email || !contact || !status || !role_id) {
       return res.status(400).send({ message: "All feild is required" });
     }
+
     const secure_password = await bcrypt.hash(password, 12);
     //console.log(secure_password);
     const check_email_query = `select *from  users where email = "${email}" `;
     //console.log(check_email_query);
-    var sql = `INSERT INTO users (firstName,lastName,email,password,contact,status,role_id)VALUES("${firstName}","${lastName}","${email}","${secure_password}","${contact}",${status},${role_id})`;
+    var sql = `INSERT INTO users (firstName,lastName,image,email,password,contact,status,role_id)VALUES("${firstName}","${lastName}","${req.file.path}","${email}","${secure_password}","${contact}",${status},${role_id})`;
     mysqlconnection.query(check_email_query, function (err, result) {
-      //console.log(result.length);
+      console.log(sql, "jhjjjhjh");
       if (result.length > 0) {
         res.status(409).send({ message: "Email allready registred" });
       } else {
@@ -44,19 +50,35 @@ module.exports = {
   getusercontroller: (req, res) => {
     // const { offset, limit } = req.body;
     //console.log(offset, limit);
-    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, roles.name as "role", students.firstName as SfirstName, students.lastName as SlastName from users inner join roles on roles.id = users.role_id  inner join students on students.user_id = users.id`;
-
+    let results = [];
+    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id`;
+    console.log("sql: ", sql);
     mysqlconnection.query(sql, function (err, result) {
+      for (users1 in result) {
+        // console.log("result: ", users1, { ...result[users1] });
+        console.log("result: ", users1, { ...result[users1], count: users1 });
+
+        var stud = `select * from students where user_id = ${result[users1].id}`;
+        mysqlconnection.query(stud, function (err, results) {
+          console.log("-------x---------", (result[users1] = results.length));
+          // result[users1]=results.length;
+          // console.log("-----x-----", {
+          //   x: users1,
+          //   count: results.length,
+          // });
+        });
+      }
+      // console.log(result)
       if (err) throw err;
       //console.log(result);
-      res.status(200).json({ message: "ok done", data: result });
+      res.status(200).json({ message: "ok", data: result });
     });
   },
 
   //get user details controller
   getuserdetailscontroller: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, roles.name as "role", students.firstName as SfirstName, students.lastName as SlastName from users inner join roles on roles.id = users.role_id inner join students on students.user_id = users.id where users.id = ${id}`;
+    var sql = `select users.id, users.firstname,students.firstName,students.lastName, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id where users.id = ${id}`;
     //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
