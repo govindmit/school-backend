@@ -7,7 +7,7 @@ module.exports = {
   //add activity controller
   addactivitycontroller: (req, res) => {
     //console.log(req.body, req.file);
-    console.log("image file", req.file);
+    //console.log("image file", req.file);
     //console.log("data", req.body);
     if (!req.file) {
       return res.status(400).send({ message: "Image feild is required" });
@@ -30,18 +30,18 @@ module.exports = {
       enddate,
       status,
     } = req.body;
-    if (
-      !name ||
-      !description ||
-      !shortdescription ||
-      !type ||
-      !price ||
-      !startdate ||
-      !enddate ||
-      !status
-    ) {
-      return res.status(400).send({ message: "All feild is required" });
-    }
+    // if (
+    //   !name ||
+    //   !description ||
+    //   !shortdescription ||
+    //   !type ||
+    //   !price ||
+    //   !startdate ||
+    //   !enddate ||
+    //   !status
+    // ) {
+    //   return res.status(400).send({ message: "All feild is required" });
+    // }
     const check_name_query = `select * from  activites where name = "${name}" `;
     mysqlconnection.query(check_name_query, function (err, result) {
       if (result.length > 0) {
