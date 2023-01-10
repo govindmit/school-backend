@@ -11,45 +11,29 @@ const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
   //add user controller
   addusercontroller: async (req, res) => {
-    console.log(req.body);
-    console.log(req.file);
     const { firstName, lastName, email, contact, status, role_id } = req.body;
     if (!req.file) {
-      return res.status(400).send({ message: "Image feild is required" });
+      return res.status(400).send({ message: "Image field is required" });
     }
-    // if (
-    //   req.file.originalname.split(".").pop() !== "png" &&
-    //   req.file.originalname.split(".").pop() !== "jpeg"
-    // ) {
-    //   return res
-    //     .status(400)
-    //     .send({ message: "Please upload png and jpeg image formats " });
-    // }
-    if (!firstName || !lastName || !email || !contact) {
-      return res.status(400).send({ message: "All feild is required" });
+
+    if (!firstName || !lastName || !email || !contact || !status || !role_id) {
+      return res.status(400).send({ message: "All field is required" });
     }
 
     const check_email_query = `select *from  users where email = "${email}" `;
-    //console.log(check_email_query);
     var sql = `INSERT INTO users (firstName,lastName,image,email,contact,status,role_id)VALUES("${firstName}","${lastName}","${req.file.path}","${email}","${contact}",${status},${role_id})`;
     mysqlconnection.query(check_email_query, function (err, result) {
       if (result.length > 0) {
         res.status(409).send({ message: "Email allready registred" });
       } else {
-        //console.log(sql);
         mysqlconnection.query(sql, function (err, result) {
           if (err) throw err;
 
           if (result) {
             nodemailer.createTestAccount((err, account) => {
               if (err) {
-                console.error(
-                  "Failed to create a testing account. " + err.message
-                );
                 return process.exit(1);
               }
-
-              console.log("Credentials obtained, sending message...");
 
               // Create a SMTP transporter object
               let transporter = nodemailer.createTransport({
@@ -156,16 +140,8 @@ module.exports = {
 
               transporter.sendMail(message, (err, info) => {
                 if (err) {
-                  console.log("Error occurred. " + err.message);
                   return process.exit(1);
                 }
-
-                console.log("Message sent: %s", info.messageId);
-                // Preview only available when sending through an Ethereal account
-                console.log(
-                  "Preview URL: %s",
-                  nodemailer.getTestMessageUrl(info)
-                );
               });
             });
             res.status(200).json({
@@ -173,8 +149,6 @@ module.exports = {
               User: result,
             });
           }
-          //console.log(result);
-          // res.status(201).json({ message: "data inserted", data: result });
         });
       }
     });
@@ -182,11 +156,8 @@ module.exports = {
 
   //get users controller
   getusercontroller: async (req, res) => {
-    // const { offset, limit } = req.body;
-    //console.log(offset, limit);
     var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id`;
     const rows = await query(sql);
-    console.log(rows, "rowssssss");
     let g = [];
     for (let row of rows) {
       var stud = `select * from students where user_id = ${row.id}`;
@@ -194,9 +165,7 @@ module.exports = {
 
       g.push({ count: rows?.length || 0, ...row });
     }
-    // console.log(g);
-    // if (err) throw err;
-    //console.log(result);
+
     res.status(200).json({ message: "ok", data: g });
   },
 
@@ -204,10 +173,8 @@ module.exports = {
   getuserdetailscontroller: (req, res) => {
     const id = req.params.id;
     var sql = `select users.id, users.firstname,students.firstName,students.lastName, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id where users.id = ${id}`;
-    //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-      //console.log(result);
       res.status(200).json({ message: "ok", data: result });
     });
   },
@@ -215,13 +182,9 @@ module.exports = {
   //edit user controller
   editusercontroller: (req, res) => {
     const id = req.params.id;
-    //console.log(id);
-    //console.log(req.body);
     const { firstName, lastName, email, contact, status, role_id } = req.body;
     var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.role_id, roles.name as "role" from users inner join roles on roles.id = users.role_id where users.id = ${id}`;
-    //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
-      //console.log(result);
       if (result.length > 0) {
         let new_firstname,
           new_lastname,
@@ -251,11 +214,8 @@ module.exports = {
           new_contact = result[0].contact;
         }
         const updt_query = `update users set firstname = "${new_firstname}", lastname = "${new_lastname}", email = "${new_email}", contact = "${new_contact}" where users.id = ${id}`;
-        console.log(updt_query);
         mysqlconnection.query(updt_query, function (err, result) {
-          //console.log(result);
           if (err) throw err;
-          //console.log(result);
           res
             .status(200)
             .json({ message: "data updated successfully", data: result });
@@ -268,10 +228,8 @@ module.exports = {
   deleteusercontroller: (req, res) => {
     const id = req.params.id;
     var sql = `delete from users where id = ${id}`;
-    //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-      //console.log(result);
       res
         .status(200)
         .json({ message: "data deleted successfully", responce: result });
