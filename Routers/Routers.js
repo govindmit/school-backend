@@ -9,7 +9,7 @@ const { verifyAuthToken } = require("../Middlewares/auth");
 //aunthontication middleware
 // const { verifyLoginAuthToken } = require("../Middlewares/loginauthtoken");
 //upload image
-const uploads = require("../Middlewares/uploadmulter");
+const upload = require("../Middlewares/uploadmulter");
 
 //######################################################################################
 //#                                REQUIRE CONTROLLERS                                 #
@@ -67,21 +67,26 @@ const {
 //#                                    ROUTERS                                          #
 //#######################################################################################
 
-//get  authorization token
+//get  authorization tokenss
 router.get("/get_authorization_token", getauthtoken);
 
 //############################## role routers    ###############################
 router.post("/addrole", verifyAuthToken, addrolecontroller);
 
 //#############################  user routers ##################################
-router.post("/adduser", verifyAuthToken, addusercontroller);
+router.post(
+  "/adduser",
+  verifyAuthToken,
+  upload.single("image"),
+  addusercontroller
+);
 router.get("/getuser", verifyAuthToken, getusercontroller);
 router.get("/getuserdetails/:id", verifyAuthToken, getuserdetailscontroller);
 router.put("/edituser/:id", verifyAuthToken, editusercontroller);
 router.delete("/deleteuser/:id", verifyAuthToken, deleteusercontroller);
 
 //##############################  students routes   ############################
-router.post("/addstudent", addstudentcontroller);
+router.post("/addstudent", upload.none(), addstudentcontroller);
 router.get("/getstudentbyuser/:id", getstudentcontroller);
 router.put("/updatestudent/:id", editstudentcontroller);
 
@@ -94,7 +99,7 @@ router.post("/resetpassword/:id", verifyAuthToken, resetpasswordcontroller);
 router.post(
   "/addactivity",
   verifyAuthToken,
-  uploads.single("image"),
+  upload.single("image"),
   addactivitycontroller
 );
 router.get("/getactivity", verifyAuthToken, getactivitycontroller);
@@ -106,7 +111,7 @@ router.get(
 router.put(
   "/editactivity/:id",
   verifyAuthToken,
-  uploads.single("image"),
+  upload.single("image"),
   editactivitycontroller
 );
 router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);

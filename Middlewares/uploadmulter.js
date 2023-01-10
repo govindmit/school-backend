@@ -1,12 +1,15 @@
 var multer = require("multer");
-var storage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    callback(null, "./uploads/");
-  },
-  filename: function (req, file, callback) {
-    callback(null, file.originalname + Date.now() + ".jpg"); //Appending .jpg
-  },
-});
 
-const uploads = multer({ storage: storage });
-module.exports = uploads;
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+      cb(null, 'uploads')
+  },
+  filename: function (req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now())
+  }
+})
+
+var upload = multer({ storage: storage })
+
+//const uploads = multer({ storage: storage });
+module.exports = upload;
