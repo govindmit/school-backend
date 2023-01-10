@@ -82,7 +82,12 @@ router.post(
 );
 router.get("/getuser", verifyAuthToken, getusercontroller);
 router.get("/getuserdetails/:id", verifyAuthToken, getuserdetailscontroller);
-router.put("/edituser/:id", verifyAuthToken, editusercontroller);
+router.put(
+  "/edituser/:id",
+  verifyAuthToken,
+  upload.single("image"),
+  editusercontroller
+);
 router.delete("/deleteuser/:id", verifyAuthToken, deleteusercontroller);
 
 //##############################  students routes   ############################
