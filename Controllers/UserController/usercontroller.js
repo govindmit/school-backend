@@ -9,7 +9,6 @@ const nodemailer = require("nodemailer");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 
 module.exports = {
-  //add user controller
   addusercontroller: async (req, res) => {
     const { firstName, lastName, email, contact, status, role_id } = req.body;
     if (!req.file) {

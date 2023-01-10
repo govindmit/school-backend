@@ -6,11 +6,8 @@ const mysqlconnection = require("../../DB/db.config.connection");
 module.exports = {
   //add activity controller
   addactivitycontroller: (req, res) => {
-    //console.log(req.body, req.file);
-    //console.log("image file", req.file);
-    //console.log("data", req.body);
     if (!req.file) {
-      return res.status(400).send({ message: "Image feild is required" });
+      return res.status(400).send({ message: "Image field is required" });
     }
     if (
       req.file.originalname.split(".").pop() !== "png" &&
@@ -30,28 +27,26 @@ module.exports = {
       enddate,
       status,
     } = req.body;
-    // if (
-    //   !name ||
-    //   !description ||
-    //   !shortdescription ||
-    //   !type ||
-    //   !price ||
-    //   !startdate ||
-    //   !enddate ||
-    //   !status
-    // ) {
-    //   return res.status(400).send({ message: "All feild is required" });
-    // }
+    if (
+      !name ||
+      !description ||
+      !shortdescription ||
+      !type ||
+      !price ||
+      !startdate ||
+      !enddate ||
+      !status
+    ) {
+      return res.status(400).send({ message: "All field is required" });
+    }
     const check_name_query = `select * from  activites where name = "${name}" `;
     mysqlconnection.query(check_name_query, function (err, result) {
       if (result.length > 0) {
-        res.status(409).send({ message: "Activity allready registred" });
+        res.status(409).send({ message: "Activity already registred" });
       } else {
         var sql = `INSERT INTO activites (name,image,description,shortdescription,type,price,startdate,enddate,status)VALUES("${name}","${req.file.path}","${description}","${shortdescription}","${type}",${price},"${startdate}","${enddate}","${status}")`;
-        //console.log(sql);
         mysqlconnection.query(sql, function (err, result) {
           if (err) throw err;
-          //console.log(result);
           res.status(201).json({ message: "data inserted", data: result });
         });
       }
@@ -60,13 +55,9 @@ module.exports = {
 
   //get activity controller
   getactivitycontroller: (req, res) => {
-    // const { offset, limit } = req.body;
-    //console.log(offset, limit);
     var sql = `select * from activites`;
-    //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-      //console.log(result);
       res.status(200).json({ message: "ok", data: result });
     });
   },
@@ -75,10 +66,8 @@ module.exports = {
   getactivitydetailscontroller: (req, res) => {
     const id = req.params.id;
     var sql = `select * from activites where id = ${id}`;
-    //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-      //console.log(result);
       res.status(200).json({ message: "ok", data: result });
     });
   },
@@ -86,7 +75,6 @@ module.exports = {
   //edit activity controller
   editactivitycontroller: (req, res) => {
     const id = req.params.id;
-    //console.log(req.file, req.body);
     if (
       req.file.originalname.split(".").pop() !== "png" &&
       req.file.originalname.split(".").pop() !== "jpeg"
@@ -107,9 +95,7 @@ module.exports = {
     } = req.body;
 
     var selectsql = `select *from activites where id = ${id}`;
-    //console.log(selectsql);
     mysqlconnection.query(selectsql, function (err, result) {
-      //console.log(result);
       if (result.length > 0) {
         let new_name,
           new_desc,
@@ -164,9 +150,7 @@ module.exports = {
         const updt_query = `update activites set name = "${new_name}", description = "${new_desc}", shortdescription = "${new_short_desc}", type = "${new_type}", price = ${new_price}, startdate = "${new_start_date}", enddate = "${new_end_date}", status = "${new_status}" where id = ${id}`;
         console.log(updt_query);
         mysqlconnection.query(updt_query, function (err, result) {
-          //console.log(result);
           if (err) throw err;
-          //console.log(result);
           res
             .status(200)
             .json({ message: "data updated successfully", data: result });
@@ -179,10 +163,8 @@ module.exports = {
   deleteactivitycontroller: (req, res) => {
     const id = req.params.id;
     var sql = `delete from activites where id = ${id}`;
-    //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-      //console.log(result);
       res
         .status(200)
         .json({ message: "data deleted successfully", responce: result });

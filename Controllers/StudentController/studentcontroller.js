@@ -9,12 +9,11 @@ module.exports = {
   addstudentcontroller: (req, res) => {
     const { firstName, lastName, user_id } = req.body;
     if (!firstName || !lastName || !user_id) {
-      return res.status(400).send({ message: "All feild is required" });
+      return res.status(400).send({ message: "All field is required" });
     }
     var sql = `INSERT INTO students (firstName,lastName,user_id)VALUES("${firstName}","${lastName}",${user_id})`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-
       res.status(201).json({ message: "data inserted", data: result });
     });
   },
