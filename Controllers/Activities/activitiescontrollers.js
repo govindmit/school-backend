@@ -42,7 +42,7 @@ module.exports = {
     const check_name_query = `select * from  activites where name = "${name}" `;
     mysqlconnection.query(check_name_query, function (err, result) {
       if (result.length > 0) {
-        res.status(409).send({ message: "Activity allready registred" });
+        res.status(409).send({ message: "Activity already registred" });
       } else {
         var sql = `INSERT INTO activites (name,image,description,shortdescription,type,price,startdate,enddate,status)VALUES("${name}","${req.file.path}","${description}","${shortdescription}","${type}",${price},"${startdate}","${enddate}","${status}")`;
         mysqlconnection.query(sql, function (err, result) {
