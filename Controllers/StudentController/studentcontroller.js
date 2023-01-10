@@ -25,14 +25,17 @@ module.exports = {
   //get students controller
   getstudentcontroller: (req, res) => {
     const id = req.params.id;
-
-    var sql = `select * from students where students.user_id = ${id}`;
-    //console.log(sql);
-    mysqlconnection.query(sql, function (err, result) {
-      if (err) throw err;
-      //console.log(result);
-      res.status(200).json({ message: "ok", data: result });
-    });
+    if (id) {
+      var sql = `select * from students where students.user_id = ${id}`;
+      //console.log(sql);
+      mysqlconnection.query(sql, function (err, result) {
+        if (err) throw err;
+        //console.log(result);
+        res.status(200).json({ message: "ok", data: result });
+      });
+    } else {
+      res.status(400).json({ message: "Id not found" });
+    }
   },
 
   editstudentcontroller: (req, res) => {

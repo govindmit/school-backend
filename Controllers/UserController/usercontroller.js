@@ -172,7 +172,8 @@ module.exports = {
   //get user details controller
   getuserdetailscontroller: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.firstname,students.firstName,students.lastName, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id where users.id = ${id}`;
+    var sql = `select users.id, users.firstname,users.image, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id where users.id = ${id}`;
+    console.log(sql, "iddddddd");
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -180,48 +181,24 @@ module.exports = {
   },
 
   //edit user controller
-  editusercontroller: (req, res) => {
+  editusercontroller: async (req, res) => {
     const id = req.params.id;
     const { firstName, lastName, email, contact, status, role_id } = req.body;
-    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.role_id, roles.name as "role" from users inner join roles on roles.id = users.role_id where users.id = ${id}`;
-    mysqlconnection.query(sql, function (err, result) {
-      if (result.length > 0) {
-        let new_firstname,
-          new_lastname,
-          new_email,
-          new_contact,
-          new_status,
-          new_role_id;
 
-        if (firstName !== "") {
-          new_firstname = firstName;
-        } else {
-          new_firstname = result[0].firstname;
-        }
-        if (lastName !== "") {
-          new_lastname = lastName;
-        } else {
-          new_lastname = result[0].lastname;
-        }
-        if (email !== "") {
-          new_email = email;
-        } else {
-          new_email = result[0].email;
-        }
-        if (contact !== "") {
-          new_contact = contact;
-        } else {
-          new_contact = result[0].contact;
-        }
-        const updt_query = `update users set firstname = "${new_firstname}", lastname = "${new_lastname}", email = "${new_email}", contact = "${new_contact}" where users.id = ${id}`;
-        mysqlconnection.query(updt_query, function (err, result) {
-          if (err) throw err;
-          res
-            .status(200)
-            .json({ message: "data updated successfully", data: result });
-        });
-      }
-    });
+    let sql = `select * from users where id=${id}`;
+
+    let User = await query(sql);
+
+    var image = req.file?.path;
+    if (!req.file) {
+      image = User[0]?.image;
+    }
+    const updt_query = `update users set firstName = "${firstName}", lastName = "${lastName}", email = "${email}", contact = "${contact}",image="${image}" where users.id = ${id}`;
+    let updateUser = await query(updt_query);
+
+    res
+      .status(200)
+      .json({ message: "data updated successfully", data: updateUser });
   },
 
   //delete user controller
