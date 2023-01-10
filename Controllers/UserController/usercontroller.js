@@ -4,9 +4,7 @@ const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
 
 module.exports = {
-  //add user controller
   addusercontroller: async (req, res) => {
-    //console.log(req.body);
     const { firstName, lastName, email, password, contact, status, role_id } =
       req.body;
     if (
@@ -21,19 +19,14 @@ module.exports = {
       return res.status(400).send({ message: "All field is required" });
     }
     const secure_password = await bcrypt.hash(password, 12);
-    //console.log(secure_password);
     const check_email_query = `select *from  users where email = "${email}" `;
-    //console.log(check_email_query);
     var sql = `INSERT INTO users (firstName,lastName,email,password,contact,status,role_id)VALUES("${firstName}","${lastName}","${email}","${secure_password}","${contact}",${status},${role_id})`;
     mysqlconnection.query(check_email_query, function (err, result) {
-      //console.log(result.length);
       if (result.length > 0) {
         res.status(409).send({ message: "Email already registered" });
       } else {
-        //console.log(sql);
         mysqlconnection.query(sql, function (err, result) {
           if (err) throw err;
-          //console.log(result);
           res.status(201).json({ message: "data inserted", data: result });
         });
       }
@@ -42,13 +35,9 @@ module.exports = {
 
   //get users controller
   getusercontroller: (req, res) => {
-    // const { offset, limit } = req.body;
-    //console.log(offset, limit);
     var sql = `select users.id, users.firstname,students.firstName,students.lastName, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id`;
-
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-      //console.log(result);
       res.status(200).json({ message: "ok", data: result });
     });
   },
@@ -57,10 +46,8 @@ module.exports = {
   getuserdetailscontroller: (req, res) => {
     const id = req.params.id;
     var sql = `select users.id, users.firstname,students.firstName,students.lastName, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id where users.id = ${id}`;
-    //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-      //console.log(result);
       res.status(200).json({ message: "ok", data: result });
     });
   },
@@ -68,13 +55,9 @@ module.exports = {
   //edit user controller
   editusercontroller: (req, res) => {
     const id = req.params.id;
-    //console.log(id);
-    //console.log(req.body);
     const { firstName, lastName, email, contact, status, role_id } = req.body;
     var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.role_id, roles.name as "role" from users inner join roles on roles.id = users.role_id where users.id = ${id}`;
-    //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
-      //console.log(result);
       if (result.length > 0) {
         let new_firstname,
           new_lastname,
@@ -106,9 +89,7 @@ module.exports = {
         const updt_query = `update users set firstname = "${new_firstname}", lastname = "${new_lastname}", email = "${new_email}", contact = "${new_contact}" where users.id = ${id}`;
         console.log(updt_query);
         mysqlconnection.query(updt_query, function (err, result) {
-          //console.log(result);
           if (err) throw err;
-          //console.log(result);
           res
             .status(200)
             .json({ message: "data updated successfully", data: result });
@@ -121,10 +102,8 @@ module.exports = {
   deleteusercontroller: (req, res) => {
     const id = req.params.id;
     var sql = `delete from users where id = ${id}`;
-    //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-      //console.log(result);
       res
         .status(200)
         .json({ message: "data deleted successfully", responce: result });
