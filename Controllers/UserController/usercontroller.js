@@ -24,7 +24,7 @@ module.exports = {
     var sql = `INSERT INTO users (firstName,lastName,image,email,contact,status,role_id)VALUES("${firstName}","${lastName}","${req.file.path}","${email}","${contact}",${status},${role_id})`;
     mysqlconnection.query(check_email_query, function (err, result) {
       if (result.length > 0) {
-        res.status(409).send({ message: "Email already registered" });
+        res.status(409).send({ message: "Email already registered." });
       } else {
         mysqlconnection.query(sql, function (err, result) {
           if (err) throw err;
@@ -145,7 +145,7 @@ module.exports = {
               });
             });
             res.status(200).json({
-              Message: "We have send link to reset your password",
+              Message: "We have send link to reset your password.",
               User: result,
             });
           }
