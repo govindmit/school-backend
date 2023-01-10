@@ -1,7 +1,10 @@
 const bcrypt = require("bcryptjs");
 const express = require("express");
+const { CHAR_LEFT_ANGLE_BRACKET } = require("picomatch/lib/constants");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
+const util = require("util");
+const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 
 module.exports = {
   //add user controller
@@ -10,7 +13,6 @@ module.exports = {
     console.log(req.file);
     const { firstName, lastName, email, password, contact, status, role_id } =
       req.body;
-    console.log(req.body, "lklk");
     if (!req.file) {
       return res.status(400).send({ message: "Image feild is required" });
     }
@@ -22,7 +24,7 @@ module.exports = {
     //     .status(400)
     //     .send({ message: "Please upload png and jpeg image formats " });
     // }
-    if (!firstName || !lastName || !email || !contact || !status || !role_id) {
+    if (!firstName || !lastName || !email || !contact) {
       return res.status(400).send({ message: "All feild is required" });
     }
 
@@ -47,32 +49,23 @@ module.exports = {
   },
 
   //get users controller
-  getusercontroller: (req, res) => {
+  getusercontroller: async (req, res) => {
     // const { offset, limit } = req.body;
     //console.log(offset, limit);
-    let results = [];
     var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id`;
-    console.log("sql: ", sql);
-    mysqlconnection.query(sql, function (err, result) {
-      for (users1 in result) {
-        // console.log("result: ", users1, { ...result[users1] });
-        console.log("result: ", users1, { ...result[users1], count: users1 });
+    const rows = await query(sql);
+    console.log(rows, "rowssssss");
+    let g = [];
+    for (let row of rows) {
+      var stud = `select * from students where user_id = ${row.id}`;
+      let rows = await query(stud);
 
-        var stud = `select * from students where user_id = ${result[users1].id}`;
-        mysqlconnection.query(stud, function (err, results) {
-          console.log("-------x---------", (result[users1] = results.length));
-          // result[users1]=results.length;
-          // console.log("-----x-----", {
-          //   x: users1,
-          //   count: results.length,
-          // });
-        });
-      }
-      // console.log(result)
-      if (err) throw err;
-      //console.log(result);
-      res.status(200).json({ message: "ok", data: result });
-    });
+      g.push({ count: rows?.length || 0, ...row });
+    }
+    // console.log(g);
+    // if (err) throw err;
+    //console.log(result);
+    res.status(200).json({ message: "ok", data: g });
   },
 
   //get user details controller
