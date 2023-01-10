@@ -10,7 +10,7 @@ module.exports = {
     //console.log(req.body);
     const { firstName, lastName, user_id } = req.body;
     if (!firstName || !lastName || !user_id) {
-      return res.status(400).send({ message: "All feild is required" });
+      return res.status(400).send({ message: "All field is required" });
     }
     var sql = `INSERT INTO students (firstName,lastName,user_id)VALUES("${firstName}","${lastName}",${user_id})`;
     //console.log(sql);

@@ -8,7 +8,7 @@ module.exports = {
     //console.log(req.body);
     const { name } = req.body;
     if (!name) {
-      return res.status(400).send({ message: "all feild is required" });
+      return res.status(400).send({ message: "all field is required" });
     }
     const check_query = `select * from roles where name = "${name}"`;
     mysqlconnection.query(check_query, function (err, result) {

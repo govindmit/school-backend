@@ -6,11 +6,8 @@ const mysqlconnection = require("../../DB/db.config.connection");
 module.exports = {
   //add activity controller
   addactivitycontroller: (req, res) => {
-    //console.log(req.body, req.file);
-    //console.log("image file", req.file);
-    //console.log("data", req.body);
     if (!req.file) {
-      return res.status(400).send({ message: "Image feild is required" });
+      return res.status(400).send({ message: "Image field is required" });
     }
     if (
       req.file.originalname.split(".").pop() !== "png" &&
@@ -30,28 +27,26 @@ module.exports = {
       enddate,
       status,
     } = req.body;
-    // if (
-    //   !name ||
-    //   !description ||
-    //   !shortdescription ||
-    //   !type ||
-    //   !price ||
-    //   !startdate ||
-    //   !enddate ||
-    //   !status
-    // ) {
-    //   return res.status(400).send({ message: "All feild is required" });
-    // }
+    if (
+      !name ||
+      !description ||
+      !shortdescription ||
+      !type ||
+      !price ||
+      !startdate ||
+      !enddate ||
+      !status
+    ) {
+      return res.status(400).send({ message: "All field is required" });
+    }
     const check_name_query = `select * from  activites where name = "${name}" `;
     mysqlconnection.query(check_name_query, function (err, result) {
       if (result.length > 0) {
         res.status(409).send({ message: "Activity allready registred" });
       } else {
         var sql = `INSERT INTO activites (name,image,description,shortdescription,type,price,startdate,enddate,status)VALUES("${name}","${req.file.path}","${description}","${shortdescription}","${type}",${price},"${startdate}","${enddate}","${status}")`;
-        //console.log(sql);
         mysqlconnection.query(sql, function (err, result) {
           if (err) throw err;
-          //console.log(result);
           res.status(201).json({ message: "data inserted", data: result });
         });
       }

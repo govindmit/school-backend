@@ -12,7 +12,7 @@ module.exports = {
     if (!email || !password) {
       return res
         .status(400)
-        .send({ message: "Email and Password feild is required" });
+        .send({ message: "Email and Password field is required" });
     }
     const check_email_query = `select *from  users where email = "${email}" `;
     mysqlconnection.query(check_email_query, function (err, result) {
@@ -42,7 +42,7 @@ module.exports = {
     //console.log(req.body);
     const { email, reset_password_page_url } = req.body;
     if (!email) {
-      return res.status(400).send({ message: "Email feild is required" });
+      return res.status(400).send({ message: "Email field is required" });
     }
     var check_email = `select *from users where email = "${email}"`;
     //console.log(check_email);

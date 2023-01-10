@@ -18,7 +18,7 @@ module.exports = {
       !status ||
       !role_id
     ) {
-      return res.status(400).send({ message: "All feild is required" });
+      return res.status(400).send({ message: "All field is required" });
     }
     const secure_password = await bcrypt.hash(password, 12);
     //console.log(secure_password);
@@ -28,7 +28,7 @@ module.exports = {
     mysqlconnection.query(check_email_query, function (err, result) {
       //console.log(result.length);
       if (result.length > 0) {
-        res.status(409).send({ message: "Email allready registred" });
+        res.status(409).send({ message: "Email already registered" });
       } else {
         //console.log(sql);
         mysqlconnection.query(sql, function (err, result) {
