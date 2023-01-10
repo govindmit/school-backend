@@ -12,16 +12,14 @@ module.exports = {
     if (!email || !password) {
       return res
         .status(400)
-        .send({ message: "Email and Password feild is required" });
+        .send({ message: "Email and Password field is required" });
     }
     const check_email_query = `select *from  users where email = "${email}" `;
     mysqlconnection.query(check_email_query, function (err, result) {
-      //console.log(result);
       if (result.length > 0) {
         let verify_password = bcrypt
           .compare(password, result[0].password)
           .then((result) => {
-            //console.log(result, "result");
             if (result === true) {
               res.status(200).send({ message: "User login successfully" });
             } else {
@@ -39,13 +37,11 @@ module.exports = {
 
   //forgot password controller
   forgotpasswordcontroller: (req, res) => {
-    //console.log(req.body);
     const { email, reset_password_page_url } = req.body;
     if (!email) {
-      return res.status(400).send({ message: "Email feild is required" });
+      return res.status(400).send({ message: "Email field is required" });
     }
     var check_email = `select *from users where email = "${email}"`;
-    //console.log(check_email);
     mysqlconnection.query(check_email, function (err, result) {
       console.log(result);
       if (result.length > 0) {
@@ -154,9 +150,6 @@ module.exports = {
             console.log("Error occurred. " + err.message);
             return process.exit(1);
           }
-          //console.log("Message sent: %s", info.messageId);
-          // Preview only available when sending through an Ethereal account
-          //console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
           res.status(200).send({ message: "Email send successfully" });
         });
       } else {
@@ -174,10 +167,8 @@ module.exports = {
     }
     const secure_pass = await bcrypt.hash(password, 12);
     const sql = `update users set password ="${secure_pass}" where id = ${id}`;
-    //console.log(sql);
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-      //console.log(result);
       res
         .status(200)
         .json({ message: "Password updated successfully", data: result });
