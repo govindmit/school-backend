@@ -44,7 +44,9 @@ module.exports = {
       //console.log(result);
       if (err) throw err;
       //console.log(result);
-      res.status(200).json({ message: "data successfully", data: result });
+      res
+        .status(200)
+        .json({ message: "data updated successfully", data: result });
     });
   },
 };
