@@ -1,18 +1,27 @@
 const bcrypt = require("bcryptjs");
 const express = require("express");
-const { CHAR_LEFT_ANGLE_BRACKET } = require("picomatch/lib/constants");
 const app = express();
-const mysqlconnection = require("../../DB/db.config.connection");
-const util = require("util");
 const nodemailer = require("nodemailer");
-
+const mysqlconnection = require("../../DB/db.config.connection");
+const { CHAR_LEFT_ANGLE_BRACKET } = require("picomatch/lib/constants");
+const util = require("util");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 
 module.exports = {
+  // Add user Controller
   addusercontroller: async (req, res) => {
     const { firstName, lastName, email, contact, status, role_id } = req.body;
     if (!req.file) {
       return res.status(400).send({ message: "Image field is required" });
+    }
+    if (
+      req.file.originalname.split(".").pop() !== "png" &&
+      req.file.originalname.split(".").pop() !== "jpeg" &&
+      req.file.originalname.split(".").pop() !== "jpg"
+    ) {
+      return res
+        .status(400)
+        .send({ message: "Please upload png and jpeg image formats " });
     }
 
     if (!firstName || !lastName || !email || !contact || !status || !role_id) {
@@ -21,19 +30,18 @@ module.exports = {
 
     const check_email_query = `select *from  users where email = "${email}" `;
     var sql = `INSERT INTO users (firstName,lastName,image,email,contact,status,role_id)VALUES("${firstName}","${lastName}","${req.file.path}","${email}","${contact}",${status},${role_id})`;
+
     mysqlconnection.query(check_email_query, function (err, result) {
       if (result.length > 0) {
         res.status(409).send({ message: "Email already registered." });
       } else {
         mysqlconnection.query(sql, function (err, result) {
           if (err) throw err;
-
           if (result) {
             nodemailer.createTestAccount((err, account) => {
               if (err) {
                 return process.exit(1);
               }
-
               // Create a SMTP transporter object
               let transporter = nodemailer.createTransport({
                 host: "smtp.ethereal.email",
@@ -44,7 +52,6 @@ module.exports = {
                   pass: "P6UMNmyEJjc2BFtDex",
                 },
               });
-
               // Message object
               let message = {
                 from: "sj2585097@gmail.com",
@@ -136,7 +143,6 @@ module.exports = {
               </body>
               `,
               };
-
               transporter.sendMail(message, (err, info) => {
                 if (err) {
                   return process.exit(1);
@@ -144,7 +150,10 @@ module.exports = {
               });
             });
             res.status(200).json({
-              Message: "We have send link to reset your password.",
+              Message: {
+                msg1: "Registration successfully.",
+                msg2: "Link send successfully for reset password plese check your registerd email ",
+              },
               User: result,
             });
           }

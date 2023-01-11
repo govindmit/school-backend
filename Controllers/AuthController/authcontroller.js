@@ -1,8 +1,10 @@
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
 const express = require("express");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
+const web_url = "https://school.mangoitsol.com";
 
 module.exports = {
   // user login controller
@@ -43,8 +45,13 @@ module.exports = {
     }
     var check_email = `select *from users where email = "${email}"`;
     mysqlconnection.query(check_email, function (err, result) {
-      console.log(result);
       if (result.length > 0) {
+        //create reset password token
+        const resetPasswordtoken = jwt.sign(
+          { email: result[0].email, id: result[0].id },
+          process.env.JWT_SECRET_KEY
+        );
+
         let transporter = nodemailer.createTransport({
           host: "smtp.ethereal.email",
           port: 587,
@@ -113,7 +120,7 @@ module.exports = {
                             instructions.
                           </p>
                           <a
-                            href=${reset_password_page_url}/${result[0].id}
+                            href=${web_url}/auth/resetPassword/${resetPasswordtoken}
                             style="background:#057035;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;"
                           >
                             Reset Password
@@ -161,17 +168,25 @@ module.exports = {
   //reset password controller
   resetpasswordcontroller: async (req, res) => {
     const id = req.params.id;
-    const { password } = req.body;
+    const { token, password } = req.body;
     if (!password) {
       return res.status(400).send({ message: "Password Required" });
     }
+    const decodetoken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const email = decodetoken.email;
+
+    var check_email = `select *from users where email = "${email}"`;
     const secure_pass = await bcrypt.hash(password, 12);
-    const sql = `update users set password ="${secure_pass}" where id = ${id}`;
-    mysqlconnection.query(sql, function (err, result) {
-      if (err) throw err;
-      res
-        .status(200)
-        .json({ message: "Password updated successfully", data: result });
+    mysqlconnection.query(check_email, function (err, result) {
+      if (result.length > 0) {
+        const sql = `update users set password ="${secure_pass}" where id = ${result[0].id}`;
+        mysqlconnection.query(sql, function (err, result) {
+          if (err) throw err;
+          res
+            .status(200)
+            .json({ message: "Password updated successfully", data: result });
+        });
+      }
     });
   },
 };
