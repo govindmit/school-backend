@@ -167,25 +167,38 @@ module.exports = {
 
   //reset password controller
   resetpasswordcontroller: async (req, res) => {
-    const id = req.params.id;
     const { token, password } = req.body;
     if (!password) {
       return res.status(400).send({ message: "Password Required" });
     }
-    const decodetoken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const email = decodetoken.email;
-
+    if (!token) {
+      return res
+        .status(403)
+        .send({ message: "A token is required for Reset Password" });
+    }
+    let decodedtoken;
+    try {
+      decodedtoken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    } catch (err) {
+      return res.status(401).send({ message: "Invalid  Token" });
+    }
+    const email = decodedtoken.email;
     var check_email = `select *from users where email = "${email}"`;
     const secure_pass = await bcrypt.hash(password, 12);
     mysqlconnection.query(check_email, function (err, result) {
       if (result.length > 0) {
         const sql = `update users set password ="${secure_pass}" where id = ${result[0].id}`;
         mysqlconnection.query(sql, function (err, result) {
-          if (err) throw err;
-          res
-            .status(200)
-            .json({ message: "Password updated successfully", data: result });
+          if (err) {
+            res.status(400).json({ message: "Invalid credential" });
+          } else {
+            res
+              .status(200)
+              .json({ message: "Password updated successfully", data: result });
+          }
         });
+      } else {
+        res.status(400).json({ message: "Invalid credential" });
       }
     });
   },
