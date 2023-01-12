@@ -98,7 +98,7 @@ router.put("/updatestudent/:id", editstudentcontroller);
 //#############################  Auth login reset forgot pas router  ###########
 router.post("/userlogin", verifyAuthToken, userlogincontroller);
 router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
-router.post("/resetpassword/:id", verifyAuthToken, resetpasswordcontroller);
+router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
 
 //#############################  activities routers  ###########################
 router.post(
