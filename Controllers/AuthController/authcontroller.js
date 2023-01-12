@@ -9,7 +9,6 @@ const web_url = "https://school.mangoitsol.com";
 module.exports = {
   // user login controller
   userlogincontroller: (req, res) => {
-    console.log(req.body);
     const { email, password } = req.body;
     if (!email || !password) {
       return res
@@ -21,9 +20,24 @@ module.exports = {
       if (result.length > 0) {
         let verify_password = bcrypt
           .compare(password, result[0].password)
-          .then((result) => {
-            if (result === true) {
-              res.status(200).send({ message: "User login successfully" });
+          .then((responce) => {
+            if (responce) {
+              const loginToken = jwt.sign(
+                { email: result[0].email, password: result[0].id },
+                process.env.JWT_SECRET_KEY
+              );
+              const insert_query = `update users set loginToken = "${loginToken}" where email = "${email}"`;
+              mysqlconnection.query(insert_query, function (err, result) {
+                if (err) throw err;
+              });
+              res.cookie("QIS_Login_Token", loginToken, {
+                httpOnly: true,
+              });
+              res.status(200).send({
+                message: "User login successfully",
+                loginToken: loginToken,
+                data: { role_id: result[0].role_id },
+              });
             } else {
               res.status(400).send({ message: "invalid credentials" });
             }
