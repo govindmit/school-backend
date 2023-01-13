@@ -11,6 +11,8 @@ const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
   addusercontroller: async (req, res) => {
     const { firstName, lastName, email, contact, status, role_id } = req.body;
+
+    console.log(req.body, "bodyyyyyyy");
     if (!req.file) {
       return res.status(400).send({ message: "Image field is required" });
     }
