@@ -80,7 +80,7 @@ router.post(
   upload.single("image"),
   addusercontroller
 );
-router.get("/getuser", verifyAuthToken, getusercontroller);
+router.post("/getuser", verifyAuthToken, getusercontroller);
 router.get("/getuserdetails/:id", verifyAuthToken, getuserdetailscontroller);
 router.put(
   "/edituser/:id",
