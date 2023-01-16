@@ -164,16 +164,24 @@ module.exports = {
 
   //get users controller
   getusercontroller: async (req, res) => {
-    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id`;
+    //console.log(req.body);
+    const { status } = req.body;
+    let searchsql = "";
+    if (status === 1) {
+      searchsql = `where status =${status}`;
+    } else if (status === 0) {
+      searchsql = `where status =${req.body.status}`;
+    } else {
+      searchsql = "";
+    }
+    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id ${searchsql}`;
     const rows = await query(sql);
     let g = [];
     for (let row of rows) {
       var stud = `select * from students where user_id = ${row.id}`;
       let rows = await query(stud);
-
       g.push({ count: rows?.length || 0, ...row });
     }
-
     res.status(200).json({ message: "ok", data: g });
   },
 

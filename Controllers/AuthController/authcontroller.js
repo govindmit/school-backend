@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const express = require("express");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
-const web_url = "https://school.mangoitsol.com";
+const web_url = "https://school.mangoitsol.com/auth/resetpassword/";
 
 module.exports = {
   // user login controller
@@ -23,11 +23,11 @@ module.exports = {
           .then((responce) => {
             if (responce) {
               const loginToken = jwt.sign(
-                { email: result[0].email, password: result[0].id },
+                { email: result[0].email, id: result[0].id },
                 process.env.JWT_SECRET_KEY
               );
-              const insert_query = `update users set loginToken = "${loginToken}" where email = "${email}"`;
-              mysqlconnection.query(insert_query, function (err, result) {
+              const update_query = `update users set loginToken = "${loginToken}" where email = "${email}"`;
+              mysqlconnection.query(update_query, function (err, result) {
                 if (err) throw err;
               });
               res.cookie("QIS_Login_Token", loginToken, {
@@ -53,7 +53,7 @@ module.exports = {
 
   //forgot password controller
   forgotpasswordcontroller: (req, res) => {
-    const { email, reset_password_page_url } = req.body;
+    const { email } = req.body;
     if (!email) {
       return res.status(400).send({ message: "Email field is required" });
     }
@@ -65,7 +65,6 @@ module.exports = {
           { email: result[0].email, id: result[0].id },
           process.env.JWT_SECRET_KEY
         );
-
         let transporter = nodemailer.createTransport({
           host: "smtp.ethereal.email",
           port: 587,
@@ -134,7 +133,7 @@ module.exports = {
                             instructions.
                           </p>
                           <a
-                            href=${web_url}/auth/resetPassword/${resetPasswordtoken}
+                            href=${web_url}${resetPasswordtoken}
                             style="background:#057035;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;"
                           >
                             Reset Password
@@ -182,38 +181,34 @@ module.exports = {
   //reset password controller
   resetpasswordcontroller: async (req, res) => {
     const { token, password } = req.body;
-    if (!password) {
-      return res.status(400).send({ message: "Password Required" });
-    }
-    if (!token) {
+    if (!password || !token) {
       return res
-        .status(403)
-        .send({ message: "A token is required for Reset Password" });
+        .status(400)
+        .send({ message: "Password and Token is  Required" });
     }
-    let decodedtoken;
+    const secure_pass = await bcrypt.hash(password, 12);
     try {
       decodedtoken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    } catch (err) {
-      return res.status(401).send({ message: "Invalid  Token" });
-    }
-    const email = decodedtoken.email;
-    var check_email = `select *from users where email = "${email}"`;
-    const secure_pass = await bcrypt.hash(password, 12);
-    mysqlconnection.query(check_email, function (err, result) {
-      if (result.length > 0) {
-        const sql = `update users set password ="${secure_pass}" where id = ${result[0].id}`;
-        mysqlconnection.query(sql, function (err, result) {
-          if (err) {
-            res.status(400).json({ message: "Invalid credential" });
+      if (decodedtoken) {
+        const email = decodedtoken.email;
+        const id = decodedtoken.id;
+        var check_email = `select *from users where email = "${email}"`;
+        mysqlconnection.query(check_email, function (err, result) {
+          if (result.length > 0) {
+            const updtsql = `update users set password ="${secure_pass}" where email = "${result[0].email}"`;
+            mysqlconnection.query(updtsql, function (err, result) {
+              if (err) throw err;
+              res.status(200).json({
+                message: "Password updated successfully",
+              });
+            });
           } else {
-            res
-              .status(200)
-              .json({ message: "Password updated successfully", data: result });
+            res.status(400).json({ message: "Link Experied" });
           }
         });
-      } else {
-        res.status(400).json({ message: "Invalid credential" });
       }
-    });
+    } catch (err) {
+      return res.status(400).send({ message: "Link Experied" });
+    }
   },
 };
