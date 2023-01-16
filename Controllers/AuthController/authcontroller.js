@@ -57,7 +57,7 @@ module.exports = {
     if (!email) {
       return res.status(400).send({ message: "Email field is required" });
     }
-    var check_email = `select *from users where email = "${email}"`;
+    const check_email = `select *from users where email = "${email}"`;
     mysqlconnection.query(check_email, function (err, result) {
       if (result.length > 0) {
         //create reset password token
@@ -65,13 +65,14 @@ module.exports = {
           { email: result[0].email, id: result[0].id },
           process.env.JWT_SECRET_KEY
         );
+
         let transporter = nodemailer.createTransport({
           host: "smtp.ethereal.email",
           port: 587,
           secure: false,
           auth: {
-            user: "nyah.casper33@ethereal.email",
-            pass: "P6UMNmyEJjc2BFtDex",
+            user: "providenci.mills@ethereal.email",
+            pass: "wcVyJD51NbZQCTe5Wp",
           },
         });
         // Message object
