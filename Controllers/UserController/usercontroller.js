@@ -48,8 +48,8 @@ module.exports = {
                 port: 587,
                 secure: false,
                 auth: {
-                  user: "nyah.casper33@ethereal.email",
-                  pass: "P6UMNmyEJjc2BFtDex",
+                  user: "providenci.mills@ethereal.email",
+                  pass: "wcVyJD51NbZQCTe5Wp",
                 },
               });
               // Message object
@@ -166,15 +166,15 @@ module.exports = {
   getusercontroller: async (req, res) => {
     //console.log(req.body);
     const { status } = req.body;
-    let searchsql = "";
+    let search_sql = "";
     if (status === 1) {
-      searchsql = `where status =${status}`;
+      search_sql += `and status = ${status}`;
     } else if (status === 0) {
-      searchsql = `where status =${req.body.status}`;
+      search_sql += `and status = ${status}`;
     } else {
-      searchsql = "";
+      search_sql = "";
     }
-    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id ${searchsql}`;
+    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id where 1=1 ${search_sql}`;
     const rows = await query(sql);
     let g = [];
     for (let row of rows) {

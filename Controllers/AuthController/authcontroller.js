@@ -5,6 +5,10 @@ const express = require("express");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
 const web_url = "https://school.mangoitsol.com/auth/resetpassword/";
+const sendGridMail = require("@sendgrid/mail");
+sendGridMail.setApiKey(
+  "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"
+);
 
 module.exports = {
   // user login controller
@@ -176,6 +180,31 @@ module.exports = {
       } else {
         res.status(401).json({ message: "Email Not Registred" });
       }
+
+      let transporter = nodemailer.createTransport({
+        host: "smtp.sendgrid.net",
+        port: 587,
+        auth: {
+          user: "apikey",
+          pass: "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",
+        },
+      });
+      transporter.sendMail(
+        {
+          from: "sj9040797@gmail.com", // verified sender email
+          to: "providenci.mills@ethereal.email", // recipient email
+          subject: "Test message subject", // Subject line
+          text: "Hello world!", // plain text body
+          html: "<b>Hello world!</b>", // html body
+        },
+        function (error, info) {
+          if (error) {
+            console.log(error);
+          } else {
+            console.log("Email sent: " + info.response);
+          }
+        }
+      );
     });
   },
 
