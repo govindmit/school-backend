@@ -8,15 +8,19 @@ const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
   CreateInvoice: async (req, res) => {
     const body = req.body;
-    var uId = req.body.user_id;
-    var student_id = req.body.student_id;
+    var customerId = req.body.customerId;
+    var invoiceId = req.body.invoiceId;
     var amount = req.body.amount;
-    var item = req.body.item;
-    var invoicePayDateTime = req.body.invoice_pay_date_time;
-    var generateDateTime = req.body.generate_date_time;
+    var itemId = req.body.itemId;
     var status = req.body.status;
+    var createdDate = req.body.createdDate;
+    var createdBy = req.body.createdBy;
+    var invoiceDate = req.body.invoiceDate;
+    var isDeleted = req.body.isDeleted;
+    var deletedBy = req.body.deletedBy;
+    var deletedDate = req.body.deletedDate;
 
-    var sql = `INSERT INTO invoices (user_id,student_id,amount,item,status,invoice_pay_date_time,generate_date_time) VALUES('${uId}','${student_id}','${amount}','${item}','${status}','${invoicePayDateTime}','${generateDateTime}')`;
+    var sql = `INSERT INTO invoices (customerId,invoiceId,amount,itemId,status,createdDate,createdBy,invoiceDate,isDeleted,deletedBy,deletedDate) VALUES('${customerId}','${invoiceId}','${amount}','${itemId}','${status}','${createdDate}','${createdBy}','${invoiceDate}','${isDeleted}','${deletedBy}','${deletedDate}')`;
     console.log(sql, "sql");
 
     const invoice = await query(sql);
