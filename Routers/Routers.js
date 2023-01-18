@@ -124,7 +124,7 @@ router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);
 //#############################  invoice routers  ###########################
 
 router.post("/createInvoice", CreateInvoice);
-router.get("/getInvoiceByUserId/:id?", getInvoice);
+router.post("/getInvoiceByUserId/:id?", upload.none(), getInvoice);
 router.delete("/deleteInvoice/:id", DeleteInvoice);
 router.put("/updateInvoice/:id", updateInvoice);
 
