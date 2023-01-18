@@ -80,7 +80,7 @@ router.post(
   upload.single("image"),
   addusercontroller
 );
-router.get("/getuser", verifyAuthToken, getusercontroller);
+router.post("/getuser", verifyAuthToken, getusercontroller);
 router.get("/getuserdetails/:id", verifyAuthToken, getuserdetailscontroller);
 router.put(
   "/edituser/:id",
@@ -98,7 +98,7 @@ router.put("/updatestudent/:id", editstudentcontroller);
 //#############################  Auth login reset forgot pas router  ###########
 router.post("/userlogin", verifyAuthToken, userlogincontroller);
 router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
-router.post("/resetpassword/:id", verifyAuthToken, resetpasswordcontroller);
+router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
 
 //#############################  activities routers  ###########################
 router.post(
