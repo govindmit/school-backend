@@ -1,9 +1,7 @@
-const bcrypt = require("bcryptjs");
-const express = require("express");
-const app = express();
+const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const ResetEmailFormat = require("../Helper/ResetEmailTemp");
 const mysqlconnection = require("../../DB/db.config.connection");
-const { CHAR_LEFT_ANGLE_BRACKET } = require("picomatch/lib/constants");
 const util = require("util");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 
@@ -11,10 +9,16 @@ module.exports = {
   // Add user Controller
   addusercontroller: async (req, res) => {
     const { firstName, lastName, email, contact, status, role_id } = req.body;
-
-    console.log(req.body, "bodyyyyyyy");
-    if (!req.file) {
-      return res.status(400).send({ message: "Image field is required" });
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !contact ||
+      !status ||
+      !role_id ||
+      !req.file
+    ) {
+      return res.status(400).send({ message: "All field is required" });
     }
     if (
       req.file.originalname.split(".").pop() !== "png" &&
@@ -23,23 +27,22 @@ module.exports = {
     ) {
       return res
         .status(400)
-        .send({ message: "Please upload png and jpeg image formats " });
+        .send({ message: "Please upload png, jpg and jpeg image formats " });
     }
-
-    if (!firstName || !lastName || !email || !contact || !status || !role_id) {
-      return res.status(400).send({ message: "All field is required" });
-    }
-
-    const check_email_query = `select *from  users where email = "${email}" `;
+    const check_email_query = `select id,email from  users where email = "${email}" `;
     var sql = `INSERT INTO users (firstName,lastName,image,email,contact,status,role_id)VALUES("${firstName}","${lastName}","${req.file.path}","${email}","${contact}",${status},${role_id})`;
-
     mysqlconnection.query(check_email_query, function (err, result) {
       if (result.length > 0) {
         res.status(409).send({ message: "Email already registered." });
       } else {
-        mysqlconnection.query(sql, function (err, result) {
+        mysqlconnection.query(sql, function (err, responce) {
           if (err) throw err;
-          if (result) {
+          if (responce) {
+            //create reset password token
+            const resetPasswordtoken = jwt.sign(
+              { email: email, id: responce.insertId },
+              process.env.JWT_SECRET_KEY
+            );
             nodemailer.createTestAccount((err, account) => {
               if (err) {
                 return process.exit(1);
@@ -50,113 +53,29 @@ module.exports = {
                 port: 587,
                 secure: false,
                 auth: {
-                  user: "nyah.casper33@ethereal.email",
-                  pass: "P6UMNmyEJjc2BFtDex",
+                  user: process.env.eathEmail,
+                  pass: process.env.eathPass,
                 },
               });
               // Message object
               let message = {
-                from: "sj2585097@gmail.com",
-                to: "infoocean8454@gmail.com",
-                subject: "Reset Password Link From Educorp✔",
+                from: process.env.emailFrom,
+                to: process.env.emailTo,
+                subject: "Reset Password Link From QIS✔",
                 text: `Hello,`,
-                html: `<body
-                      marginheight="0"
-                      topmargin="0"
-                      marginwidth="0"
-                      style="margin: 0px; background-color: #f2f3f8;"
-                      leftmargin="0"
-                    >
-                    <table
-                      cellspacing="0"
-                      border="0"
-                      cellpadding="0"
-                      width="100%"
-                      bgcolor="#f2f3f8"
-                    >
-                  <tr>
-                    <td>
-                      <table
-                        style="background-color: #f2f3f8; max-width:670px;  margin:0 auto;"
-                        width="100%"
-                        border="0"
-                        align="center"
-                        cellpadding="0"
-                        cellspacing="0"
-                      >
-                        <tr>
-                          <td style="height:20px;">&nbsp;</td>
-                        </tr>
-                        <tr />
-                        <td>
-                          <table
-                            width="95%"
-                            border="0"
-                            align="center"
-                            cellpadding="0"
-                            cellspacing="0"
-                            style="max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"
-                          >
-                            <tr>
-                              <td style="height:40px;">&nbsp;</td>
-                            </tr>
-                            <tr>
-                              <td style="padding:0 35px;">
-                                <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">
-                                  You have requested to reset your password
-                                </h1>
-                                <span style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
-                                <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                  We cannot simply send you your old password. A unique link
-                                  to reset your password has been generated for you. To reset
-                                  your password, click the following link and follow the
-                                  instructions.
-                                </p>
-                                <a
-                                   href=https://school.mangoitsol.com/auth/resetpassword/${result.insertId}
-                                  style="background:#057035;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;"
-                                >
-                                  Reset Password
-                                </a>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td style="height:40px;">&nbsp;</td>
-                            </tr>
-                          </table>
-                        </td>
-                        <tr>
-                          <td style="height:20px;">&nbsp;</td>
-                        </tr>
-                        <tr>
-                          <td style="text-align:center;">
-                            <p style="font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;">
-                              &copy; <strong>www.ourhotel.com</strong>
-                            </p>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="height:80px;">&nbsp;</td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </body>
-              `,
+                html: ResetEmailFormat(resetPasswordtoken),
               };
               transporter.sendMail(message, (err, info) => {
                 if (err) {
                   return process.exit(1);
                 }
+                res.status(200).json({
+                  Message: {
+                    msg1: "Registration successfully.",
+                    msg2: "Link send successfully for reset password plese check your registerd email ",
+                  },
+                });
               });
-            });
-            res.status(200).json({
-              Message: {
-                msg1: "Registration successfully.",
-                msg2: "Link send successfully for reset password plese check your registerd email ",
-              },
-              User: result,
             });
           }
         });
@@ -168,15 +87,15 @@ module.exports = {
   getusercontroller: async (req, res) => {
     //console.log(req.body);
     const { status } = req.body;
-    let searchsql = "";
+    let search_sql = "";
     if (status === 1) {
-      searchsql = `where status =${status}`;
+      search_sql += `and status = ${status}`;
     } else if (status === 0) {
-      searchsql = `where status =${req.body.status}`;
+      search_sql += `and status = ${status}`;
     } else {
-      searchsql = "";
+      search_sql = "";
     }
-    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id ${searchsql}`;
+    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id where 1=1 ${search_sql}`;
     const rows = await query(sql);
     let g = [];
     for (let row of rows) {
