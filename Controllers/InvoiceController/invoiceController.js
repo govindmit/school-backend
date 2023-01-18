@@ -33,9 +33,60 @@ module.exports = {
     // });
   },
 
+  // getInvoice: async (req, res) => {
+  //   var invoiceData = [];
+  //   var status = "";
+  //   if (req.body.status == "paid") {
+  //     status = `WHERE invoices.status = '${req.body.status}'`;
+  //   } else if (req.body.status == "pending") {
+  //     status = `WHERE invoices.status = '${req.body.status}'`;
+  //   } else {
+  //     var status = "";
+  //   }
+
+  //   if (!req.params.id) {
+  //     let sql = `SELECT users.firstName,users.lastName,invoices.amount,invoices.status,invoices.student_id,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id  = users.id ${status}`;
+  //     console.log(sql, "swwww");
+
+  //     const invoice = await query(sql);
+  //     for (let row of invoice) {
+  //       let students = `SELECT * from students WHERE id = ${row.student_id}`;
+  //       const studentRecords = await query(students);
+
+  //       invoiceData.push({
+  //         ...row,
+  //         student: studentRecords ? studentRecords[0] : null,
+  //       });
+  //     }
+
+  //     res.status(200).json({ data: invoiceData });
+  //   } else {
+  //     let sql = `SELECT users.firstName,users.lastName,invoices.amount,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE invoices.id = ${req.params.id}`;
+  //     const invoice = await query(sql);
+
+  //     for (let row of invoice) {
+  //       let students = `SELECT * from students WHERE id = ${row.student_id}`;
+  //       const studentRecords = await query(students);
+
+  //       invoiceData.push({
+  //         ...row,
+  //         student: studentRecords ? studentRecords[0] : null,
+  //       });
+  //     }
+  //     res.status(200).json({ data: invoiceData });
+  //   }
+  // },
+
   getInvoice: async (req, res) => {
     var invoiceData = [];
+    var startDate = req.body.startDate;
+    var endDate = req.body.endDate;
+    var sprice = req.body.sprice;
+    var eprice = req.body.eprice;
+
     var status = "";
+    var date = "";
+    var amount = "";
     if (req.body.status == "paid") {
       status = `WHERE invoices.status = '${req.body.status}'`;
     } else if (req.body.status == "pending") {
@@ -43,11 +94,28 @@ module.exports = {
     } else {
       var status = "";
     }
+    if (startDate && endDate) {
+      date = `WHERE invoices.generate_date_time BETWEEN '${startDate}' AND '${endDate}'`;
+    }
+    if (startDate && endDate && req.body.status) {
+      date = `AND invoices.generate_date_time BETWEEN '${startDate}' AND '${endDate}'`;
+    }
+    if (sprice && eprice && !startDate && !endDate && !req.body.status) {
+      amount = `WHERE invoices.amount BETWEEN '${sprice}' AND '${eprice}'`;
+    }
+    if (sprice && eprice && startDate && endDate && req.body.status) {
+      amount = `AND invoices.amount BETWEEN '${sprice}' AND '${eprice}'`;
+    }
+    if (sprice && eprice && startDate && endDate) {
+      amount = `AND invoices.amount BETWEEN '${sprice}' AND '${eprice}'`;
+    }
+    if (sprice && eprice && req.body.status) {
+      amount = `AND invoices.amount BETWEEN '${sprice}' AND '${eprice}'`;
+    }
 
     if (!req.params.id) {
-      let sql = `SELECT users.firstName,users.lastName,invoices.amount,invoices.status,invoices.student_id,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id  = users.id ${status}`;
-      console.log(sql, "swwww");
-
+      let sql = `SELECT users.firstName,users.lastName,invoices.amount,invoices.status,invoices.student_id,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id ${status} ${date} ${amount}`;
+      console.log(sql, "...................x");
       const invoice = await query(sql);
       for (let row of invoice) {
         let students = `SELECT * from students WHERE id = ${row.student_id}`;
@@ -76,7 +144,6 @@ module.exports = {
       res.status(200).json({ data: invoiceData });
     }
   },
-
   updateInvoice: (req, res) => {
     const {
       user_id,
