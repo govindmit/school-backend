@@ -1,15 +1,10 @@
 const mysql = require("mysql");
 
-//database info
-const username = process.env.dbusername;
-const password = process.env.password;
-const dbname = process.env.dbname;
-
 var mysqlconnection = mysql.createConnection({
-  host: "localhost",
-  user: username,
-  password: password,
-  database: dbname,
+  host: process.env.dbhostname,
+  user: process.env.dbusername,
+  password: process.env.password,
+  database: process.env.dbname,
   charset: "utf8mb4",
   insecureAuth: true,
   acquireTimeout: 6000000,
