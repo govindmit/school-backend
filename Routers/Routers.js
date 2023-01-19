@@ -15,18 +15,23 @@ const upload = require("../Middlewares/uploadmulter");
 //#                                REQUIRE CONTROLLERS                                 #
 //######################################################################################
 
-//#############  Get auth controller   #######################
+//#############  Get get auth token controller   #############
 const { getauthtoken } = require("../Controllers/GetAuthtoken/getauthtoken");
 
-//#############  Roles controllers  ##########################
+//#############  Roles controllers  ###########################
 const {
-  addrolecontroller,
+  addRoleController,
 } = require("../Controllers/RoleController/rolecontroller");
 
-//#############  User controllers  ###########################
+//#############  types controllers  ###########################
 const {
-  addusercontroller,
-  getusercontroller,
+  addTypeController,
+} = require("../Controllers/TypeController/typecontroller");
+
+//#############  User controllers  ############################
+const {
+  addUserController,
+  getUserController,
   deleteusercontroller,
   getuserdetailscontroller,
   editusercontroller,
@@ -67,20 +72,24 @@ const {
 //#                                    ROUTERS                                          #
 //#######################################################################################
 
-//get  authorization tokenss
+//############################## get  authorization tokenss ###################
 router.get("/get_authorization_token", getauthtoken);
 
 //############################## role routers    ###############################
-router.post("/addrole", verifyAuthToken, addrolecontroller);
+router.post("/addRole", verifyAuthToken, addRoleController);
+
+//############################## type routers    ###############################
+router.post("/addType", verifyAuthToken, addTypeController);
 
 //#############################  user routers ##################################
 router.post(
-  "/adduser",
+  "/addUser",
   verifyAuthToken,
   upload.single("image"),
-  addusercontroller
+  addUserController
 );
-router.post("/getuser", verifyAuthToken, getusercontroller);
+
+router.post("/getUser", verifyAuthToken, getUserController);
 router.get("/getuserdetails/:id", verifyAuthToken, getuserdetailscontroller);
 router.put(
   "/edituser/:id",

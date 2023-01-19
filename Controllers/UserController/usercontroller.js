@@ -2,80 +2,83 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const ResetEmailFormat = require("../Helper/ResetEmailTemp");
 const mysqlconnection = require("../../DB/db.config.connection");
-const util = require("util");
-const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
+const sendmail = require("sendmail")();
 
 module.exports = {
   // Add user Controller
-  addusercontroller: async (req, res) => {
-    const { firstName, lastName, email, contact, status, role_id } = req.body;
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !contact ||
-      !status ||
-      !role_id ||
-      !req.file
-    ) {
-      return res.status(400).send({ message: "All field is required" });
-    }
-    if (
-      req.file.originalname.split(".").pop() !== "png" &&
-      req.file.originalname.split(".").pop() !== "jpeg" &&
-      req.file.originalname.split(".").pop() !== "jpg"
-    ) {
-      return res
-        .status(400)
-        .send({ message: "Please upload png, jpg and jpeg image formats " });
-    }
-    const check_email_query = `select id,email from  users where email = "${email}" `;
-    var sql = `INSERT INTO users (firstName,lastName,image,email,contact,status,role_id)VALUES("${firstName}","${lastName}","${req.file.path}","${email}","${contact}",${status},${role_id})`;
+  addUserController: async (req, res) => {
+    const {
+      firstName,
+      lastName,
+      email1,
+      email2,
+      phone1,
+      phone2,
+      contactName,
+      printUs,
+      status,
+      roleId,
+      typeId,
+    } = req.body;
+
+    const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
     mysqlconnection.query(check_email_query, function (err, result) {
+      if (err) throw err;
       if (result.length > 0) {
-        res.status(409).send({ message: "Email already registered." });
+        res.status(409).send({ message: "Email1 already registered." });
       } else {
-        mysqlconnection.query(sql, function (err, responce) {
+        const insert_query = `INSERT INTO users (firstName,lastName,email1,email2,phone1,phone2,contactName,printUs,status,roleId,typeId)VALUES("${firstName}","${lastName}","${email1}","${email2}",${phone1},${phone2},"${contactName}","${printUs}",${status},${roleId},${typeId})`;
+        mysqlconnection.query(insert_query, function (err, responce) {
           if (err) throw err;
           if (responce) {
             //create reset password token
             const resetPasswordtoken = jwt.sign(
-              { email: email, id: responce.insertId },
+              { email1: email1, id: responce.insertId },
               process.env.JWT_SECRET_KEY
             );
-            nodemailer.createTestAccount((err, account) => {
-              if (err) {
-                return process.exit(1);
-              }
-              // Create a SMTP transporter object
-              let transporter = nodemailer.createTransport({
-                host: "smtp.ethereal.email",
-                port: 587,
-                secure: false,
-                auth: {
-                  user: process.env.eathEmail,
-                  pass: process.env.eathPass,
-                },
-              });
-              // Message object
-              let message = {
-                from: process.env.emailFrom,
-                to: process.env.emailTo,
-                subject: "Reset Password Link From QIS✔",
-                text: `Hello,`,
-                html: ResetEmailFormat(resetPasswordtoken),
-              };
-              transporter.sendMail(message, (err, info) => {
-                if (err) {
-                  return process.exit(1);
-                }
-                res.status(200).json({
-                  Message: {
-                    msg1: "Registration successfully.",
-                    msg2: "Link send successfully for reset password plese check your registerd email ",
-                  },
+            //send reset password mail
+
+            //insert customer
+            const getCustuser = `select id from users where roleId = 2 and id = ${responce.insertId}`;
+            mysqlconnection.query(getCustuser, function (err, result) {
+              if (err) throw err;
+              if (result.length > 0) {
+                const insert_cust = `INSERT INTO customers (userId)VALUES(${result[0].id})`;
+                mysqlconnection.query(insert_cust, function (err, custResult) {
+                  if (err) throw err;
+                  if (custResult) {
+                    const updtCust = `update customers set customerId = "CUST-000${custResult.insertId}" where id =${custResult.insertId}`;
+                    mysqlconnection.query(updtCust, function (err, result) {
+                      if (err) throw err;
+                    });
+                  }
                 });
-              });
+              }
+            });
+
+            //insert parent
+            const getParent = `select id, parentId from users where roleId = 2 and id = ${responce.insertId}`;
+            mysqlconnection.query(getParent, function (err, parentResult) {
+              if (err) throw err;
+              if (parentResult.length > 0 && parentResult[0].parentId !== 0) {
+                const insert_parnt = `INSERT INTO parents (userId)VALUES(${parentResult[0].id})`;
+                mysqlconnection.query(
+                  insert_parnt,
+                  function (err, parntResult) {
+                    if (err) throw err;
+                    if (parntResult) {
+                      const updtparnt = `update parents set parentId = "PARNT-000${parntResult.insertId}" where id =${parntResult.insertId}`;
+                      mysqlconnection.query(updtparnt, function (err, result) {
+                        if (err) throw err;
+                      });
+                    }
+                  }
+                );
+              }
+            });
+
+            res.status(200).json({
+              msg1: "Registration successfully.",
             });
           }
         });
@@ -84,8 +87,7 @@ module.exports = {
   },
 
   //get users controller
-  getusercontroller: async (req, res) => {
-    //console.log(req.body);
+  getUserController: async (req, res) => {
     const { status } = req.body;
     let search_sql = "";
     if (status === 1) {
@@ -95,15 +97,18 @@ module.exports = {
     } else {
       search_sql = "";
     }
-    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id where 1=1 ${search_sql}`;
-    const rows = await query(sql);
-    let g = [];
-    for (let row of rows) {
-      var stud = `select * from students where user_id = ${row.id}`;
-      let rows = await query(stud);
-      g.push({ count: rows?.length || 0, ...row });
-    }
-    res.status(200).json({ message: "ok", data: g });
+    var sqlquery = `select users.id, customers.customerId, users.firstname,
+    users.lastname, users.email1, users.email2, 
+    users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
+    users.status, users.printUs, roles.name as "UserRole" from users 
+    LEFT outer join roles on roles.id = users.roleId 
+    LEFT outer join types on types.id = users.typeId 
+    left outer join customers on customers.userId = users.id 
+    where 1=1 ${search_sql}`;
+    mysqlconnection.query(sqlquery, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
+    });
   },
 
   //get user details controller
