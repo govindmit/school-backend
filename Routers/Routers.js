@@ -67,7 +67,11 @@ const {
   getInvoice,
   DeleteInvoice,
   updateInvoice,
+  SendInvoiceEmail,
 } = require("../Controllers/InvoiceController/invoiceController");
+const {
+  CreateItem,
+} = require("../Controllers/InvoiceController/itemController");
 
 //#######################################################################################
 //#                                    ROUTERS                                          #
@@ -134,8 +138,11 @@ router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);
 //#############################  invoice routers  ###########################
 
 router.post("/createInvoice", CreateInvoice);
-router.post("/getInvoiceByUserId/:id?", upload.none(), getInvoice);
-router.delete("/deleteInvoice/:id", DeleteInvoice);
+router.post("/getInvoice/:id?", upload.none(), getInvoice);
+router.delete("/deleteInvoice/:id", upload.none(), DeleteInvoice);
 router.put("/updateInvoice/:id", updateInvoice);
+router.get("/sendInvoiceEmail/:id", SendInvoiceEmail);
+//############################ Item routers ############################
+router.post("/createItem", CreateItem);
 
 module.exports = router;
