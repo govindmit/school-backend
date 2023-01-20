@@ -7,7 +7,6 @@ const sendmail = require("sendmail")();
 module.exports = {
   // Add user Controller
   addUserController: async (req, res) => {
-    console.log(req.body);
     const {
       firstName,
       lastName,
@@ -22,89 +21,87 @@ module.exports = {
       roleId,
       typeId,
       parentId,
-      createdAt,
       createdBy,
-      updatedAt,
       updatedBy,
     } = req.body;
+    //check email query
     const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
+    //insert query
+    const insert_query = `INSERT INTO users (firstName,lastName,name,email1,email2,phone1,phone2,printUs,contactName,status,roleId,typeId,parentId,createdBy,updatedBy)VALUES("${
+      firstName ? firstName : ""
+    }", "${lastName ? lastName : ""}", "${name ? name : ""}", "${email1}", "${
+      email2 ? email2 : ""
+    }",${phone1 ? phone1 : 0}, ${phone2 ? phone2 : 0}, "${
+      contactName ? contactName : ""
+    }", "${printUs ? printUs : ""}", ${status ? status : 1}, ${
+      roleId ? roleId : 0
+    }, ${typeId ? typeId : 0}, ${parentId ? parentId : 0}, ${
+      createdBy ? createdBy : 1
+    }, ${updatedBy ? updatedBy : 1})`;
     mysqlconnection.query(check_email_query, function (err, result) {
       if (err) throw err;
       if (result.length > 0) {
-        res.status(409).send({ message: "Email1 already registered." });
+        return res.status(409).send({ message: "Email1 already registered." });
       } else {
-        const insert_query = `INSERT INTO users (firstName,lastName,name,email1,email2,phone1,phone2,printUs,contactName,status,roleId,typeId,parentId,createdAt,createdBy,updatedAt,updatedBy)VALUES("${
-          firstName ? firstName : ""
-        }", "${lastName ? lastName : ""}", "${
-          name ? name : ""
-        }", "${email1}", "${email2 ? email2 : ""}",${phone1 ? phone1 : 0}, ${
-          phone2 ? phone2 : 0
-        }, "${contactName ? contactName : ""}", "${printUs ? printUs : ""}", ${
-          status ? status : 1
-        }, ${roleId ? roleId : 0}, ${typeId ? typeId : 0}, ${
-          parentId ? parentId : 0
-        }, "${createdAt ? createdAt : "2023-01-01"}", ${
-          createdBy ? createdBy : 1
-        }, "${updatedAt ? updatedAt : "2023-01-01"}", ${
-          updatedBy ? updatedBy : 1
-        })`;
-        mysqlconnection.query(insert_query, function (err, responce) {
-          if (err) throw err;
-          if (responce) {
-            const updatequery = `update users set parentId = ${
-              parentId ? parentId : responce.insertId
-            } where id = ${responce.insertId}`;
-            mysqlconnection.query(updatequery, function (err, result) {
-              if (err) throw err;
-            });
-            //create reset password token
-            const resetPasswordtoken = jwt.sign(
-              { email1: email1, id: responce.insertId },
-              process.env.JWT_SECRET_KEY
-            );
-            //send reset password mail
-            //insert customer
-            const getCustuser = `select id from users where roleId = 2 and id = ${responce.insertId}`;
-            mysqlconnection.query(getCustuser, function (err, result) {
-              if (err) throw err;
-              if (result.length > 0) {
-                const insert_cust = `INSERT INTO customers (userId)VALUES(${result[0].id})`;
-                mysqlconnection.query(insert_cust, function (err, custResult) {
-                  if (err) throw err;
-                  if (custResult) {
-                    const updtCust = `update customers set customerId = "CUST-000${custResult.insertId}" where id =${custResult.insertId}`;
-                    mysqlconnection.query(updtCust, function (err, result) {
+        console.log(parentId);
+
+        if (parentId > 0 || parentId === undefined) {
+          //create customer
+          mysqlconnection.query(insert_query, function (err, responce) {
+            if (err) throw err;
+            if (responce) {
+              //create customer
+              const getCustuser = `select id from users where roleId = 2 and id = ${responce.insertId}`;
+              mysqlconnection.query(getCustuser, function (err, result) {
+                if (err) throw err;
+                if (result.length > 0) {
+                  const insert_cust = `INSERT INTO customers (userId)VALUES(${result[0].id})`;
+                  mysqlconnection.query(
+                    insert_cust,
+                    function (err, custResult) {
                       if (err) throw err;
-                    });
-                  }
-                });
-              }
-            });
-            //insert parent
-            const getParent = `select id, parentId from users where roleId = 2 and id = ${responce.insertId}`;
-            mysqlconnection.query(getParent, function (err, parentResult) {
-              if (err) throw err;
-              if (parentResult.length > 0 && parentResult[0].parentId !== 0) {
-                const insert_parnt = `INSERT INTO parents (userId)VALUES(${parentResult[0].id})`;
-                mysqlconnection.query(
-                  insert_parnt,
-                  function (err, parntResult) {
-                    if (err) throw err;
-                    if (parntResult) {
-                      const updtparnt = `update parents set parentId = "PARNT-000${parntResult.insertId}" where id =${parntResult.insertId}`;
-                      mysqlconnection.query(updtparnt, function (err, result) {
-                        if (err) throw err;
-                      });
+                      if (custResult) {
+                        const updtCust = `update customers set customerId = "CUST-000${custResult.insertId}" where id =${custResult.insertId}`;
+                        mysqlconnection.query(updtCust, function (err, result) {
+                          if (err) throw err;
+                          //create reset password token
+                          const resetPasswordtoken = jwt.sign(
+                            { email1: email1, id: responce.insertId },
+                            process.env.JWT_SECRET_KEY
+                          );
+                          res.status(200).json({
+                            msg1: "Customer Registration successfully.",
+                          });
+                        });
+                      }
                     }
-                  }
-                );
-              }
-            });
-            res.status(200).json({
-              msg1: "Registration successfully.",
-            });
-          }
-        });
+                  );
+                }
+              });
+            }
+          });
+        } else {
+          //create parent
+          mysqlconnection.query(insert_query, function (err, responce) {
+            if (err) throw err;
+            if (responce) {
+              //create parent
+              const insert_parnt = `INSERT INTO parents (userId)VALUES(${responce.insertId})`;
+              mysqlconnection.query(insert_parnt, function (err, parntResult) {
+                if (err) throw err;
+                if (parntResult) {
+                  const updtparnt = `update parents set parentId = "PARNT-000${parntResult.insertId}" where id =${parntResult.insertId}`;
+                  mysqlconnection.query(updtparnt, function (err, result) {
+                    if (err) throw err;
+                    res.status(200).json({
+                      msg1: "Parent Registration successfully.",
+                    });
+                  });
+                }
+              });
+            }
+          });
+        }
       }
     });
   },
@@ -127,7 +124,7 @@ module.exports = {
     LEFT outer join roles on roles.id = users.roleId 
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
-    where 1=1 ${search_sql}`;
+    where 1=1 and roleId = 2 ${search_sql}`;
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
