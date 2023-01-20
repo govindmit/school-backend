@@ -22,4 +22,13 @@ module.exports = {
       }
     });
   },
+
+  //get type controller
+  getTypeController: (req, res) => {
+    var sqlquery = `select types.id, types.name from types`;
+    mysqlconnection.query(sqlquery, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
+    });
+  },
 };

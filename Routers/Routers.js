@@ -26,6 +26,7 @@ const {
 //#############  types controllers  ###########################
 const {
   addTypeController,
+  getTypeController,
 } = require("../Controllers/TypeController/typecontroller");
 
 //#############  User controllers  ############################
@@ -80,7 +81,7 @@ router.post("/addRole", verifyAuthToken, addRoleController);
 
 //############################## type routers    ###############################
 router.post("/addType", verifyAuthToken, addTypeController);
-
+router.get("/getType", verifyAuthToken, getTypeController);
 //#############################  user routers ##################################
 router.post(
   "/addUser",
