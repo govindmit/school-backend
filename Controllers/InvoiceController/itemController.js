@@ -14,4 +14,17 @@ module.exports = {
     const item = await query(sql);
     res.status(200).json({ message: "Item created successfully", data: item });
   },
+  GetItembyid: async (req, res) => {
+    console.log(req.body.id);
+    var sql = `SELECT * FROM items WHERE id IN(${req.body.id})`;
+    const item = await query(sql);
+
+    res.status(200).json({ data: item });
+  },
+  GetItem: async (req, res) => {
+    var sql = `SELECT * FROM items`;
+    const item = await query(sql);
+
+    res.status(200).json({ data: item });
+  },
 };

@@ -19,6 +19,7 @@ module.exports = {
     var deletedBy = req.body.deletedBy;
     var deletedDate = req.body.deletedDate;
 
+    console.log(req.body, "bodttttttttttt");
     if (
       !customerId ||
       !amount ||
@@ -702,20 +703,27 @@ module.exports = {
       res.status(200).json({ data: invoiceData });
     }
   },
-  updateInvoice: (req, res) => {
-    const {
-      user_id,
-      student_id,
-      amount,
-      item,
-      invoice_pay_date_time,
-      generate_date_time,
-    } = req.body;
-    var sql = `UPDATE invoices SET user_id = '${user_id}', student_id ='${student_id}', amount='${amount}',item ='${item}', invoice_pay_date_time='${invoice_pay_date_time}',generate_date_time='${generate_date_time}' WHERE id = ${req.params.id}`;
-    conn.query(sql, function (err, result) {
-      if (err) throw err;
-      res.send(result);
-    });
+  updateInvoice: async (req, res) => {
+    let sqls = `SELECT invoices.amount,invoices.customerId,invoices.createdBy,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices WHERE invoices.id = ${req.params.id}`;
+    const invoice = await query(sqls);
+
+    console.log(invoice[0], "invoiceeeeeeeee");
+
+    const { user_id, amount, itemId, createdDate, invoiceDate, createdBy } =
+      req.body;
+
+    let customerId = user_id ? user_id : invoice[0].customerId;
+    let amounts = amount ? amount : invoice[0].amount;
+    let createdDates = createdDate ? createdDate : invoice[0].createdDate;
+    let invoiceDates = invoiceDate ? invoiceDate : invoice[0].invoiceDate;
+    let itemIds = itemId ? itemId : invoice[0].itemId;
+    let createdBys = createdBy ? createdBy : invoice[0].createdBy;
+    let status = "paid";
+
+    var sql = `UPDATE invoices SET customerId = '${customerId}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',status='${status}' WHERE id = ${req.params.id}`;
+    const invoices = await query(sql);
+
+    res.send(invoices);
   },
 
   DeleteInvoice: async (req, res) => {
