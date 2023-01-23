@@ -4,9 +4,7 @@ const jwt = require("jsonwebtoken");
 const express = require("express");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
-const sendGridMail = require("@sendgrid/mail");
 const ResetEmailFormat = require("../Helper/ResetEmailTemp");
-sendGridMail.setApiKey(process.env.sendGridAPIKey);
 
 module.exports = {
   // user login controller

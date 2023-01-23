@@ -2,91 +2,115 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const ResetEmailFormat = require("../Helper/ResetEmailTemp");
 const mysqlconnection = require("../../DB/db.config.connection");
-const util = require("util");
-const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
+const sendmail = require("sendmail")();
 
 module.exports = {
   // Add user Controller
-  addusercontroller: async (req, res) => {
-    const { firstName, lastName, email, contact, status, role_id } = req.body;
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !contact ||
-      !status ||
-      !role_id ||
-      !req.file
-    ) {
-      return res.status(400).send({ message: "All field is required" });
-    }
-    if (
-      req.file.originalname.split(".").pop() !== "png" &&
-      req.file.originalname.split(".").pop() !== "jpeg" &&
-      req.file.originalname.split(".").pop() !== "jpg"
-    ) {
-      return res
-        .status(400)
-        .send({ message: "Please upload png, jpg and jpeg image formats " });
-    }
-    const check_email_query = `select id,email from  users where email = "${email}" `;
-    var sql = `INSERT INTO users (firstName,lastName,image,email,contact,status,role_id)VALUES("${firstName}","${lastName}","${req.file.path}","${email}","${contact}",${status},${role_id})`;
+  addUserController: async (req, res) => {
+    const {
+      firstName,
+      lastName,
+      name,
+      email1,
+      email2,
+      phone1,
+      phone2,
+      printUs,
+      contactName,
+      status,
+      roleId,
+      typeId,
+      parentId,
+      createdBy,
+      updatedBy,
+    } = req.body;
+    //check email query
+    const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
+    //insert query
+    const insert_query = `INSERT INTO users (firstName,lastName,name,email1,email2,phone1,phone2,printUs,contactName,status,roleId,typeId,parentId,createdBy,updatedBy)VALUES("${
+      firstName ? firstName : ""
+    }", "${lastName ? lastName : ""}", "${name ? name : ""}", "${email1}", "${
+      email2 ? email2 : ""
+    }",${phone1 ? phone1 : 0}, ${phone2 ? phone2 : 0}, "${
+      contactName ? contactName : ""
+    }", "${printUs ? printUs : ""}", ${status ? status : 1}, ${
+      roleId ? roleId : 2
+    }, ${typeId ? typeId : 0}, ${parentId ? parentId : 0}, ${
+      createdBy ? createdBy : 1
+    }, ${updatedBy ? updatedBy : 1})`;
     mysqlconnection.query(check_email_query, function (err, result) {
+      if (err) throw err;
       if (result.length > 0) {
-        res.status(409).send({ message: "Email already registered." });
+        return res.status(409).send({ message: "Email1 already registered." });
       } else {
-        mysqlconnection.query(sql, function (err, responce) {
-          if (err) throw err;
-          if (responce) {
-            //create reset password token
-            const resetPasswordtoken = jwt.sign(
-              { email: email, id: responce.insertId },
-              process.env.JWT_SECRET_KEY
-            );
-            nodemailer.createTestAccount((err, account) => {
-              if (err) {
-                return process.exit(1);
-              }
-              // Create a SMTP transporter object
-              let transporter = nodemailer.createTransport({
-                host: "smtp.ethereal.email",
-                port: 587,
-                secure: false,
-                auth: {
-                  user: process.env.eathEmail,
-                  pass: process.env.eathPass,
-                },
-              });
-              // Message object
-              let message = {
-                from: process.env.emailFrom,
-                to: process.env.emailTo,
-                subject: "Reset Password Link From QIS✔",
-                text: `Hello,`,
-                html: ResetEmailFormat(resetPasswordtoken),
-              };
-              transporter.sendMail(message, (err, info) => {
-                if (err) {
-                  return process.exit(1);
+        if (parentId > 0 || parentId === undefined) {
+          //create customer
+          mysqlconnection.query(insert_query, function (err, responce) {
+            if (err) throw err;
+            if (responce) {
+              //create customer
+              const getCustuser = `select id from users where roleId = 2 and id = ${responce.insertId}`;
+              mysqlconnection.query(getCustuser, function (err, result) {
+                if (err) throw err;
+                if (result.length > 0) {
+                  const insert_cust = `INSERT INTO customers (userId)VALUES(${result[0].id})`;
+                  mysqlconnection.query(
+                    insert_cust,
+                    function (err, custResult) {
+                      if (err) throw err;
+                      if (custResult) {
+                        const updtCust = `update customers set customerId = "CUST-000${custResult.insertId}" where id =${custResult.insertId}`;
+                        mysqlconnection.query(updtCust, function (err, result) {
+                          if (err) throw err;
+                          //create reset password token
+                          const resetPasswordtoken = jwt.sign(
+                            { email1: email1, id: responce.insertId },
+                            process.env.JWT_SECRET_KEY
+                          );
+                          res.status(201).json({
+                            msg1: "Customer Registration successfully.",
+                          });
+                        });
+                      }
+                    }
+                  );
                 }
-                res.status(200).json({
-                  Message: {
-                    msg1: "Registration successfully.",
-                    msg2: "Link send successfully for reset password plese check your registerd email ",
-                  },
-                });
               });
-            });
-          }
-        });
+            }
+          });
+        } else {
+          //create parent
+          mysqlconnection.query(insert_query, function (err, responce) {
+            if (err) throw err;
+            if (responce) {
+              //create parent
+              const insert_parnt = `INSERT INTO parents (userId)VALUES(${responce.insertId})`;
+              mysqlconnection.query(insert_parnt, function (err, parntResult) {
+                if (err) throw err;
+                if (parntResult) {
+                  const updtparnt = `update parents set parentId = "PARNT-000${parntResult.insertId}" where id =${parntResult.insertId}`;
+                  mysqlconnection.query(updtparnt, function (err, result) {
+                    if (err) throw err;
+                    res.status(200).json({
+                      msg1: "Parent Registration successfully.",
+                    });
+                  });
+                }
+              });
+            }
+          });
+        }
       }
     });
   },
 
   //get users controller
-  getusercontroller: async (req, res) => {
-    //console.log(req.body);
-    const { status } = req.body;
+  getUserController: async (req, res) => {
+    const { status, contactName, customerType, phoneNumber, sorting } =
+      req.body;
+
+   // console.log(req.body);
+
     let search_sql = "";
     if (status === 1) {
       search_sql += `and status = ${status}`;
@@ -95,15 +119,28 @@ module.exports = {
     } else {
       search_sql = "";
     }
-    var sql = `select users.id, users.firstname, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id LEFT outer join students on students.user_id = users.id where 1=1 ${search_sql}`;
-    const rows = await query(sql);
-    let g = [];
-    for (let row of rows) {
-      var stud = `select * from students where user_id = ${row.id}`;
-      let rows = await query(stud);
-      g.push({ count: rows?.length || 0, ...row });
-    }
-    res.status(200).json({ message: "ok", data: g });
+
+    // if (contactName === "" && contactName === undefined) {
+    //   search_sql = "";
+    // } else {
+    //   search_sql = ` and contactName = "${contactName}"`;
+    // }
+
+    var sqlquery = `select users.id, customers.customerId, users.firstname,
+    users.lastname, users.email1, users.email2, 
+    users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
+    users.status, users.printUs, roles.name as "UserRole" from users 
+    LEFT outer join roles on roles.id = users.roleId 
+    LEFT outer join types on types.id = users.typeId 
+    left outer join customers on customers.userId = users.id 
+    where 1=1 and roleId = 2 ${search_sql}`;
+
+   // console.log(sqlquery);
+
+    mysqlconnection.query(sqlquery, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
+    });
   },
 
   //get user details controller
