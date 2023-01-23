@@ -34,7 +34,7 @@ module.exports = {
     }",${phone1 ? phone1 : 0}, ${phone2 ? phone2 : 0}, "${
       contactName ? contactName : ""
     }", "${printUs ? printUs : ""}", ${status ? status : 1}, ${
-      roleId ? roleId : 0
+      roleId ? roleId : 2
     }, ${typeId ? typeId : 0}, ${parentId ? parentId : 0}, ${
       createdBy ? createdBy : 1
     }, ${updatedBy ? updatedBy : 1})`;
@@ -43,8 +43,6 @@ module.exports = {
       if (result.length > 0) {
         return res.status(409).send({ message: "Email1 already registered." });
       } else {
-        console.log(parentId);
-
         if (parentId > 0 || parentId === undefined) {
           //create customer
           mysqlconnection.query(insert_query, function (err, responce) {
@@ -69,7 +67,7 @@ module.exports = {
                             { email1: email1, id: responce.insertId },
                             process.env.JWT_SECRET_KEY
                           );
-                          res.status(200).json({
+                          res.status(201).json({
                             msg1: "Customer Registration successfully.",
                           });
                         });
@@ -108,7 +106,11 @@ module.exports = {
 
   //get users controller
   getUserController: async (req, res) => {
-    const { status } = req.body;
+    const { status, contactName, customerType, phoneNumber, sorting } =
+      req.body;
+
+   // console.log(req.body);
+
     let search_sql = "";
     if (status === 1) {
       search_sql += `and status = ${status}`;
@@ -117,6 +119,13 @@ module.exports = {
     } else {
       search_sql = "";
     }
+
+    // if (contactName === "" && contactName === undefined) {
+    //   search_sql = "";
+    // } else {
+    //   search_sql = ` and contactName = "${contactName}"`;
+    // }
+
     var sqlquery = `select users.id, customers.customerId, users.firstname,
     users.lastname, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
@@ -125,6 +134,9 @@ module.exports = {
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
     where 1=1 and roleId = 2 ${search_sql}`;
+
+   // console.log(sqlquery);
+
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
