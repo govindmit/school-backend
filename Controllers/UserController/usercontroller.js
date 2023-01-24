@@ -69,6 +69,7 @@ module.exports = {
                           );
                           res.status(201).json({
                             msg1: "Customer Registration successfully.",
+                            data: responce,
                           });
                         });
                       }
@@ -106,25 +107,23 @@ module.exports = {
 
   //get users controller
   getUserController: async (req, res) => {
-    const { status, contactName, customerType, phoneNumber, sorting } =
-      req.body;
+    const { status, customerType, contactName, number, sorting } = req.body;
+    let bystatus = "";
+    let bycontactName = "";
+    let bynumber = "";
 
-   // console.log(req.body);
-
-    let search_sql = "";
     if (status === 1) {
-      search_sql += `and status = ${status}`;
+      bystatus = ` and status = ${status}`;
     } else if (status === 0) {
-      search_sql += `and status = ${status}`;
-    } else {
-      search_sql = "";
+      bystatus = ` and status = ${status}`;
     }
 
-    // if (contactName === "" && contactName === undefined) {
-    //   search_sql = "";
-    // } else {
-    //   search_sql = ` and contactName = "${contactName}"`;
-    // }
+    if (contactName) {
+      bycontactName = ` and contactName = "${contactName}"`;
+    }
+    if (number) {
+      bynumber = ` and phone1 = ${number}`;
+    }
 
     var sqlquery = `select users.id, customers.customerId, users.firstname,
     users.lastname, users.email1, users.email2, 
@@ -133,9 +132,7 @@ module.exports = {
     LEFT outer join roles on roles.id = users.roleId 
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
-    where 1=1 and roleId = 2 ${search_sql}`;
-
-   // console.log(sqlquery);
+    where 1=1 and roleId = 2 ${bystatus} ${bycontactName} ${bynumber}`;
 
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
@@ -144,10 +141,9 @@ module.exports = {
   },
 
   //get user details controller
-  getuserdetailscontroller: (req, res) => {
+  getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.firstname,users.image, users.lastname, users.email, users.contact, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.role_id where users.id = ${id}`;
-    console.log(sql, "iddddddd");
+    var sql = `select users.id, users.firstName, users.lastName, users.email1, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -176,14 +172,14 @@ module.exports = {
   },
 
   //delete user controller
-  deleteusercontroller: (req, res) => {
+  deleteUserController: (req, res) => {
     const id = req.params.id;
     var sql = `delete from users where id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res
         .status(200)
-        .json({ message: "data deleted successfully", responce: result });
+        .json({ message: "Data deleted successfully", responce: result });
     });
   },
 };

@@ -33,8 +33,8 @@ const {
 const {
   addUserController,
   getUserController,
-  deleteusercontroller,
-  getuserdetailscontroller,
+  deleteUserController,
+  getUserDetailsController,
   editusercontroller,
 } = require("../Controllers/UserController/usercontroller");
 
@@ -97,14 +97,14 @@ router.post(
 );
 
 router.post("/getUser", verifyAuthToken, getUserController);
-router.get("/getuserdetails/:id", verifyAuthToken, getuserdetailscontroller);
+router.get("/getUserDetails/:id", verifyAuthToken, getUserDetailsController);
 router.put(
   "/edituser/:id",
   verifyAuthToken,
   upload.single("image"),
   editusercontroller
 );
-router.delete("/deleteuser/:id", verifyAuthToken, deleteusercontroller);
+router.delete("/deleteuser/:id", verifyAuthToken, deleteUserController);
 
 //##############################  students routes   ############################
 router.post("/addstudent", upload.none(), addstudentcontroller);
