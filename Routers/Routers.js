@@ -139,13 +139,13 @@ router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);
 
 //#############################  invoice routers  ###########################
 
-router.post("/createInvoice", CreateInvoice);
+router.post("/createInvoice", upload.none(), CreateInvoice);
 router.post("/getInvoice/:id?", upload.none(), getInvoice);
 router.delete("/deleteInvoice/:id", upload.none(), DeleteInvoice);
 router.put("/updateInvoice/:id", updateInvoice);
 router.get("/sendInvoiceEmail/:id", SendInvoiceEmail);
 //############################ Item routers ############################
-router.post("/createItem", CreateItem);
+router.post("/createItem", upload.none(), CreateItem);
 router.post("/getItembyid", upload.none(), GetItembyid);
 router.get("/getItem", GetItem);
 

@@ -69,6 +69,7 @@ module.exports = {
                           );
                           res.status(201).json({
                             msg1: "Customer Registration successfully.",
+                            data: responce,
                           });
                         });
                       }
@@ -109,7 +110,7 @@ module.exports = {
     const { status, contactName, customerType, phoneNumber, sorting } =
       req.body;
 
-   // console.log(req.body);
+    // console.log(req.body);
 
     let search_sql = "";
     if (status === 1) {
@@ -126,7 +127,7 @@ module.exports = {
     //   search_sql = ` and contactName = "${contactName}"`;
     // }
 
-    var sqlquery = `select users.id, customers.customerId, users.firstname,
+    var sqlquery = `select users.id, customers.customerId,users.name, users.firstname,
     users.lastname, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
     users.status, users.printUs, roles.name as "UserRole" from users 
@@ -135,7 +136,7 @@ module.exports = {
     left outer join customers on customers.userId = users.id 
     where 1=1 and roleId = 2 ${search_sql}`;
 
-   // console.log(sqlquery);
+    // console.log(sqlquery);
 
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;

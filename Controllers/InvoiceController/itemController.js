@@ -16,7 +16,9 @@ module.exports = {
   },
   GetItembyid: async (req, res) => {
     console.log(req.body.id);
-    var sql = `SELECT * FROM items WHERE id IN(${req.body.id})`;
+
+    let id = req.body.id ? req.body.id : null;
+    var sql = `SELECT * FROM items WHERE id IN(${id})`;
     const item = await query(sql);
 
     res.status(200).json({ data: item });
