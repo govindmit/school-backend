@@ -19,7 +19,6 @@ module.exports = {
     var deletedBy = req.body.deletedBy;
     var deletedDate = req.body.deletedDate;
 
-    console.log(req.body, "bodttttttttttt");
     if (
       !customerId ||
       !amount ||
@@ -673,8 +672,7 @@ module.exports = {
     }
 
     if (!req.params.id) {
-      let sql = `SELECT users.firstName,users.lastName,users.name,items.description,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id ${status} ${date} ${amount} ${customer} ${isdeleted} ${order}`;
-      console.log(sql, "sqlllllllllllllll");
+      let sql = `SELECT users.name,items.description,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id ${status} ${date} ${amount} ${customer} ${isdeleted} ${order}`;
       const invoice = await query(sql);
       // for (let row of invoice) {
       //   let students = `SELECT * from students WHERE id = ${row.student_id}`;
@@ -688,7 +686,7 @@ module.exports = {
 
       res.status(200).json({ data: invoice });
     } else {
-      let sql = `SELECT users.firstName,users.lastName,users.name,item.name,invoices.amount,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE invoices.id = ${req.params.id}`;
+      let sql = `SELECT users.name,item.description,invoices.amount,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE invoices.id = ${req.params.id}`;
       const invoice = await query(sql);
 
       for (let row of invoice) {
@@ -706,8 +704,6 @@ module.exports = {
   updateInvoice: async (req, res) => {
     let sqls = `SELECT invoices.amount,invoices.customerId,invoices.createdBy,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices WHERE invoices.id = ${req.params.id}`;
     const invoice = await query(sqls);
-
-    console.log(invoice[0], "invoiceeeeeeeee");
 
     const { user_id, amount, itemId, createdDate, invoiceDate, createdBy } =
       req.body;
@@ -739,7 +735,6 @@ module.exports = {
     if (!userId) {
       return res.status(400).send({ message: "userId is required" });
     }
-    console.log(userId); // "17-6-2022"
 
     var sqls = `UPDATE invoices SET isDeleted='1',deletedBy='${userId}',deletedDate='${currentDate}' WHERE id = ${req.params.id}`;
     const updateInvoice = await query(sqls);
@@ -750,7 +745,6 @@ module.exports = {
     let sqld = `SELECT users.firstName,users.lastName,items.description,items.name,invoices.amount,invoices.status,invoices.invoiceId, invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${req.params.id}`;
     const Getinvoice = await query(sqld);
 
-    console.log(sqld, "sqlddddddd");
     sendmail(
       {
         from: process.env.emailFrom,
