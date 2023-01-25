@@ -35,8 +35,9 @@ module.exports = {
     const invoice = await query(sql);
     var sqls = `UPDATE invoices SET  invoiceId='INV000${invoice.insertId}' WHERE id = ${invoice.insertId}`;
     const updateInvoice = await query(sqls);
-    let sqld = `SELECT users.firstName,users.lastName,items.description,items.name,invoices.amount,invoices.status,invoices.invoiceId, invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${invoice.insertId}`;
+    let sqld = `SELECT users.name,items.name as itemname,items.description,invoices.amount,invoices.status,invoices.invoiceId,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${invoice.insertId}`;
     const Getinvoice = await query(sqld);
+    console.log(Getinvoice, "Getinvoice");
     if (invoice) {
       sendmail(
         {
@@ -481,7 +482,7 @@ module.exports = {
                       <tr>
                         <td class="email-masthead">
                           <a href="https://example.com" class="f-fallback email-masthead_name">
-                          ${Getinvoice[0].name}
+                          ${Getinvoice[0].itemname}
                         </a>
                         </td>
                       </tr>
@@ -493,9 +494,9 @@ module.exports = {
                             <tr>
                               <td class="content-cell">
                                 <div class="f-fallback">
-                                  <h1>Hi ${Getinvoice[0].firstName} &nbsp;${Getinvoice[0].lastName}
+                                  <h1>Hi ${Getinvoice[0].name}
                                   </h1>
-                                  <p>Thanks for using ${Getinvoice[0].name}. This is an invoice for your recent purchase.</p>
+                                  <p>Thanks for using ${Getinvoice[0].itemname}. This is an invoice for your recent purchase.</p>
                                   <table class="attributes" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                                     <tr>
                                       <td class="attributes_content">
@@ -672,7 +673,7 @@ module.exports = {
     }
 
     if (!req.params.id) {
-      let sql = `SELECT users.name,items.description,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id ${status} ${date} ${amount} ${customer} ${isdeleted} ${order}`;
+      let sql = `SELECT users.name,items.name as itemname,items.description,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id ${status} ${date} ${amount} ${customer} ${isdeleted} ${order}`;
       const invoice = await query(sql);
       // for (let row of invoice) {
       //   let students = `SELECT * from students WHERE id = ${row.student_id}`;
@@ -686,7 +687,7 @@ module.exports = {
 
       res.status(200).json({ data: invoice });
     } else {
-      let sql = `SELECT users.name,item.description,invoices.amount,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE invoices.id = ${req.params.id}`;
+      let sql = `SELECT users.name,items.name as itemname,item.description,invoices.amount,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE invoices.id = ${req.params.id}`;
       const invoice = await query(sql);
 
       for (let row of invoice) {

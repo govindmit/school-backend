@@ -8,8 +8,6 @@ module.exports = {
   // Add user Controller
   addUserController: async (req, res) => {
     const {
-      firstName,
-      lastName,
       name,
       email1,
       email2,
@@ -27,17 +25,15 @@ module.exports = {
     //check email query
     const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
     //insert query
-    const insert_query = `INSERT INTO users (firstName,lastName,name,email1,email2,phone1,phone2,printUs,contactName,status,roleId,typeId,parentId,createdBy,updatedBy)VALUES("${
-      firstName ? firstName : ""
-    }", "${lastName ? lastName : ""}", "${name ? name : ""}", "${email1}", "${
-      email2 ? email2 : ""
-    }",${phone1 ? phone1 : 0}, ${phone2 ? phone2 : 0}, "${
-      contactName ? contactName : ""
-    }", "${printUs ? printUs : ""}", ${status ? status : 1}, ${
-      roleId ? roleId : 2
-    }, ${typeId ? typeId : 0}, ${parentId ? parentId : 0}, ${
-      createdBy ? createdBy : 1
-    }, ${updatedBy ? updatedBy : 1})`;
+    const insert_query = `INSERT INTO users (name,email1,email2,phone1,phone2,printUs,contactName,status,roleId,typeId,parentId,createdBy,updatedBy)VALUES("${
+      name ? name : ""
+    }", "${email1}", "${email2 ? email2 : ""}",${phone1 ? phone1 : 0}, ${
+      phone2 ? phone2 : 0
+    }, "${contactName ? contactName : ""}", "${printUs ? printUs : ""}", ${
+      status ? status : 1
+    }, ${roleId ? roleId : 2}, ${typeId ? typeId : 0}, ${
+      parentId ? parentId : 0
+    }, ${createdBy ? createdBy : 1}, ${updatedBy ? updatedBy : 1})`;
     mysqlconnection.query(check_email_query, function (err, result) {
       if (err) throw err;
       if (result.length > 0) {
@@ -125,8 +121,7 @@ module.exports = {
       bynumber = ` and phone1 = ${number}`;
     }
 
-    var sqlquery = `select users.id, customers.customerId,users.name, users.firstname,
-    users.lastname, users.email1, users.email2, 
+    var sqlquery = `select users.id, customers.customerId, users.name, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
     users.status, users.printUs, roles.name as "UserRole" from users 
     LEFT outer join roles on roles.id = users.roleId 
@@ -143,7 +138,7 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.firstName, users.lastName, users.email1, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
+    var sql = `select users.id, users.name, users.email1, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
