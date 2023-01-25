@@ -688,7 +688,7 @@ module.exports = {
 
       res.status(200).json({ data: invoice });
     } else {
-      let sql = `SELECT users.firstName,users.lastName,users.name,item.name,invoices.amount,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE invoices.id = ${req.params.id}`;
+      let sql = `SELECT users.firstName,users.lastName,users.name,invoices.amount,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE invoices.id = ${req.params.id}`;
       const invoice = await query(sql);
 
       for (let row of invoice) {
