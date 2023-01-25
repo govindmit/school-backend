@@ -673,7 +673,7 @@ module.exports = {
     }
 
     if (!req.params.id) {
-      let sql = `SELECT users.firstName,users.lastName,items.name,items.description,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id ${status} ${date} ${amount} ${customer} ${isdeleted} ${order}`;
+      let sql = `SELECT users.firstName,users.lastName,users.name,items.description,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id ${status} ${date} ${amount} ${customer} ${isdeleted} ${order}`;
       console.log(sql, "sqlllllllllllllll");
       const invoice = await query(sql);
       // for (let row of invoice) {
@@ -688,7 +688,7 @@ module.exports = {
 
       res.status(200).json({ data: invoice });
     } else {
-      let sql = `SELECT users.firstName,users.lastName,invoices.amount,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE invoices.id = ${req.params.id}`;
+      let sql = `SELECT users.firstName,users.lastName,users.name,item.name,invoices.amount,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE invoices.id = ${req.params.id}`;
       const invoice = await query(sql);
 
       for (let row of invoice) {

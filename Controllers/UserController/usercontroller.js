@@ -125,7 +125,7 @@ module.exports = {
       bynumber = ` and phone1 = ${number}`;
     }
 
-    var sqlquery = `select users.id, customers.customerId, users.firstname,
+    var sqlquery = `select users.id, customers.customerId,users.name, users.firstname,
     users.lastname, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
     users.status, users.printUs, roles.name as "UserRole" from users 
