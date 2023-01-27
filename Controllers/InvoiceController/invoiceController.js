@@ -41,8 +41,8 @@ module.exports = {
     if (invoice) {
       sendmail(
         {
-          from: process.env.emailFrom,
-          to: process.env.emailTo,
+          from: "jaydeepc721@gmail.com",
+          to: "qatar.school@yopmail.com",
           subject: "test sendmail",
           html: `<style type="text/css" rel="stylesheet" media="all">
               /* Base ------------------------------ */
@@ -703,24 +703,31 @@ module.exports = {
     }
   },
   updateInvoice: async (req, res) => {
-    let sqls = `SELECT invoices.amount,invoices.customerId,invoices.createdBy,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices WHERE invoices.id = ${req.params.id}`;
+    let sqls = `SELECT invoices.amount,invoices.customerId,invoices.status,invoices.createdBy,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices WHERE invoices.id = ${req.params.id}`;
     const invoice = await query(sqls);
 
     const { user_id, amount, itemId, createdDate, invoiceDate, createdBy } =
       req.body;
 
-    let customerId = user_id ? user_id : invoice[0].customerId;
-    let amounts = amount ? amount : invoice[0].amount;
-    let createdDates = createdDate ? createdDate : invoice[0].createdDate;
-    let invoiceDates = invoiceDate ? invoiceDate : invoice[0].invoiceDate;
-    let itemIds = itemId ? itemId : invoice[0].itemId;
-    let createdBys = createdBy ? createdBy : invoice[0].createdBy;
-    let status = "paid";
+    if (invoice[0].status === "paid") {
+      console.log("paidddddddd");
+      res.status(401).json({ message: "Already Paid" });
+    } else {
+      console.log("Unpaidddddddd");
 
-    var sql = `UPDATE invoices SET customerId = '${customerId}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',status='${status}' WHERE id = ${req.params.id}`;
-    const invoices = await query(sql);
+      let customerId = user_id ? user_id : invoice[0].customerId;
+      let amounts = amount ? amount : invoice[0].amount;
+      let createdDates = createdDate ? createdDate : invoice[0].createdDate;
+      let invoiceDates = invoiceDate ? invoiceDate : invoice[0].invoiceDate;
+      let itemIds = itemId ? itemId : invoice[0].itemId;
+      let createdBys = createdBy ? createdBy : invoice[0].createdBy;
+      let status = "paid";
 
-    res.send(invoices);
+      var sql = `UPDATE invoices SET customerId = '${customerId}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',status='${status}' WHERE id = ${req.params.id}`;
+      const invoices = await query(sql);
+
+      res.send(invoices);
+    }
   },
 
   DeleteInvoice: async (req, res) => {
@@ -748,8 +755,8 @@ module.exports = {
 
     sendmail(
       {
-        from: process.env.emailFrom,
-        to: process.env.emailTo,
+        from: "jaydeepc721@gmail.com",
+        to: "qatar.school@yopmail.com",
         subject: "test sendmail",
         html: `<style type="text/css" rel="stylesheet" media="all">
             /* Base ------------------------------ */
