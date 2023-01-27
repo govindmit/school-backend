@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const ResetEmailFormat = require("../Helper/ResetEmailTemp");
 const mysqlconnection = require("../../DB/db.config.connection");
-const sendmail = require("sendmail")();
 
 module.exports = {
   // Add user Controller
@@ -63,10 +62,44 @@ module.exports = {
                             { email1: email1, id: responce.insertId },
                             process.env.JWT_SECRET_KEY
                           );
-                          res.status(201).json({
-                            msg1: "Customer Registration successfully.",
-                            data: responce,
+
+                          res.status(409).send({
+                            message: "Customer Registration successfully.",
                           });
+
+                          // nodemailer.createTestAccount((err, account) => {
+                          //   if (err) {
+                          //     return process.exit(1);
+                          //   }
+                          //   // Create a SMTP transporter object
+                          //   let transporter = nodemailer.createTransport({
+                          //     host: "smtp.ethereal.email",
+                          //     port: 587,
+                          //     secure: false,
+                          //     auth: {
+                          //       user: process.env.eathEmail,
+                          //       pass: process.env.eathPass,
+                          //     },
+                          //   });
+                          //   // Message object
+                          //   let message = {
+                          //     from: process.env.emailFrom,
+                          //     to: process.env.emailTo,
+                          //     subject: "Reset Password Link From QIS✔",
+                          //     text: `Hello,`,
+                          //     html: ResetEmailFormat(resetPasswordtoken),
+                          //   };
+                          //   transporter.sendMail(message, (err, info) => {
+                          //     if (err) {
+                          //       return process.exit(1);
+                          //     }
+                          //     res.status(201).json({
+                          //       msg: "Link send successfully for reset password",
+                          //       msg1: "Customer Registration successfully.",
+                          //       data: responce,
+                          //     });
+                          //   });
+                          // });
                         });
                       }
                     }
@@ -138,7 +171,7 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.name, users.email1, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
+    var sql = `select users.id, users.name, users.email1, users.email2, users.email2, users.phone1, users.phone2, users.contactName, users.printus, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -146,24 +179,40 @@ module.exports = {
   },
 
   //edit user controller
-  editusercontroller: async (req, res) => {
+  editUserController: async (req, res) => {
     const id = req.params.id;
-    const { firstName, lastName, email, contact, status, role_id } = req.body;
-
-    let sql = `select * from users where id=${id}`;
-
-    let User = await query(sql);
-
-    var image = req.file?.path;
-    if (!req.file) {
-      image = User[0]?.image;
-    }
-    const updt_query = `update users set firstName = "${firstName}", lastName = "${lastName}", email = "${email}", contact = "${contact}",image="${image}" where users.id = ${id}`;
-    let updateUser = await query(updt_query);
-
-    res
-      .status(200)
-      .json({ message: "data updated successfully", data: updateUser });
+    const {
+      name,
+      email1,
+      email2,
+      phone1,
+      phone2,
+      printUs,
+      contactName,
+      status,
+      roleId,
+      typeId,
+      parentId,
+      createdBy,
+      updatedBy,
+    } = req.body;
+    let sql = `select id, name, email1, email2, phone1, phone2, contactName, printUs,status from users where id=${id}`;
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) throw err;
+      const updt_query = `update users set name = "${
+        name ? name : result[0].name
+      }", email1 = "${email1 ? email1 : result[0].email1}", email2 = "${
+        email2 ? email2 : result[0].email2
+      }",contactName="${
+        contactName ? contactName : result[0].contactName
+      }",printUs = "${printUs ? printUs : result[0].printUs}", status= ${
+        status ? status : result[0].status
+      } where id = ${id}`;
+      mysqlconnection.query(updt_query, function (err, result) {
+        if (err) throw err;
+        res.status(200).json({ message: "data updated successfully" });
+      });
+    });
   },
 
   //delete user controller
