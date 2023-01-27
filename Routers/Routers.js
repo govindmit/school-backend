@@ -35,7 +35,7 @@ const {
   getUserController,
   deleteUserController,
   getUserDetailsController,
-  editusercontroller,
+  editUserController,
 } = require("../Controllers/UserController/usercontroller");
 
 //############  Student controller  ##########################
@@ -88,22 +88,12 @@ router.post("/addRole", verifyAuthToken, addRoleController);
 //############################## type routers    ###############################
 router.post("/addType", verifyAuthToken, addTypeController);
 router.get("/getType", verifyAuthToken, getTypeController);
-//#############################  user routers ##################################
-router.post(
-  "/addUser",
-  verifyAuthToken,
-  upload.single("image"),
-  addUserController
-);
 
+//#############################  user routers ##################################
+router.post("/addUser", verifyAuthToken, addUserController);
 router.post("/getUser", verifyAuthToken, getUserController);
 router.get("/getUserDetails/:id", verifyAuthToken, getUserDetailsController);
-router.put(
-  "/edituser/:id",
-  verifyAuthToken,
-  upload.single("image"),
-  editusercontroller
-);
+router.put("/edituser/:id", verifyAuthToken, editUserController);
 router.delete("/deleteuser/:id", verifyAuthToken, deleteUserController);
 
 //##############################  students routes   ############################

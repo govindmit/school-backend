@@ -9,13 +9,13 @@ const ResetEmailFormat = require("../Helper/ResetEmailTemp");
 module.exports = {
   // user login controller
   userlogincontroller: (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { email1, password } = req.body;
+    if (!email1 || !password) {
       return res
         .status(400)
         .send({ message: "Email and Password field is required" });
     }
-    const check_email_query = `select id, firstName, email, password, status, role_id from  users where email = "${email}" `;
+    const check_email_query = `select id, firstName, email1, password, status, roleId from  users where email1 = "${email1}" `;
     mysqlconnection.query(check_email_query, function (err, result) {
       if (result.length > 0) {
         bcrypt
@@ -23,7 +23,7 @@ module.exports = {
           .then((responce) => {
             if (responce) {
               const loginToken = jwt.sign(
-                { email: result[0].email, id: result[0].id },
+                { email1: result[0].email1, id: result[0].id },
                 process.env.JWT_SECRET_KEY
               );
               res.status(200).send({
@@ -31,7 +31,7 @@ module.exports = {
                 loginToken: loginToken,
                 data: {
                   name: result[0].firstName,
-                  email: result[0].email,
+                  email: result[0].email1,
                   role_id: result[0].role_id,
                 },
               });
@@ -50,16 +50,16 @@ module.exports = {
 
   //forgot password controller
   forgotpasswordcontroller: (req, res) => {
-    const { email } = req.body;
-    if (!email) {
+    const { email1 } = req.body;
+    if (!email1) {
       return res.status(400).send({ message: "Email field is required" });
     }
-    const check_email = `select id, email from users where email = "${email}"`;
+    const check_email = `select id, email1 from users where email1 = "${email1}"`;
     mysqlconnection.query(check_email, function (err, result) {
       if (result.length > 0) {
         //create reset password token
         const resetPasswordtoken = jwt.sign(
-          { email: result[0].email, id: result[0].id },
+          { email1: result[0].email1, id: result[0].id },
           process.env.JWT_SECRET_KEY
         );
         nodemailer.createTestAccount((err, account) => {
@@ -111,12 +111,12 @@ module.exports = {
     try {
       decodedtoken = jwt.verify(token, process.env.JWT_SECRET_KEY);
       if (decodedtoken) {
-        const email = decodedtoken.email;
+        const email1 = decodedtoken.email1;
         const id = decodedtoken.id;
-        var check_email = `select id, email from users where email = "${email}"`;
+        var check_email = `select id, email1 from users where email1 = "${email1}"`;
         mysqlconnection.query(check_email, function (err, result) {
           if (result.length > 0) {
-            const updtsql = `update users set password ="${secure_pass}" where email = "${result[0].email}" and id = ${result[0].id}`;
+            const updtsql = `update users set password ="${secure_pass}" where email1 = "${result[0].email1}" and id = ${result[0].id}`;
             mysqlconnection.query(updtsql, function (err, result) {
               if (err) throw err;
               res.status(200).json({
