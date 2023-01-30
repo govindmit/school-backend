@@ -176,7 +176,7 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.name, users.email1, users.email2, users.email2, users.phone1, users.phone2, users.contactName, users.printUs, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
+    var sql = `select users.id, users.name, users.email1, users.email2, users.email2, users.phone1, users.phone2, users.contactName, users.printUs as printus, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -201,7 +201,7 @@ module.exports = {
       createdBy,
       updatedBy,
     } = req.body;
-    let sql = `select id, name, email1, email2, phone1, phone2, contactName, printUs,status from users where id=${id}`;
+    let sql = `select id, name, email1, email2, phone1, phone2,typeId, contactName, printUs,status from users where id=${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       const updt_query = `update users set name = "${
@@ -212,7 +212,9 @@ module.exports = {
         contactName ? contactName : result[0].contactName
       }",printUs = "${
         printUs ? printUs : result[0].printUs
-      }", status= ${status} where id = ${id}`;
+      }", status= ${status} ,typeId= ${
+        typeId ? typeId : result[0].typeId
+      } where id = ${id} `;
       mysqlconnection.query(updt_query, function (err, result) {
         if (err) throw err;
         res.status(200).json({ message: "data updated successfully" });
