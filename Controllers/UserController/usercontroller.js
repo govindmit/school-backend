@@ -28,15 +28,15 @@ module.exports = {
       name ? name : ""
     }", "${email1}", "${email2 ? email2 : ""}",${phone1 ? phone1 : 0}, ${
       phone2 ? phone2 : 0
-    }, "${contactName ? contactName : ""}", "${printUs ? printUs : ""}", ${
-      status ? status : 1
-    }, ${roleId ? roleId : 2}, ${typeId ? typeId : 0}, ${
+    }, "${contactName ? contactName : ""}", "${
+      printUs ? printUs : ""
+    }", ${status}, ${roleId ? roleId : 2}, ${typeId ? typeId : 0}, ${
       parentId ? parentId : 0
     }, ${createdBy ? createdBy : 1}, ${updatedBy ? updatedBy : 1})`;
     mysqlconnection.query(check_email_query, function (err, result) {
       if (err) throw err;
       if (result.length > 0) {
-        return res.status(409).send({ message: "Email1 already registered." });
+        return res.status(400).send({ message: "Email1 already registered." });
       } else {
         if (parentId > 0 || parentId === undefined) {
           //create customer
@@ -63,7 +63,7 @@ module.exports = {
                             process.env.JWT_SECRET_KEY
                           );
 
-                          res.status(409).send({
+                          res.status(200).send({
                             message: "Customer Registration successfully.",
                           });
 
@@ -140,7 +140,8 @@ module.exports = {
     let bystatus = "";
     let bycontactName = "";
     let bynumber = "";
-
+    let type = "";
+    console.log(req.body, "bodyyyyyyyyyyyyyyyyyy");
     if (status === 1) {
       bystatus = ` and status = ${status}`;
     } else if (status === 0) {
@@ -153,6 +154,9 @@ module.exports = {
     if (number) {
       bynumber = ` and phone1 = ${number}`;
     }
+    if (customerType) {
+      type = ` and typeId = ${customerType}`;
+    }
 
     var sqlquery = `select users.id, customers.customerId, users.name, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
@@ -160,8 +164,9 @@ module.exports = {
     LEFT outer join roles on roles.id = users.roleId 
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
-    where 1=1 and roleId = 2 ${bystatus} ${bycontactName} ${bynumber}`;
+    where 1=1 and roleId = 2 ${bystatus} ${bycontactName} ${bynumber} ${type}`;
 
+    console.log(sqlquery, "sqlquery");
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -171,7 +176,7 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.name, users.email1, users.email2, users.email2, users.phone1, users.phone2, users.contactName, users.printus, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
+    var sql = `select users.id, users.name, users.email1, users.email2, users.email2, users.phone1, users.phone2, users.contactName, users.printUs, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -205,9 +210,9 @@ module.exports = {
         email2 ? email2 : result[0].email2
       }",contactName="${
         contactName ? contactName : result[0].contactName
-      }",printUs = "${printUs ? printUs : result[0].printUs}", status= ${
-        status ? status : result[0].status
-      } where id = ${id}`;
+      }",printUs = "${
+        printUs ? printUs : result[0].printUs
+      }", status= ${status} where id = ${id}`;
       mysqlconnection.query(updt_query, function (err, result) {
         if (err) throw err;
         res.status(200).json({ message: "data updated successfully" });
