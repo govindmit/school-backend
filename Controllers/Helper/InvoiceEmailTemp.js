@@ -439,7 +439,7 @@ const InvoiceEmailFormat = (Getinvoice) => {
           <tr>
             <td class="email-masthead">
               <a href="https://example.com" class="f-fallback email-masthead_name">
-              ${Getinvoice[0].name}
+              ${Getinvoice[0]?.name}
             </a>
             </td>
           </tr>
@@ -451,9 +451,9 @@ const InvoiceEmailFormat = (Getinvoice) => {
                 <tr>
                   <td class="content-cell">
                     <div class="f-fallback">
-                      <h1>Hi ${Getinvoice[0].firstName} &nbsp;${Getinvoice[0].lastName}
+                      <h1>Hi ${Getinvoice[0]?.name}
                       </h1>
-                      <p>Thanks for using ${Getinvoice[0].name}. This is an invoice for your recent purchase.</p>
+                      <p>Thanks for using ${Getinvoice[0]?.name}. This is an invoice for your recent purchase.</p>
                       <table class="attributes" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                         <tr>
                           <td class="attributes_content">
@@ -461,14 +461,14 @@ const InvoiceEmailFormat = (Getinvoice) => {
                               <tr>
                                 <td class="attributes_item">
                                   <span class="f-fallback">
-            <strong>Amount Due:</strong> ${Getinvoice[0].amount}
+            <strong>Amount Due:</strong> ${Getinvoice[0]?.amount}
           </span>
                                 </td>
                               </tr>
                               <tr>
                                 <td class="attributes_item">
                                   <span class="f-fallback">
-            <strong>Due By:</strong> ${Getinvoice[0].invoiceDate}
+            <strong>Due By:</strong> ${Getinvoice[0]?.invoiceDate}
           </span>
                                 </td>
                               </tr>
@@ -495,10 +495,10 @@ const InvoiceEmailFormat = (Getinvoice) => {
                       <table class="purchase" width="100%" cellpadding="0" cellspacing="0">
                         <tr>
                           <td>
-                            <h3>${Getinvoice[0].invoiceId}</h3>
+                            <h3>${Getinvoice[0]?.invoiceId}</h3>
                           </td>
                           <td>
-                            <h3 class="align-right">${Getinvoice[0].createdDate}</h3>
+                            <h3 class="align-right">${Getinvoice[0]?.createdDate}</h3>
                           </td>
                         </tr>
                         <tr>
@@ -513,15 +513,15 @@ const InvoiceEmailFormat = (Getinvoice) => {
                                 </th>
                               </tr>
                               <tr>
-                                <td width="80%" class="purchase_item"><span class="f-fallback">${Getinvoice[0].description}</span></td>
-                                <td class="align-right" width="20%" class="purchase_item"><span class="f-fallback">${Getinvoice[0].amount}</span></td>
+                                <td width="80%" class="purchase_item"><span class="f-fallback">${Getinvoice[0]?.description}</span></td>
+                                <td class="align-right" width="20%" class="purchase_item"><span class="f-fallback">${Getinvoice[0]?.amount}</span></td>
                               </tr>
                               <tr>
                                 <td width="80%" class="purchase_footer" valign="middle">
                                   <p class="f-fallback purchase_total purchase_total--label">Total</p>
                                 </td>
                                 <td width="20%" class="purchase_footer" valign="middle">
-                                  <p class="f-fallback purchase_total">${Getinvoice[0].amount}</p>
+                                  <p class="f-fallback purchase_total">${Getinvoice[0]?.amount}</p>
                                 </td>
                               </tr>
                             </table>

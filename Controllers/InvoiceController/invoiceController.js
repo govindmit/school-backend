@@ -73,7 +73,7 @@ module.exports = {
     var status = "";
     var date = "";
     var amount = "";
-    var order = "";
+    var order = "DESC";
     var isdeleted = "";
     if (req.body.status == "paid") {
       status = `WHERE invoices.status = '${req.body.status}'`;
@@ -128,9 +128,10 @@ module.exports = {
 
       res.status(200).json({ data: invoice });
     } else {
-      let sql = `SELECT users.name,items.name as itemname,item.description,invoices.amount,invoice.invoiceId,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE invoices.id = ${req.params.id}`;
+      let sql = `SELECT invoices.amount,invoice.invoiceId,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE user_id = ${req.params.id}`;
       const invoice = await query(sql);
 
+      console.log(invoice, "invoiceeee");
       // for (let row of invoice) {
       //   let students = `SELECT * from students WHERE id = ${row.student_id}`;
       //   const studentRecords = await query(students);
