@@ -22,7 +22,7 @@ module.exports = {
     res.status(200).json({ data: item });
   },
   GetItem: async (req, res) => {
-    var sql = `SELECT id,name,price,description FROM items`;
+    var sql = `SELECT id FROM items`;
     const item = await query(sql);
 
     res.status(200).json({ data: item });
