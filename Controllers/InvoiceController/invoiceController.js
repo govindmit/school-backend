@@ -39,31 +39,30 @@ module.exports = {
     const updateInvoice = await query(sqls);
     let sqld = `SELECT users.name,items.name as itemname,items.description,invoices.amount,invoices.status,invoices.invoiceId,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${invoice.insertId}`;
     const Getinvoice = await query(sqld);
-    const hh = await InvoiceEmailFormat(Getinvoice);
+    // const hh = await InvoiceEmailFormat(Getinvoice);
 
-    console.log(Getinvoice, "Getinvoice");
-    if (invoice) {
-      sendmail(
-        {
-          from: "jaydeepc721@gmail.com",
-          to: "qatar.school@yopmail.com",
-          subject: "test sendmail",
-          html: hh,
-        },
-        function (err, reply) {
-          // if (err) {
-          //   res
-          //     .status(400)
-          //     .json({ message: "something went wrong to send mail" });
-          // }
-        }
-      );
-      res
-        .status(200)
-        .json({ message: "Invoice created successfully", data: invoice });
-    } else {
-      res.status(400).json({ message: "something went wrong" });
-    }
+    // if (invoice) {
+    // sendmail(
+    //   {
+    //     from: "jaydeepc721@gmail.com",
+    //     to: "qatar.school@yopmail.com",
+    //     subject: "test sendmail",
+    //     html: hh,
+    //   },
+    //   function (err, reply) {
+    //     // if (err) {
+    //     //   res
+    //     //     .status(400)
+    //     //     .json({ message: "something went wrong to send mail" });
+    //     // }
+    //   }
+    // );
+    res
+      .status(200)
+      .json({ message: "Invoice created successfully", data: invoice });
+    // } else {
+    //   res.status(400).json({ message: "something went wrong" });
+    // }
   },
 
   getInvoice: async (req, res) => {

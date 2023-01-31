@@ -74,6 +74,7 @@ const {
   CreateItem,
   GetItem,
   GetItembyid,
+  GetItemData,
 } = require("../Controllers/InvoiceController/itemController");
 
 //#######################################################################################
@@ -141,5 +142,6 @@ router.get("/getInvoicebyUser/:id", getInvoiceByUserId);
 router.post("/createItem", upload.none(), CreateItem);
 router.post("/getItembyid", upload.none(), GetItembyid);
 router.get("/getItem", GetItem);
+router.get("/getItems", GetItemData);
 
 module.exports = router;
