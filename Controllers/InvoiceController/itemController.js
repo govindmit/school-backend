@@ -18,13 +18,13 @@ module.exports = {
     console.log(req.body.id);
 
     let id = req.body.id ? req.body.id : null;
-    var sql = `SELECT name,price,description FROM items WHERE id IN(${id})`;
+    var sql = `SELECT id,name,price,description FROM items WHERE id IN(${id})`;
     const item = await query(sql);
 
     res.status(200).json({ data: item });
   },
   GetItem: async (req, res) => {
-    var sql = `SELECT name,price,description FROM items`;
+    var sql = `SELECT id,name,price,description FROM items`;
     const item = await query(sql);
 
     res.status(200).json({ data: item });
