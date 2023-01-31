@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
 const util = require("util");
+const moment = require("moment");
 const nodemailer = require("nodemailer");
 const InvoiceEmailFormat = require("../Helper/InvoiceEmailTemp");
 const sendmail = require("sendmail")();
@@ -127,21 +128,6 @@ module.exports = {
       // }
 
       res.status(200).json({ data: invoice });
-    } else {
-      let sql = `SELECT invoices.amount,invoice.invoiceId,invoices.id,invoices.item,invoices.invoice_pay_date_time,invoices.generate_date_time FROM invoices INNER JOIN users ON invoices.user_id = users.id WHERE user_id = ${req.params.id}`;
-      const invoice = await query(sql);
-
-      console.log(invoice, "invoiceeee");
-      // for (let row of invoice) {
-      //   let students = `SELECT * from students WHERE id = ${row.student_id}`;
-      //   const studentRecords = await query(students);
-
-      //   invoiceData.push({
-      //     ...row,
-      //     student: studentRecords ? studentRecords[0] : null,
-      //   });
-      // }
-      res.status(200).json({ data: invoice });
     }
   },
   updateInvoice: async (req, res) => {
@@ -209,5 +195,22 @@ module.exports = {
         }
       }
     );
+  },
+  getInvoiceByUserId: async (req, res) => {
+    console.log(req.query.key, "queryyyy");
+    let date = moment(new Date()).format("DD/MM/YYYY");
+    console.log(date, "dateeeeeee");
+    if (req.query.key == "close") {
+      let sql = `SELECT invoices.amount,invoices.invoiceId,invoices.isDeleted,invoices.customerId,invoices.status,invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND status ='paid' AND isDeleted = 0 ORDER BY invoiceDate DESC LIMIT 2 `;
+
+      const invoice = await query(sql);
+
+      res.send(invoice);
+    } else {
+      let sql = `SELECT invoices.amount,invoices.invoiceId,invoices.status,invoices.customerId,invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND isDeleted = 0 AND status = 'pending' ORDER BY invoiceDate DESC LIMIT 2`;
+
+      const invoice = await query(sql);
+      res.send(invoice);
+    }
   },
 };
