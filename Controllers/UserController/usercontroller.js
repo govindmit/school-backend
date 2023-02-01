@@ -63,43 +63,43 @@ module.exports = {
                             process.env.JWT_SECRET_KEY
                           );
 
-                          res.status(200).send({
-                            message: "Customer Registration successfully.",
-                          });
-
-                          // nodemailer.createTestAccount((err, account) => {
-                          //   if (err) {
-                          //     return process.exit(1);
-                          //   }
-                          //   // Create a SMTP transporter object
-                          //   let transporter = nodemailer.createTransport({
-                          //     host: "smtp.ethereal.email",
-                          //     port: 587,
-                          //     secure: false,
-                          //     auth: {
-                          //       user: process.env.eathEmail,
-                          //       pass: process.env.eathPass,
-                          //     },
-                          //   });
-                          //   // Message object
-                          //   let message = {
-                          //     from: process.env.emailFrom,
-                          //     to: process.env.emailTo,
-                          //     subject: "Reset Password Link From QIS✔",
-                          //     text: `Hello,`,
-                          //     html: ResetEmailFormat(resetPasswordtoken),
-                          //   };
-                          //   transporter.sendMail(message, (err, info) => {
-                          //     if (err) {
-                          //       return process.exit(1);
-                          //     }
-                          //     res.status(201).json({
-                          //       msg: "Link send successfully for reset password",
-                          //       msg1: "Customer Registration successfully.",
-                          //       data: responce,
-                          //     });
-                          //   });
+                          // res.status(200).send({
+                          //   message: "Customer Registration successfully.",
                           // });
+
+                          nodemailer.createTestAccount((err, account) => {
+                            if (err) {
+                              return process.exit(1);
+                            }
+                            // Create a SMTP transporter object
+                            let transporter = nodemailer.createTransport({
+                              host: "smtp.ethereal.email",
+                              port: 587,
+                              secure: false,
+                              auth: {
+                                user: process.env.eathEmail,
+                                pass: process.env.eathPass,
+                              },
+                            });
+                            // Message object
+                            let message = {
+                              from: process.env.emailFrom,
+                              to: process.env.emailTo,
+                              subject: "Reset Password Link From QIS✔",
+                              text: `Hello,`,
+                              html: ResetEmailFormat(resetPasswordtoken),
+                            };
+                            transporter.sendMail(message, (err, info) => {
+                              if (err) {
+                                return process.exit(1);
+                              }
+                              res.status(201).json({
+                                msg: "Link send successfully for reset password",
+                                msg1: "Customer Registration successfully.",
+                                data: responce,
+                              });
+                            });
+                          });
                         });
                       }
                     }
@@ -176,14 +176,13 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.name, users.email1, users.email2, users.email2, users.phone1, users.phone2, users.contactName, users.printUs as printus, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
+    var sql = `select users.id, users.name, users.email1, users.email2, users.email2, users.phone1,users.typeId,users.phone2, users.contactName, users.printUs as printus, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
     });
   },
 
-  //edit user controller
   editUserController: async (req, res) => {
     const id = req.params.id;
     const {
