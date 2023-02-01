@@ -177,14 +177,15 @@ module.exports = {
   },
 
   SendInvoiceEmail: async (req, res) => {
-    let sqld = `SELECT users.name,items.description,items.name,invoices.amount,invoices.status,invoices.invoiceId, invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${req.params.id}`;
+    let sqld = `SELECT users.name,users.email1,items.description,items.name,invoices.amount,invoices.status,invoices.invoiceId, invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${req.params.id}`;
     const Getinvoice = await query(sqld);
     const hh = await InvoiceEmailFormat(Getinvoice);
 
+    console.log(Getinvoice[0].email1, "getInvoiceee");
     return sendmail(
       {
-        from: "jaydeepc721@gmail.com",
-        to: "qatar.school@yopmail.com",
+        from: process.env.emailFrom,
+        to: process.env.emailTo,
         subject: "test sendmail",
         html: hh,
       },

@@ -15,9 +15,11 @@ module.exports = {
         .status(400)
         .send({ message: "Email and Password field is required" });
     }
-    const check_email_query = `select id, firstName, email1, password, status, roleId from  users where email1 = "${email1}" `;
+
+    const check_email_query = `select id, name, email1, password, status, roleId from  users where email1 = "${email1}" `;
     mysqlconnection.query(check_email_query, function (err, result) {
-      if (result.length > 0) {
+      console.log(result, "result");
+      if (result) {
         bcrypt
           .compare(password, result[0].password)
           .then((responce) => {
@@ -30,9 +32,10 @@ module.exports = {
                 message: "User login successfully",
                 loginToken: loginToken,
                 data: {
-                  name: result[0].firstName,
+                  id: result[0].id,
+                  fname: result[0].name,
                   email: result[0].email1,
-                  role_id: result[0].role_id,
+                  role_id: result[0].roleId,
                 },
               });
             } else {
