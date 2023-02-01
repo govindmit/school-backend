@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const ResetEmailFormat = require("../Helper/ResetEmailTemp");
 const mysqlconnection = require("../../DB/db.config.connection");
+const { createIntacctCustomer, deleteIntacctCustomer, updateIntacctCustomer } = require("../../SageIntacctAPIs/CustomerServices");
 
 module.exports = {
   // Add user Controller
@@ -40,9 +41,32 @@ module.exports = {
       } else {
         if (parentId > 0 || parentId === undefined) {
           //create customer
-          mysqlconnection.query(insert_query, function (err, responce) {
+          mysqlconnection.query(insert_query, async function (err, responce) {
             if (err) throw err;
             if (responce) {
+
+              //create customer in Instacct
+              var active ;
+              if(status === 1){
+                active = true;
+              }
+              if(status === 0){
+                active = false;
+              }
+             
+              const data ={
+                name,
+                email1,
+                email2,
+                phoneNumber1:phone1,
+                phoneNumber2:phone2,
+                active : active,
+                parentCustomerId: parentId || '10011',
+              }
+               const instacctCustomer = await createIntacctCustomer(data);
+               const customerId = instacctCustomer._data[0]["CUSTOMERID"];
+               const recordNo = parseInt(instacctCustomer.data[0]["RECORDNO"]);
+
               //create customer
               const getCustuser = `select id from users where roleId = 2 and id = ${responce.insertId}`;
               mysqlconnection.query(getCustuser, function (err, result) {
@@ -54,7 +78,8 @@ module.exports = {
                     function (err, custResult) {
                       if (err) throw err;
                       if (custResult) {
-                        const updtCust = `update customers set customerId = "CUST-000${custResult.insertId}" where id =${custResult.insertId}`;
+                        // const updtCust = `update customers set customerId = "CUST-000${custResult.insertId}" where id =${custResult.insertId}`;
+                        const updtCust = `update customers set customerId = "${customerId}" , record_no=${recordNo} where id =${custResult.insertId}`;
                         mysqlconnection.query(updtCust, function (err, result) {
                           if (err) throw err;
                           //create reset password token
@@ -141,7 +166,7 @@ module.exports = {
     let bycontactName = "";
     let bynumber = "";
     let type = "";
-    console.log(req.body, "bodyyyyyyyyyyyyyyyyyy");
+
     if (status === 1) {
       bystatus = ` and status = ${status}`;
     } else if (status === 0) {
@@ -166,7 +191,7 @@ module.exports = {
     left outer join customers on customers.userId = users.id 
     where 1=1 and roleId = 2 ${bystatus} ${bycontactName} ${bynumber} ${type}`;
 
-    console.log(sqlquery, "sqlquery");
+  
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -213,8 +238,32 @@ module.exports = {
       }",printUs = "${
         printUs ? printUs : result[0].printUs
       }", status= ${status} where id = ${id}`;
+
+      var sqlquery = `SELECT * FROM customers where userId = ${id}`;
       mysqlconnection.query(updt_query, function (err, result) {
         if (err) throw err;
+
+        // update intacct customer
+        mysqlconnection.query(sqlquery, function (err, result) {
+          if (err) throw err;
+          if(result){
+                console.log("result =>",result[0].customerId);
+                 const data ={
+                  customerId:result[0].customerId,
+                  customerName:name,
+                  active:status === 1 ? true :false,
+                  primaryEmailAddress:email1,
+                  secondaryEmailAddress:email2,
+                  primaryPhoneNo:phone1,
+                  secondaryPhoneNo : phone2,
+                  parentCustomerId: parentId || '10011'
+                 }
+           
+                 updateIntacctCustomer(data);
+
+            }
+        });
+
         res.status(200).json({ message: "data updated successfully" });
       });
     });
@@ -224,8 +273,21 @@ module.exports = {
   deleteUserController: (req, res) => {
     const id = req.params.id;
     var sql = `delete from users where id = ${id}`;
+
+    var sqlquery = `SELECT * FROM customers where userId = ${id}`;
+
+ 
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
+
+      // delete the Instacct customer
+      mysqlconnection.query(sqlquery, function (err, result) {
+        if (err) throw err;
+        if(result){
+              console.log("result =>",result[0].customerId);
+              deleteIntacctCustomer({customerId:result[0].customerId})
+          }
+      });
       res
         .status(200)
         .json({ message: "Data deleted successfully", responce: result });
