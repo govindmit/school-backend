@@ -17,52 +17,56 @@ module.exports = {
     var createdDate = req.body.createdDate;
     var createdBy = req.body.createdBy;
     var invoiceDate = req.body.invoiceDate;
-    var isDeleted = req.body.isDeleted;
-    var deletedBy = req.body.deletedBy;
-    var deletedDate = req.body.deletedDate;
 
-    if (
-      !customerId ||
-      !amount ||
-      !itemId ||
-      !status ||
-      !createdDate ||
-      !invoiceDate
-    ) {
-      return res.status(400).send({ message: "All field is required" });
+    if (!customerId) {
+      return res.status(400).send({ message: "customer field is required" });
+    } else if (!amount) {
+      return res.status(400).send({ message: "amount field is required" });
+    } else if (!itemId) {
+      return res.status(400).send({ message: "item field is required" });
+    } else if (!status) {
+      return res.status(400).send({ message: "status field is required" });
+    } else if (!invoiceDate) {
+      return res.status(400).send({ message: "invoiceDate field is required" });
+    } else {
+      var sql = `INSERT INTO invoices (customerId,amount,itemId,status,createdDate,createdBy,invoiceDate) VALUES('${customerId}','${amount}','${itemId}','${status}','${createdDate}','${createdBy}','${invoiceDate}')`;
+
+      const invoice = await query(sql);
+      var sqls = `UPDATE invoices SET  invoiceId='INV000${invoice.insertId}' WHERE id = ${invoice.insertId}`;
+      const updateInvoice = await query(sqls);
+      let sqld = `SELECT users.name,items.name as itemname,items.description,invoices.amount,invoices.status,invoices.invoiceId,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${invoice.insertId}`;
+      const Getinvoice = await query(sqld);
+      const hh = await InvoiceEmailFormat(Getinvoice);
+
+      if (invoice && status === "pending") {
+        sendmail(
+          {
+            from: "test@gmail.com",
+            to: "qatar.school@yopmail.com",
+            subject: "test sendmail",
+            html: hh,
+          },
+          function (err, reply) {
+            if (err) {
+              res
+                .status(400)
+                .json({ message: "something went wrong to send mail" });
+            } else {
+              console.log("mail send successfully");
+            }
+          }
+        );
+        res
+          .status(200)
+          .json({ message: "Invoice created successfully", data: invoice });
+      } else if (invoice && status === "draft") {
+        res
+          .status(200)
+          .json({ message: "Invoice created successfully", data: invoice });
+      } else {
+        res.status(400).json({ message: "something went wrong" });
+      }
     }
-
-    var sql = `INSERT INTO invoices (customerId,amount,itemId,status,createdDate,createdBy,invoiceDate) VALUES('${customerId}','${amount}','${itemId}','${status}','${createdDate}','${createdBy}','${invoiceDate}')`;
-
-    const invoice = await query(sql);
-    var sqls = `UPDATE invoices SET  invoiceId='INV000${invoice.insertId}' WHERE id = ${invoice.insertId}`;
-    const updateInvoice = await query(sqls);
-    let sqld = `SELECT users.name,items.name as itemname,items.description,invoices.amount,invoices.status,invoices.invoiceId,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${invoice.insertId}`;
-    const Getinvoice = await query(sqld);
-    // const hh = await InvoiceEmailFormat(Getinvoice);
-
-    // if (invoice) {
-    // sendmail(
-    //   {
-    //     from: "jaydeepc721@gmail.com",
-    //     to: "qatar.school@yopmail.com",
-    //     subject: "test sendmail",
-    //     html: hh,
-    //   },
-    //   function (err, reply) {
-    //     // if (err) {
-    //     //   res
-    //     //     .status(400)
-    //     //     .json({ message: "something went wrong to send mail" });
-    //     // }
-    //   }
-    // );
-    res
-      .status(200)
-      .json({ message: "Invoice created successfully", data: invoice });
-    // } else {
-    //   res.status(400).json({ message: "something went wrong" });
-    // }
   },
 
   getInvoice: async (req, res) => {
@@ -137,11 +141,8 @@ module.exports = {
       req.body;
 
     if (invoice[0].status === "paid") {
-      console.log("paidddddddd");
       res.status(401).json({ message: "Already Paid" });
     } else {
-      console.log("Unpaidddddddd");
-
       let customerId = user_id ? user_id : invoice[0].customerId;
       let amounts = amount ? amount : invoice[0].amount;
       let createdDates = createdDate ? createdDate : invoice[0].createdDate;
@@ -181,7 +182,6 @@ module.exports = {
     const Getinvoice = await query(sqld);
     const hh = await InvoiceEmailFormat(Getinvoice);
 
-    console.log(Getinvoice[0].email1, "getInvoiceee");
     return sendmail(
       {
         from: process.env.emailFrom,
@@ -197,9 +197,7 @@ module.exports = {
     );
   },
   getInvoiceByUserId: async (req, res) => {
-    console.log(req.query.key, "queryyyy");
     let date = moment(new Date()).format("DD/MM/YYYY");
-    console.log(date, "dateeeeeee");
     if (req.query.key == "close") {
       let sql = `SELECT invoices.amount,invoices.invoiceId,invoices.isDeleted,invoices.customerId,invoices.status,invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND status ='paid' AND isDeleted = 0 ORDER BY invoiceDate DESC LIMIT 2 `;
 
