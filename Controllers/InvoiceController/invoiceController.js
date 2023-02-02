@@ -184,8 +184,8 @@ module.exports = {
 
     return sendmail(
       {
-        from: process.env.emailFrom,
-        to: process.env.emailTo,
+        from: "test@gmail.com",
+        to: "qatar.school@yopmail.com",
         subject: "test sendmail",
         html: hh,
       },
