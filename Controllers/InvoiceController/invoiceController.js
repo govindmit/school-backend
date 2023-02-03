@@ -17,6 +17,10 @@ module.exports = {
     var createdDate = req.body.createdDate;
     var createdBy = req.body.createdBy;
     var invoiceDate = req.body.invoiceDate;
+    var invoiceNo = req.body.invoiceNo;
+    let sqls = `SELECT invoiceId FROM invoices WHERE invoiceId = '${invoiceNo}'`;
+
+    var invoiceNos = await query(sqls);
 
     if (!customerId) {
       return res.status(400).send({ message: "customer field is required" });
@@ -28,12 +32,18 @@ module.exports = {
       return res.status(400).send({ message: "status field is required" });
     } else if (!invoiceDate) {
       return res.status(400).send({ message: "invoiceDate field is required" });
+    } else if (!invoiceNo) {
+      return res.status(400).send({ message: "invoiceNo field is required" });
+    } else if (invoiceNos.length > 0) {
+      return res
+        .status(400)
+        .send({ message: "please enter unique invoice no" });
     } else {
-      var sql = `INSERT INTO invoices (customerId,amount,itemId,status,createdDate,createdBy,invoiceDate) VALUES('${customerId}','${amount}','${itemId}','${status}','${createdDate}','${createdBy}','${invoiceDate}')`;
+      var sql = `INSERT INTO invoices (customerId,amount,itemId,status,createdDate,createdBy,invoiceDate,invoiceId) VALUES('${customerId}','${amount}','${itemId}','${status}','${createdDate}','${createdBy}','${invoiceDate}','${invoiceNo}')`;
 
       const invoice = await query(sql);
-      var sqls = `UPDATE invoices SET  invoiceId='INV000${invoice.insertId}' WHERE id = ${invoice.insertId}`;
-      const updateInvoice = await query(sqls);
+      // var sqls = `UPDATE invoices SET  invoiceId='INV000${invoice.insertId}' WHERE id = ${invoice.insertId}`;
+      // const updateInvoice = await query(sqls);
       let sqld = `SELECT users.name,items.name as itemname,items.description,invoices.amount,invoices.status,invoices.invoiceId,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${invoice.insertId}`;
       const Getinvoice = await query(sqld);
       const hh = await InvoiceEmailFormat(Getinvoice);
@@ -82,6 +92,8 @@ module.exports = {
     if (req.body.status == "paid") {
       status = `WHERE invoices.status = '${req.body.status}'`;
     } else if (req.body.status == "pending") {
+      status = `WHERE invoices.status = '${req.body.status}'`;
+    } else if (req.body.status == "draft") {
       status = `WHERE invoices.status = '${req.body.status}'`;
     } else {
       var status = "";
@@ -136,10 +148,13 @@ module.exports = {
   updateInvoice: async (req, res) => {
     let sqls = `SELECT invoices.amount,invoices.customerId,invoices.status,invoices.createdBy,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices WHERE invoices.id = ${req.params.id}`;
     const invoice = await query(sqls);
-
+    // const { note } = req.body;
     const { user_id, amount, itemId, createdDate, invoiceDate, createdBy } =
       req.body;
-
+    var note = "";
+    if (req.body.note) {
+      note = `,note='${req.body.note}'`;
+    }
     if (invoice[0].status === "paid") {
       res.status(401).json({ message: "Already Paid" });
     } else {
@@ -150,12 +165,20 @@ module.exports = {
       let itemIds = itemId ? itemId : invoice[0].itemId;
       let createdBys = createdBy ? createdBy : invoice[0].createdBy;
       let status = "paid";
-
-      var sql = `UPDATE invoices SET customerId = '${customerId}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',status='${status}' WHERE id = ${req.params.id}`;
+      var sql = `UPDATE invoices SET customerId = '${customerId}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',status='${status}'${note} WHERE id = ${req.params.id}`;
       const invoices = await query(sql);
 
       res.send(invoices);
     }
+  },
+  getInvoiceNo: async (req, res) => {
+    let sql = `SELECT id FROM invoices ORDER BY id DESC`;
+    const invoices = await query(sql);
+
+    console.log(invoices[0].id, "invoicessss");
+    let invoiceNo = `INV000${invoices[0].id + 1}`;
+
+    res.status(201).json({ invoiceNo: invoiceNo });
   },
 
   DeleteInvoice: async (req, res) => {

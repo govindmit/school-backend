@@ -72,6 +72,7 @@ const {
   updateInvoice,
   SendInvoiceEmail,
   getInvoiceByUserId,
+  getInvoiceNo,
 } = require("../Controllers/InvoiceController/invoiceController");
 const {
   CreateItem,
@@ -140,9 +141,10 @@ router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);
 router.post("/createInvoice", upload.none(), CreateInvoice);
 router.post("/getInvoice/:id?", upload.none(), getInvoice);
 router.delete("/deleteInvoice/:id", upload.none(), DeleteInvoice);
-router.put("/updateInvoice/:id", updateInvoice);
+router.put("/updateInvoice/:id", upload.none(), updateInvoice);
 router.get("/sendInvoiceEmail/:id", SendInvoiceEmail);
 router.get("/getInvoicebyUser/:id", getInvoiceByUserId);
+router.get("/getInvoiceNo", getInvoiceNo);
 
 //############################ Item routers ############################
 router.post("/createItem", upload.none(), CreateItem);
