@@ -136,10 +136,13 @@ module.exports = {
   updateInvoice: async (req, res) => {
     let sqls = `SELECT invoices.amount,invoices.customerId,invoices.status,invoices.createdBy,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices WHERE invoices.id = ${req.params.id}`;
     const invoice = await query(sqls);
-
+    // const { note } = req.body;
     const { user_id, amount, itemId, createdDate, invoiceDate, createdBy } =
       req.body;
-
+    var note = "";
+    if (req.body.note) {
+      note = `,note='${req.body.note}'`;
+    }
     if (invoice[0].status === "paid") {
       res.status(401).json({ message: "Already Paid" });
     } else {
@@ -150,8 +153,7 @@ module.exports = {
       let itemIds = itemId ? itemId : invoice[0].itemId;
       let createdBys = createdBy ? createdBy : invoice[0].createdBy;
       let status = "paid";
-
-      var sql = `UPDATE invoices SET customerId = '${customerId}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',status='${status}' WHERE id = ${req.params.id}`;
+      var sql = `UPDATE invoices SET customerId = '${customerId}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',status='${status}'${note} WHERE id = ${req.params.id}`;
       const invoices = await query(sql);
 
       res.send(invoices);
