@@ -7,7 +7,7 @@ const router = express.Router();
 //authorization middlewar
 const { verifyAuthToken } = require("../Middlewares/auth");
 //aunthontication middleware
-// const { verifyLoginAuthToken } = require("../Middlewares/loginauthtoken");
+const { verifyLoginAuthToken } = require("../Middlewares/loginauthtoken");
 //upload image
 const upload = require("../Middlewares/uploadmulter");
 
@@ -27,6 +27,9 @@ const {
 const {
   addTypeController,
   getTypeController,
+  deleteTypeController,
+  TypeDetController,
+  TypeEditController,
 } = require("../Controllers/TypeController/typecontroller");
 
 //#############  User controllers  ############################
@@ -90,6 +93,9 @@ router.post("/addRole", verifyAuthToken, addRoleController);
 //############################## type routers    ###############################
 router.post("/addType", verifyAuthToken, addTypeController);
 router.get("/getType", verifyAuthToken, getTypeController);
+router.get("/getTypeDet/:id", verifyAuthToken, TypeDetController);
+router.put("/editType/:id", verifyAuthToken, TypeEditController);
+router.delete("/deleteType/:id", verifyAuthToken, deleteTypeController);
 
 //#############################  user routers ##################################
 router.post("/addUser", verifyAuthToken, addUserController);

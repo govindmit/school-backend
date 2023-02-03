@@ -18,9 +18,11 @@ module.exports = {
       roleId,
       typeId,
       parentId,
+      userRole,
       createdBy,
       updatedBy,
     } = req.body;
+
     //check email query
     const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
     //insert query
@@ -38,7 +40,30 @@ module.exports = {
       if (result.length > 0) {
         return res.status(400).send({ message: "Email1 already registered." });
       } else {
-        if (parentId > 0) {
+        if (parentId === 0 && userRole === "parent") {
+          console.log("hii");
+          mysqlconnection.query(insert_query, function (err, responce) {
+            if (err) throw err;
+            if (responce) {
+              //create parent
+              const insert_parnt = `INSERT INTO parents (userId)VALUES(${responce.insertId})`;
+              mysqlconnection.query(insert_parnt, function (err, parntResult) {
+                if (err) throw err;
+                if (parntResult) {
+                  const updtparnt = `update parents set parentId = "PARNT-000${parntResult.insertId}" where id =${parntResult.insertId}`;
+                  mysqlconnection.query(updtparnt, function (err, result) {
+                    if (err) throw err;
+                    res.status(200).json({
+                      msg1: "Parent Registration successfully.",
+                    });
+                  });
+                }
+              });
+            }
+          });
+        }
+
+        if ((parentId === 0 || parentId > 0) && userRole === "customer") {
           //create customer
           mysqlconnection.query(insert_query, function (err, responce) {
             if (err) throw err;
@@ -108,27 +133,6 @@ module.exports = {
               });
             }
           });
-        } else {
-          //create parent
-          mysqlconnection.query(insert_query, function (err, responce) {
-            if (err) throw err;
-            if (responce) {
-              //create parent
-              const insert_parnt = `INSERT INTO parents (userId)VALUES(${responce.insertId})`;
-              mysqlconnection.query(insert_parnt, function (err, parntResult) {
-                if (err) throw err;
-                if (parntResult) {
-                  const updtparnt = `update parents set parentId = "PARNT-000${parntResult.insertId}" where id =${parntResult.insertId}`;
-                  mysqlconnection.query(updtparnt, function (err, result) {
-                    if (err) throw err;
-                    res.status(200).json({
-                      msg1: "Parent Registration successfully.",
-                    });
-                  });
-                }
-              });
-            }
-          });
         }
       }
     });
@@ -157,13 +161,14 @@ module.exports = {
       type = ` and typeId = ${customerType}`;
     }
 
-    var sqlquery = `select users.id, customers.customerId, users.name, users.email1, users.email2, 
+    var sqlquery = `select users.id, customers.customerId, parents.parentId, users.name, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
     users.status, users.printUs, roles.name as "UserRole" from users 
     LEFT outer join roles on roles.id = users.roleId 
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
-    where 1=1 and roleId = 2 and isDeleted = 0 ${bystatus} ${bycontactName} ${bynumber} ${type}`;
+    left outer join parents on parents.userId = users.id 
+    where 1=1 and roleId = 2 and users.isDeleted = 0 ${bystatus} ${bycontactName} ${bynumber} ${type}`;
 
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
@@ -227,13 +232,20 @@ module.exports = {
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       if (result.affectedRows === 1) {
-        const deleteinvoice = `update invoives set isDeleted = 1 where customerId = ${id}`;
-        mysqlconnection.query(deleteinvoice, function (err, result) {
+        const qwery = `select id, invoiceId from invoices where customerId = ${id}`;
+        mysqlconnection.query(qwery, function (err, result) {
           if (err) throw err;
-          res
-            .status(200)
-            .json({ message: "Data deleted successfully", responce: result });
+          const deleteinvoice = `update invoives set isDeleted = 1 where customerId = ${id}`;
+          mysqlconnection.query(deleteinvoice, function (err, result) {
+            if (err) throw err;
+            res
+              .status(200)
+              .json({ message: "Data deleted successfully", responce: result });
+          });
         });
+        res
+          .status(200)
+          .json({ message: "Data deleted successfully", responce: result });
       }
     });
   },
