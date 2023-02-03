@@ -163,7 +163,7 @@ module.exports = {
     LEFT outer join roles on roles.id = users.roleId 
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
-    where 1=1 and roleId = 2 and isDeleted = 0 ${bystatus} ${bycontactName} ${bynumber} ${type}`;
+    where 1=1 and roleId = 2 and users.isDeleted = 0 ${bystatus} ${bycontactName} ${bynumber} ${type}`;
 
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
