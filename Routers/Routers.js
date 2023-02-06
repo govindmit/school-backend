@@ -39,6 +39,7 @@ const {
   deleteUserController,
   getUserDetailsController,
   editUserController,
+  GetUserByPidController,
 } = require("../Controllers/UserController/usercontroller");
 
 //############  Student controller  ##########################
@@ -104,6 +105,7 @@ router.post("/getUser", verifyAuthToken, getUserController);
 router.get("/getUserDetails/:id", verifyAuthToken, getUserDetailsController);
 router.put("/edituser/:id", verifyAuthToken, editUserController);
 router.delete("/deleteuser/:id", verifyAuthToken, deleteUserController);
+router.get("/getuserbypid/:id", verifyAuthToken, GetUserByPidController);
 
 //##############################  students routes   ############################
 router.post("/addstudent", upload.none(), addstudentcontroller);

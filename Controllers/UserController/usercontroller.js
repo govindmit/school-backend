@@ -87,12 +87,13 @@ module.exports = {
                             { email1: email1, id: responce.insertId },
                             process.env.JWT_SECRET_KEY
                           );
+                          const dt = ResetEmailFormat(resetPasswordtoken);
                           sendmail(
                             {
                               from: process.env.emailFrom,
                               to: process.env.emailTo,
                               subject: "Reset Password Link From QIS✔",
-                              html: ResetEmailFormat(resetPasswordtoken),
+                              html: dt,
                             },
                             function (err, reply) {
                               if (err) {
@@ -122,7 +123,8 @@ module.exports = {
 
   //get users controller
   getUserController: async (req, res) => {
-    const { status, customerType, contactName, number, sorting } = req.body;
+    const { status, customerType, contactName, number, sorting, ParentId } =
+      req.body;
 
     let bystatus = "";
     if (status === 1) {
@@ -161,14 +163,21 @@ module.exports = {
       bycustType = ` and typeId = ${customerType}`;
     }
 
-    var sqlquery = `select users.id, customers.customerId, parents.parentId, users.name, users.email1, users.email2, 
+    let ByparentId = "";
+    if (ParentId) {
+      ByparentId = ` and users.parentId  = ${ParentId}`;
+    } else {
+      ByparentId = "";
+    }
+
+    var sqlquery = `select users.id, customers.customerId, parents.parentId as 'GeneratedParentId', users.parentId, users.name, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
     users.status, users.printUs, roles.name as "UserRole" from users 
     LEFT outer join roles on roles.id = users.roleId 
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
     left outer join parents on parents.userId = users.id 
-    where users.isDeleted = 0 ${bystatus}${bycontactName}${bynumber}${bycustType}${bysorting}`;
+    where users.isDeleted = 0 and roleId = 2 ${bystatus}${bycontactName}${bynumber}${bycustType}${ByparentId}${bysorting}`;
 
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
@@ -179,7 +188,7 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
+    var sql = `select users.id, users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -198,9 +207,10 @@ module.exports = {
       contactName,
       status,
       typeId,
+      parentId,
       updatedBy,
     } = req.body;
-    let sql = `select id, name, email1, email2, phone1, phone2, typeId, contactName, printUs, status from users where id=${id}`;
+    let sql = `select id, name, email1, email2, phone1, phone2, typeId, parentId, contactName, printUs, status from users where id=${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       const updt_query = `update users set name = "${
@@ -215,7 +225,7 @@ module.exports = {
         printUs ? printUs : result[0].printUs
       }", status= ${status} , typeId= ${
         typeId ? typeId : result[0].typeId
-      }, updatedBy = ${
+      }, parentId = ${parentId ? parentId : result[0].parentId}, updatedBy = ${
         updatedBy ? updatedBy : result[0].updatedBy
       } where id = ${id}`;
       mysqlconnection.query(updt_query, function (err, result) {
@@ -247,6 +257,16 @@ module.exports = {
       //     });
       //   });
       // }
+    });
+  },
+
+  //get user by parent id
+  GetUserByPidController: (req, res) => {
+    const pid = req.params.id;
+    var sql = `select id, name from users where id = ${pid}`;
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
     });
   },
 };
