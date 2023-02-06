@@ -143,6 +143,15 @@ module.exports = {
       // }
 
       res.status(200).json({ data: invoice });
+    } else {
+      let invoices = `SELECT users.name,invoices.invoiceId,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${req.params.id}`;
+      const invoicess = await query(invoices);
+
+      // for (let row of invoicess) {
+
+      // const studentRecords = await query(students);
+
+      res.status(200).json({ data: invoicess });
     }
   },
   updateInvoice: async (req, res) => {
