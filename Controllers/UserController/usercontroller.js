@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const ResetEmailFormat = require("../Helper/ResetEmailTemp");
 const mysqlconnection = require("../../DB/db.config.connection");
-
+const sendmail = require("sendmail")();
 module.exports = {
   // Add user Controller
   addUserController: async (req, res) => {
@@ -18,9 +18,11 @@ module.exports = {
       roleId,
       typeId,
       parentId,
+      userRole,
       createdBy,
       updatedBy,
     } = req.body;
+
     //check email query
     const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
     //insert query
@@ -38,7 +40,30 @@ module.exports = {
       if (result.length > 0) {
         return res.status(400).send({ message: "Email1 already registered." });
       } else {
-        if (parentId > 0) {
+        if (parentId === 0 && userRole === "parent") {
+          console.log("hii");
+          mysqlconnection.query(insert_query, function (err, responce) {
+            if (err) throw err;
+            if (responce) {
+              //create parent
+              const insert_parnt = `INSERT INTO parents (userId)VALUES(${responce.insertId})`;
+              mysqlconnection.query(insert_parnt, function (err, parntResult) {
+                if (err) throw err;
+                if (parntResult) {
+                  const updtparnt = `update parents set parentId = "PARNT-000${parntResult.insertId}" where id =${parntResult.insertId}`;
+                  mysqlconnection.query(updtparnt, function (err, result) {
+                    if (err) throw err;
+                    res.status(200).json({
+                      msg1: "Parent Registration successfully.",
+                    });
+                  });
+                }
+              });
+            }
+          });
+        }
+
+        if ((parentId === 0 || parentId > 0) && userRole === "customer") {
           //create customer
           mysqlconnection.query(insert_query, function (err, responce) {
             if (err) throw err;
@@ -62,69 +87,30 @@ module.exports = {
                             { email1: email1, id: responce.insertId },
                             process.env.JWT_SECRET_KEY
                           );
-
-                          res.status(200).send({
-                            message: "Customer Registration successfully.",
-                          });
-
-                          // nodemailer.createTestAccount((err, account) => {
-                          //   if (err) {
-                          //     return process.exit(1);
-                          //   }
-                          //   // Create a SMTP transporter object
-                          //   let transporter = nodemailer.createTransport({
-                          //     host: "smtp.ethereal.email",
-                          //     port: 587,
-                          //     secure: false,
-                          //     auth: {
-                          //       user: process.env.eathEmail,
-                          //       pass: process.env.eathPass,
-                          //     },
-                          //   });
-                          //   // Message object
-                          //   let message = {
-                          //     from: process.env.emailFrom,
-                          //     to: process.env.emailTo,
-                          //     subject: "Reset Password Link From QIS✔",
-                          //     text: `Hello,`,
-                          //     html: ResetEmailFormat(resetPasswordtoken),
-                          //   };
-                          //   transporter.sendMail(message, (err, info) => {
-                          //     if (err) {
-                          //       return process.exit(1);
-                          //     }
-                          //     res.status(201).json({
-                          //       msg: "Link send successfully for reset password",
-                          //       msg1: "Customer Registration successfully.",
-                          //       data: responce,
-                          //     });
-                          //   });
-                          // });
+                          sendmail(
+                            {
+                              from: process.env.emailFrom,
+                              to: process.env.emailTo,
+                              subject: "Reset Password Link From QIS✔",
+                              html: ResetEmailFormat(resetPasswordtoken),
+                            },
+                            function (err, reply) {
+                              if (err) {
+                                res.status(400).json({
+                                  message: "something went wrong to send mail",
+                                });
+                              } else {
+                                res.status(200).send({
+                                  message:
+                                    "Customer Registration successfully.",
+                                });
+                              }
+                            }
+                          );
                         });
                       }
                     }
                   );
-                }
-              });
-            }
-          });
-        } else {
-          //create parent
-          mysqlconnection.query(insert_query, function (err, responce) {
-            if (err) throw err;
-            if (responce) {
-              //create parent
-              const insert_parnt = `INSERT INTO parents (userId)VALUES(${responce.insertId})`;
-              mysqlconnection.query(insert_parnt, function (err, parntResult) {
-                if (err) throw err;
-                if (parntResult) {
-                  const updtparnt = `update parents set parentId = "PARNT-000${parntResult.insertId}" where id =${parntResult.insertId}`;
-                  mysqlconnection.query(updtparnt, function (err, result) {
-                    if (err) throw err;
-                    res.status(200).json({
-                      msg1: "Parent Registration successfully.",
-                    });
-                  });
                 }
               });
             }
@@ -137,33 +123,52 @@ module.exports = {
   //get users controller
   getUserController: async (req, res) => {
     const { status, customerType, contactName, number, sorting } = req.body;
+
     let bystatus = "";
-    let bycontactName = "";
-    let bynumber = "";
-    let type = "";
     if (status === 1) {
       bystatus = ` and status = ${status}`;
     } else if (status === 0) {
       bystatus = ` and status = ${status}`;
+    } else {
+      bystatus = "";
     }
 
+    let bycontactName = "";
     if (contactName) {
       bycontactName = ` and contactName = "${contactName}"`;
     }
+
+    let bynumber = "";
     if (number) {
       bynumber = ` and phone1 = ${number}`;
     }
-    if (customerType) {
-      type = ` and typeId = ${customerType}`;
+
+    let bysorting = "";
+    if (sorting === 0) {
+      bysorting = ` ORDER BY createdAt ASC`;
+    } else if (sorting === 1) {
+      bysorting = ` ORDER BY createdAt DESC`;
+    } else if (sorting === 2) {
+      bysorting = ` ORDER BY name ASC`;
+    } else if (sorting === 3) {
+      bysorting = ` ORDER BY name DESC`;
+    } else {
+      bysorting = "";
     }
 
-    var sqlquery = `select users.id, customers.customerId, users.name, users.email1, users.email2, 
+    let bycustType = "";
+    if (customerType) {
+      bycustType = ` and typeId = ${customerType}`;
+    }
+
+    var sqlquery = `select users.id, customers.customerId, parents.parentId, users.name, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
     users.status, users.printUs, roles.name as "UserRole" from users 
     LEFT outer join roles on roles.id = users.roleId 
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
-    where 1=1 and roleId = 2 and users.isDeleted = 0 ${bystatus} ${bycontactName} ${bynumber} ${type}`;
+    left outer join parents on parents.userId = users.id 
+    where users.isDeleted = 0 ${bystatus}${bycontactName}${bynumber}${bycustType}${bysorting}`;
 
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
@@ -226,15 +231,22 @@ module.exports = {
     var sql = `update users set isDeleted = 1 where id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
-      if (result.affectedRows === 1) {
-        const deleteinvoice = `update invoives set isDeleted = 1 where customerId = ${id}`;
-        mysqlconnection.query(deleteinvoice, function (err, result) {
-          if (err) throw err;
-          res
-            .status(200)
-            .json({ message: "Data deleted successfully", responce: result });
-        });
-      }
+      res
+        .status(200)
+        .json({ message: "Data deleted successfully", responce: result });
+      // if (result.affectedRows === 1) {
+      //   const qwery = `select id, invoiceId from invoices where customerId = ${id}`;
+      //   mysqlconnection.query(qwery, function (err, result) {
+      //     if (err) throw err;
+      //     const deleteinvoice = `update invoives set isDeleted = 1 where customerId = ${id}`;
+      //     mysqlconnection.query(deleteinvoice, function (err, result) {
+      //       if (err) throw err;
+      //       res
+      //         .status(200)
+      //         .json({ message: "Data deleted successfully", responce: result });
+      //     });
+      //   });
+      // }
     });
   },
 };

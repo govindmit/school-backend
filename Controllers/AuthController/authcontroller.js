@@ -5,7 +5,8 @@ const express = require("express");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
 const ResetEmailFormat = require("../Helper/ResetEmailTemp");
-
+const sendmail = require("sendmail")();
+const Passdsetconformationemail = require("../Helper/Passdsetconformationemail");
 module.exports = {
   // user login controller
   userlogincontroller: (req, res) => {
@@ -65,37 +66,25 @@ module.exports = {
           { email1: result[0].email1, id: result[0].id },
           process.env.JWT_SECRET_KEY
         );
-        nodemailer.createTestAccount((err, account) => {
-          if (err) {
-            return process.exit(1);
-          }
-          // Create a SMTP transporter object
-          let transporter = nodemailer.createTransport({
-            host: "smtp.ethereal.email",
-            port: 587,
-            secure: false,
-            auth: {
-              user: process.env.eathEmail,
-              pass: process.env.eathPass,
-            },
-          });
-          // Message object
-          let message = {
+        sendmail(
+          {
             from: process.env.emailFrom,
             to: process.env.emailTo,
             subject: "Reset Password Link From QIS✔",
-            text: `Hello,`,
             html: ResetEmailFormat(resetPasswordtoken),
-          };
-          transporter.sendMail(message, (err, info) => {
+          },
+          function (err, reply) {
             if (err) {
-              return process.exit(1);
+              res.status(400).json({
+                message: "something went wrong to send mail",
+              });
+            } else {
+              res
+                .status(200)
+                .json({ msg: "Link send successfully for reset password" });
             }
-            res
-              .status(200)
-              .json({ msg: "Link send successfully for reset password" });
-          });
-        });
+          }
+        );
       } else {
         res.status(401).json({ message: "Email Not Registred" });
       }
@@ -122,9 +111,25 @@ module.exports = {
             const updtsql = `update users set password ="${secure_pass}" where email1 = "${result[0].email1}" and id = ${result[0].id}`;
             mysqlconnection.query(updtsql, function (err, result) {
               if (err) throw err;
-              res.status(200).json({
-                message: "Password updated successfully",
-              });
+              sendmail(
+                {
+                  from: process.env.emailFrom,
+                  to: process.env.emailTo,
+                  subject: "Login Link From QIS✔",
+                  html: Passdsetconformationemail(),
+                },
+                function (err, reply) {
+                  if (err) {
+                    res.status(400).json({
+                      message: "something went wrong to send mail",
+                    });
+                  } else {
+                    res.status(200).json({
+                      message: "Password updated successfully",
+                    });
+                  }
+                }
+              );
             });
           } else {
             res.status(400).json({ message: "Link Experied" });
