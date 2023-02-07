@@ -18,6 +18,7 @@ module.exports = {
     var createdBy = req.body.createdBy;
     var invoiceDate = req.body.invoiceDate;
     var invoiceNo = req.body.invoiceNo;
+    var note = req.body.note;
     let sqls = `SELECT invoiceId FROM invoices WHERE invoiceId = '${invoiceNo}'`;
 
     var invoiceNos = await query(sqls);
@@ -180,12 +181,47 @@ module.exports = {
       res.send(invoices);
     }
   },
+
+  editInvoice: async (req, res) => {
+    let sqls = `SELECT invoices.amount,invoices.customerId,invoices.status,invoices.createdBy,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices WHERE invoices.id = ${req.params.id}`;
+    const invoice = await query(sqls);
+    // const { note } = req.body;
+    const {
+      customerId,
+      amount,
+      itemId,
+      createdDate,
+      invoiceNo,
+      invoiceDate,
+      createdBy,
+      updatedAt,
+      updatedBy,
+      status,
+    } = req.body;
+
+    console.log(req.body, "bodyyyyyyyyyyyyyyyyyyyy");
+    let customerIds = customerId;
+    let amounts = amount ? amount : invoice[0]?.amount;
+    let createdDates = createdDate ? createdDate : invoice[0]?.createdDate;
+    let invoiceDates = invoiceDate ? invoiceDate : invoice[0]?.invoiceDate;
+    let itemIds = itemId ? itemId : invoice[0]?.itemId;
+    let createdBys = createdBy ? createdBy : invoice[0]?.createdBy;
+    let updatedAts = updatedAt;
+    let updatedBys = updatedBy;
+    let invoiceNos = invoiceNo;
+    let statuss = status;
+    var sql = `UPDATE invoices SET customerId = '${customerIds}',invoiceId = '${invoiceNos}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',updatedAt='${updatedAts}',updatedBy='${updatedBys}',status='${statuss}' WHERE id = ${req.params.id}`;
+    console.log(sql, "sqlllllllll");
+    const invoices = await query(sql);
+
+    res.send(invoices);
+  },
+
   getInvoiceNo: async (req, res) => {
     let sql = `SELECT id FROM invoices ORDER BY id DESC`;
     const invoices = await query(sql);
 
-    console.log(invoices[0].id, "invoicessss");
-    let invoiceNo = `INV000${invoices[0].id + 1}`;
+    let invoiceNo = `INV000${invoices[0]?.id + 1}`;
 
     res.status(201).json({ invoiceNo: invoiceNo });
   },
