@@ -269,4 +269,14 @@ module.exports = {
       res.status(200).json({ message: "ok", data: result });
     });
   },
+
+  //get user by multiple ids id
+  GetUserByMultipleIdController: (req, res) => {
+    const ids = req.params.id;
+    var sql = `select users.name, users.email1, users.email2, users.phone1, users.phone2, types.name as "CustomerType", users.contactName, users.status, users.printUs from users LEFT outer join types on types.id = users.typeId where users.id IN(${ids})`;
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
+    });
+  },
 };

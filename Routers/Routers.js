@@ -40,6 +40,7 @@ const {
   getUserDetailsController,
   editUserController,
   GetUserByPidController,
+  GetUserByMultipleIdController,
 } = require("../Controllers/UserController/usercontroller");
 
 //############  Student controller  ##########################
@@ -106,6 +107,11 @@ router.get("/getUserDetails/:id", verifyAuthToken, getUserDetailsController);
 router.put("/edituser/:id", verifyAuthToken, editUserController);
 router.delete("/deleteuser/:id", verifyAuthToken, deleteUserController);
 router.get("/getuserbypid/:id", verifyAuthToken, GetUserByPidController);
+router.get(
+  "/getuserbymultipleid/:id",
+  verifyAuthToken,
+  GetUserByMultipleIdController
+);
 
 //##############################  students routes   ############################
 router.post("/addstudent", upload.none(), addstudentcontroller);
