@@ -75,6 +75,7 @@ const {
   SendInvoiceEmail,
   getInvoiceByUserId,
   getInvoiceNo,
+  editInvoice,
 } = require("../Controllers/InvoiceController/invoiceController");
 const {
   CreateItem,
@@ -150,6 +151,8 @@ router.post("/createInvoice", upload.none(), CreateInvoice);
 router.post("/getInvoice/:id?", upload.none(), getInvoice);
 router.delete("/deleteInvoice/:id", upload.none(), DeleteInvoice);
 router.put("/updateInvoice/:id", upload.none(), updateInvoice);
+router.put("/editInvoice/:id", upload.none(), editInvoice);
+
 router.get("/sendInvoiceEmail/:id", SendInvoiceEmail);
 router.get("/getInvoicebyUser/:id", getInvoiceByUserId);
 router.get("/getInvoiceNo", getInvoiceNo);
