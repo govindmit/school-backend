@@ -19,7 +19,6 @@ module.exports = {
 
     const check_email_query = `select id, name, email1, password, status, roleId from  users where email1 = "${email1}" `;
     mysqlconnection.query(check_email_query, function (err, result) {
-      console.log(result, "result");
       if (result) {
         bcrypt
           .compare(password, result[0].password)
