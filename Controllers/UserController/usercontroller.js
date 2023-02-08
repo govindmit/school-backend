@@ -87,27 +87,30 @@ module.exports = {
                             { email1: email1, id: responce.insertId },
                             process.env.JWT_SECRET_KEY
                           );
-                          const dt = ResetEmailFormat(resetPasswordtoken);
-                          sendmail(
-                            {
-                              from: process.env.emailFrom,
-                              to: process.env.emailTo,
-                              subject: "Reset Password Link From QIS✔",
-                              html: dt,
-                            },
-                            function (err, reply) {
-                              if (err) {
-                                res.status(400).json({
-                                  message: "something went wrong to send mail",
-                                });
-                              } else {
-                                res.status(200).send({
-                                  message:
-                                    "Customer Registration successfully.",
-                                });
-                              }
-                            }
-                          );
+                          // const dt = ResetEmailFormat(resetPasswordtoken);
+                          // sendmail(
+                          //   {
+                          //     from: process.env.emailFrom,
+                          //     to: process.env.emailTo,
+                          //     subject: "Reset Password Link From QIS✔",
+                          //     html: dt,
+                          //   },
+                          //   function (err, reply) {
+                          //     if (err) {
+                          //       res.status(400).json({
+                          //         message: "something went wrong to send mail",
+                          //       });
+                          //     } else {
+                          //       res.status(200).send({
+                          //         message:
+                          //           "Customer Registration successfully.",
+                          //       });
+                          //     }
+                          //   }
+                          // );
+                          res.status(200).send({
+                            message: "Customer Registration successfully.",
+                          });
                         });
                       }
                     }
@@ -264,6 +267,16 @@ module.exports = {
   GetUserByPidController: (req, res) => {
     const pid = req.params.id;
     var sql = `select id, name from users where id = ${pid}`;
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
+    });
+  },
+
+  //get user by multiple ids id
+  GetUserByMultipleIdController: (req, res) => {
+    const ids = req.params.id;
+    var sql = `select users.name, users.email1, users.email2, users.phone1, users.phone2, types.name as "CustomerType", users.contactName, users.status, users.printUs from users LEFT outer join types on types.id = users.typeId where users.id IN(${ids})`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });

@@ -40,6 +40,7 @@ const {
   getUserDetailsController,
   editUserController,
   GetUserByPidController,
+  GetUserByMultipleIdController,
 } = require("../Controllers/UserController/usercontroller");
 
 //############  Student controller  ##########################
@@ -58,11 +59,11 @@ const {
 
 //################        activities controllers      #########
 const {
-  addactivitycontroller,
-  getactivitycontroller,
-  getactivitydetailscontroller,
-  editactivitycontroller,
-  deleteactivitycontroller,
+  addActivityController,
+  getActivityController,
+  getActivityDetailsController,
+  editActivityController,
+  deleteActivityController,
 } = require("../Controllers/Activities/activitiescontrollers");
 
 //################        invoice controllers      #########
@@ -107,6 +108,11 @@ router.get("/getUserDetails/:id", verifyAuthToken, getUserDetailsController);
 router.put("/edituser/:id", verifyAuthToken, editUserController);
 router.delete("/deleteuser/:id", verifyAuthToken, deleteUserController);
 router.get("/getuserbypid/:id", verifyAuthToken, GetUserByPidController);
+router.get(
+  "/getuserbymultipleid/:id",
+  verifyAuthToken,
+  GetUserByMultipleIdController
+);
 
 //##############################  students routes   ############################
 router.post("/addstudent", upload.none(), addstudentcontroller);
@@ -120,24 +126,24 @@ router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
 
 //#############################  activities routers  ###########################
 router.post(
-  "/addactivity",
+  "/addActivity",
   verifyAuthToken,
   upload.single("image"),
-  addactivitycontroller
+  addActivityController
 );
-router.get("/getactivity", verifyAuthToken, getactivitycontroller);
+router.get("/getActivity", verifyAuthToken, getActivityController);
 router.get(
-  "/getactivitydetails/:id",
+  "/getActivityDetails/:id",
   verifyAuthToken,
-  getactivitydetailscontroller
+  getActivityDetailsController
 );
 router.put(
-  "/editactivity/:id",
+  "/editActivity/:id",
   verifyAuthToken,
   upload.none(),
   editactivitycontroller
 );
-router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);
+router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
 
 //#############################  invoice routers  ###########################
 

@@ -1,4 +1,3 @@
-const bcrypt = require("bcryptjs");
 const express = require("express");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
@@ -22,23 +21,26 @@ module.exports = {
     if (!name || !type || !price || !startdate || !enddate || !status) {
       return res.status(400).send({ message: "All field is required" });
     }
-    const check_name_query = `select * from  activites where name = "${name}" `;
+    const check_name_query = `select id, name from  activites where name = "${name}"`;
     mysqlconnection.query(check_name_query, function (err, result) {
+      if (err) throw err;
       if (result.length > 0) {
-        res.status(409).send({ message: "Activity already registred" });
+        res.status(409).send({ message: "Activity Name already registred" });
       } else {
         var sql = `INSERT INTO activites (name,type,price,startdate,enddate,status)VALUES("${name}","${type}",${price},"${startdate}","${enddate}","${status}")`;
         mysqlconnection.query(sql, function (err, result) {
           if (err) throw err;
-          res.status(201).json({ message: "data inserted", data: result });
+          res
+            .status(201)
+            .json({ message: "Data inserted successfully", data: result });
         });
       }
     });
   },
 
   //get activity controller
-  getactivitycontroller: (req, res) => {
-    var sql = `select * from activites`;
+  getActivityController: (req, res) => {
+    var sql = `select name, type, status, startDate, endDate, price  from activites`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -46,9 +48,9 @@ module.exports = {
   },
 
   //get activity details controller
-  getactivitydetailscontroller: (req, res) => {
+  getActivityDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select * from activites where id = ${id}`;
+    var sql = `select name, type, status, startDate, endDate, price from activites where id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -56,7 +58,7 @@ module.exports = {
   },
 
   //edit activity controller
-  editactivitycontroller: (req, res) => {
+  editActivityController: (req, res) => {
     const id = req.params.id;
     // if (
     //   req.file.originalname.split(".").pop() !== "png" &&
@@ -132,7 +134,7 @@ module.exports = {
   },
 
   //delete user controller
-  deleteactivitycontroller: (req, res) => {
+  deleteActivityController: (req, res) => {
     const id = req.params.id;
     var sql = `delete from activites where id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
