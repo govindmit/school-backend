@@ -140,8 +140,8 @@ router.get(
 router.put(
   "/editActivity/:id",
   verifyAuthToken,
-  upload.single("image"),
-  editActivityController
+  upload.none(),
+  editactivitycontroller
 );
 router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
 
