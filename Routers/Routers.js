@@ -21,6 +21,7 @@ const { getauthtoken } = require("../Controllers/GetAuthtoken/getauthtoken");
 //#############  Roles controllers  ###########################
 const {
   addRoleController,
+  getRoleController,
 } = require("../Controllers/RoleController/rolecontroller");
 
 //#############  types controllers  ###########################
@@ -93,6 +94,7 @@ router.get("/get_authorization_token", getauthtoken);
 
 //############################## role routers    ###############################
 router.post("/addRole", verifyAuthToken, addRoleController);
+router.get("/getRole", verifyAuthToken, getRoleController);
 
 //############################## type routers    ###############################
 router.post("/addType", verifyAuthToken, addTypeController);

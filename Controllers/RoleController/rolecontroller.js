@@ -22,4 +22,12 @@ module.exports = {
       }
     });
   },
+  //get role controller
+  getRoleController: (req, res) => {
+    var sql = `select id, name from roles`;
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
+    });
+  },
 };
