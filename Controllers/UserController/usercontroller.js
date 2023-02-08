@@ -87,27 +87,30 @@ module.exports = {
                             { email1: email1, id: responce.insertId },
                             process.env.JWT_SECRET_KEY
                           );
-                          const dt = ResetEmailFormat(resetPasswordtoken);
-                          sendmail(
-                            {
-                              from: process.env.emailFrom,
-                              to: process.env.emailTo,
-                              subject: "Reset Password Link From QIS✔",
-                              html: dt,
-                            },
-                            function (err, reply) {
-                              if (err) {
-                                res.status(400).json({
-                                  message: "something went wrong to send mail",
-                                });
-                              } else {
-                                res.status(200).send({
-                                  message:
-                                    "Customer Registration successfully.",
-                                });
-                              }
-                            }
-                          );
+                          // const dt = ResetEmailFormat(resetPasswordtoken);
+                          // sendmail(
+                          //   {
+                          //     from: process.env.emailFrom,
+                          //     to: process.env.emailTo,
+                          //     subject: "Reset Password Link From QIS✔",
+                          //     html: dt,
+                          //   },
+                          //   function (err, reply) {
+                          //     if (err) {
+                          //       res.status(400).json({
+                          //         message: "something went wrong to send mail",
+                          //       });
+                          //     } else {
+                          //       res.status(200).send({
+                          //         message:
+                          //           "Customer Registration successfully.",
+                          //       });
+                          //     }
+                          //   }
+                          // );
+                          res.status(200).send({
+                            message: "Customer Registration successfully.",
+                          });
                         });
                       }
                     }

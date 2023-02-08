@@ -59,11 +59,11 @@ const {
 
 //################        activities controllers      #########
 const {
-  addactivitycontroller,
-  getactivitycontroller,
-  getactivitydetailscontroller,
-  editactivitycontroller,
-  deleteactivitycontroller,
+  addActivityController,
+  getActivityController,
+  getActivityDetailsController,
+  editActivityController,
+  deleteActivityController,
 } = require("../Controllers/Activities/activitiescontrollers");
 
 //################        invoice controllers      #########
@@ -126,24 +126,24 @@ router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
 
 //#############################  activities routers  ###########################
 router.post(
-  "/addactivity",
+  "/addActivity",
   verifyAuthToken,
   upload.single("image"),
-  addactivitycontroller
+  addActivityController
 );
-router.get("/getactivity", verifyAuthToken, getactivitycontroller);
+router.get("/getActivity", verifyAuthToken, getActivityController);
 router.get(
-  "/getactivitydetails/:id",
+  "/getActivityDetails/:id",
   verifyAuthToken,
-  getactivitydetailscontroller
+  getActivityDetailsController
 );
 router.put(
-  "/editactivity/:id",
+  "/editActivity/:id",
   verifyAuthToken,
   upload.single("image"),
-  editactivitycontroller
+  editActivityController
 );
-router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);
+router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
 
 //#############################  invoice routers  ###########################
 
