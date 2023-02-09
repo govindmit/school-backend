@@ -4,7 +4,7 @@ const mysqlconnection = require("../../DB/db.config.connection");
 
 module.exports = {
   //add activity controller
-  addactivitycontroller: (req, res) => {
+  addActivityController: (req, res) => {
     // if (!req.file) {
     //   return res.status(400).send({ message: "Image field is required" });
     // }
@@ -69,60 +69,6 @@ module.exports = {
     //     .send({ message: "Please upload png and jpeg image formats " });
     // }
     const { name, type, price, startdate, enddate, status } = req.body;
-
-    // var selectsql = `select *from activites where id = ${id}`;
-    // mysqlconnection.query(selectsql, function (err, result) {
-    //   if (result.length > 0) {
-    //     let new_name,
-    //       new_desc,
-    //       new_short_desc,
-    //       new_type,
-    //       new_price,
-    //       new_start_date,
-    //       new_end_date,
-    //       new_status;
-
-    //     if (name !== "") {
-    //       new_name = name;
-    //     } else {
-    //       new_name = result[0].name;
-    //     }
-    //     if (description !== "") {
-    //       new_desc = description;
-    //     } else {
-    //       new_desc = result[0].description;
-    //     }
-    //     if (shortdescription !== "") {
-    //       new_short_desc = shortdescription;
-    //     } else {
-    //       new_short_desc = result[0].shortdescription;
-    //     }
-    //     if (type !== "") {
-    //       new_type = type;
-    //     } else {
-    //       new_type = result[0].type;
-    //     }
-    //     if (price !== "") {
-    //       new_price = price;
-    //     } else {
-    //       new_price = result[0].price;
-    //     }
-    //     if (startdate !== "") {
-    //       new_start_date = startdate;
-    //     } else {
-    //       new_start_date = result[0].startdate;
-    //     }
-    //     if (enddate !== "") {
-    //       new_end_date = enddate;
-    //     } else {
-    //       new_end_date = result[0].enddate;
-    //     }
-    //     if (status !== "") {
-    //       new_status = status;
-    //     } else {
-    //       new_status = result[0].status;
-    //     }
-
     const updt_query = `update activites set name = "${name}",type = "${type}", price = ${price}, startdate = "${startdate}", enddate = "${enddate}", status = "${status}" where id = ${id}`;
     console.log(updt_query);
     mysqlconnection.query(updt_query, function (err, result) {
