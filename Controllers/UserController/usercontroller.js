@@ -20,8 +20,11 @@ module.exports = {
       parentId,
       userRole,
       createdBy,
+      previlegs,
       updatedBy,
     } = req.body;
+    const user_permition = req.body.previlegs;
+    const per = JSON.stringify({ user_permition });
 
     //check email query
     const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
@@ -40,8 +43,21 @@ module.exports = {
       if (result.length > 0) {
         return res.status(400).send({ message: "Email1 already registered." });
       } else {
+        if (userRole === "user") {
+          mysqlconnection.query(insert_query, function (err, responce) {
+            if (err) throw err;
+            if (responce) {
+              const insert_permition = `INSERT INTO metaOptions (userId,previlegs)VALUES(${responce.insertId},'${per}')`;
+              mysqlconnection.query(insert_permition, function (err, responce) {
+                if (err) throw err;
+                res.status(200).send({
+                  message: "User  Registration successfully.",
+                });
+              });
+            }
+          });
+        }
         if (parentId === 0 && userRole === "parent") {
-          console.log("hii");
           mysqlconnection.query(insert_query, function (err, responce) {
             if (err) throw err;
             if (responce) {
@@ -62,7 +78,6 @@ module.exports = {
             }
           });
         }
-
         if ((parentId === 0 || parentId > 0) && userRole === "customer") {
           //create customer
           mysqlconnection.query(insert_query, function (err, responce) {

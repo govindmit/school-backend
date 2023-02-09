@@ -143,7 +143,7 @@ router.put(
   "/editActivity/:id",
   verifyAuthToken,
   upload.none(),
-  editactivitycontroller
+  editActivityController
 );
 router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
 
