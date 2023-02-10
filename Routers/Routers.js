@@ -7,8 +7,8 @@ const router = express.Router();
 //authorization middlewar
 const { verifyAuthToken } = require("../Middlewares/auth");
 //aunthontication middleware
-const { verifyLoginAuthToken } = require("../Middlewares/loginauthtoken");
-//upload image
+//const { verifyLoginAuthToken } = require("../Middlewares/loginauthtoken");
+//upload
 const upload = require("../Middlewares/uploadmulter");
 
 //######################################################################################

@@ -102,27 +102,27 @@ module.exports = {
                             { email1: email1, id: responce.insertId },
                             process.env.JWT_SECRET_KEY
                           );
-                          // const dt = ResetEmailFormat(resetPasswordtoken);
-                          // sendmail(
-                          //   {
-                          //     from: process.env.emailFrom,
-                          //     to: process.env.emailTo,
-                          //     subject: "Reset Password Link From QIS✔",
-                          //     html: dt,
-                          //   },
-                          //   function (err, reply) {
-                          //     if (err) {
-                          //       res.status(400).json({
-                          //         message: "something went wrong to send mail",
-                          //       });
-                          //     } else {
-                          //       res.status(200).send({
-                          //         message:
-                          //           "Customer Registration successfully.",
-                          //       });
-                          //     }
-                          //   }
-                          // );
+                          const dt = ResetEmailFormat(resetPasswordtoken);
+                          sendmail(
+                            {
+                              from: process.env.emailFrom,
+                              to: process.env.emailTo,
+                              subject: "Reset Password Link From QIS✔",
+                              html: dt,
+                            },
+                            function (err, reply) {
+                              if (err) {
+                                res.status(400).json({
+                                  message: "something went wrong to send mail",
+                                });
+                              } else {
+                                res.status(200).send({
+                                  message:
+                                    "Customer Registration successfully.",
+                                });
+                              }
+                            }
+                          );
                           res.status(200).send({
                             message: "Customer Registration successfully.",
                           });
@@ -195,7 +195,7 @@ module.exports = {
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
     left outer join parents on parents.userId = users.id 
-    where users.isDeleted = 0 and roleId = 2 ${bystatus}${bycontactName}${bynumber}${bycustType}${ByparentId}${bysorting}`;
+    where users.isDeleted = 0 ${bystatus}${bycontactName}${bynumber}${bycustType}${ByparentId}${bysorting}`;
 
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
@@ -206,7 +206,7 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
+    var sql = `select users.id, users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, roles.name as "role", metaOptions.previlegs as "userPrevilegs" from users LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
