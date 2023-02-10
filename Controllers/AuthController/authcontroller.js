@@ -26,7 +26,10 @@ module.exports = {
             if (responce) {
               const loginToken = jwt.sign(
                 { email1: result[0].email1, id: result[0].id },
-                process.env.JWT_SECRET_KEY
+                process.env.JWT_SECRET_KEY,
+                {
+                  expiresIn: "4h",
+                }
               );
               res.status(200).send({
                 message: "User login successfully",

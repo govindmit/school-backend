@@ -20,9 +20,11 @@ module.exports = {
       parentId,
       userRole,
       createdBy,
+      previlegs,
       updatedBy,
     } = req.body;
-
+    const user_permition = req.body.previlegs;
+    const per = JSON.stringify({ user_permition });
     //check email query
     const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
     //insert query
@@ -40,8 +42,21 @@ module.exports = {
       if (result.length > 0) {
         return res.status(400).send({ message: "Email1 already registered." });
       } else {
+        if (userRole === "user") {
+          mysqlconnection.query(insert_query, function (err, responce) {
+            if (err) throw err;
+            if (responce) {
+              const insert_permition = `INSERT INTO metaOptions (userId,previlegs)VALUES(${responce.insertId},'${per}')`;
+              mysqlconnection.query(insert_permition, function (err, responce) {
+                if (err) throw err;
+                res.status(200).send({
+                  message: "User  Registration successfully.",
+                });
+              });
+            }
+          });
+        }
         if (parentId === 0 && userRole === "parent") {
-          console.log("hii");
           mysqlconnection.query(insert_query, function (err, responce) {
             if (err) throw err;
             if (responce) {
@@ -62,7 +77,6 @@ module.exports = {
             }
           });
         }
-
         if ((parentId === 0 || parentId > 0) && userRole === "customer") {
           //create customer
           mysqlconnection.query(insert_query, function (err, responce) {
@@ -180,7 +194,7 @@ module.exports = {
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
     left outer join parents on parents.userId = users.id 
-    where users.isDeleted = 0 and roleId = 2 ${bystatus}${bycontactName}${bynumber}${bycustType}${ByparentId}${bysorting}`;
+    where users.isDeleted = 0 ${bystatus}${bycontactName}${bynumber}${bycustType}${ByparentId}${bysorting}`;
 
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
@@ -191,7 +205,7 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, roles.name as "role" from users LEFT outer join roles on roles.id = users.roleId where users.id = ${id}`;
+    var sql = `select users.id, users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, roles.name as "role", metaOptions.previlegs as "userPrevilegs" from users LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });

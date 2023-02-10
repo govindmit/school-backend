@@ -7,8 +7,8 @@ const router = express.Router();
 //authorization middlewar
 const { verifyAuthToken } = require("../Middlewares/auth");
 //aunthontication middleware
-const { verifyLoginAuthToken } = require("../Middlewares/loginauthtoken");
-//upload image
+//const { verifyLoginAuthToken } = require("../Middlewares/loginauthtoken");
+//upload
 const upload = require("../Middlewares/uploadmulter");
 
 //######################################################################################
@@ -21,6 +21,7 @@ const { getauthtoken } = require("../Controllers/GetAuthtoken/getauthtoken");
 //#############  Roles controllers  ###########################
 const {
   addRoleController,
+  getRoleController,
 } = require("../Controllers/RoleController/rolecontroller");
 
 //#############  types controllers  ###########################
@@ -93,6 +94,7 @@ router.get("/get_authorization_token", getauthtoken);
 
 //############################## role routers    ###############################
 router.post("/addRole", verifyAuthToken, addRoleController);
+router.get("/getRole", verifyAuthToken, getRoleController);
 
 //############################## type routers    ###############################
 router.post("/addType", verifyAuthToken, addTypeController);
@@ -125,7 +127,6 @@ router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
 router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
 
 //#############################  activities routers  ###########################
-// router.post("/addActivity", verifyAuthToken, addActivityController);
 router.get("/getActivity", getActivityController);
 router.get("/getActivityDetails/:id", getActivityDetailsController);
 router.put("/editActivity/:id", upload.none(), editActivityController);
