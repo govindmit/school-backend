@@ -59,11 +59,11 @@ const {
 
 //################        activities controllers      #########
 const {
-  addActivityController,
   getActivityController,
   getActivityDetailsController,
-  editActivityController,
   deleteActivityController,
+  editActivityController,
+  addActivityController,
 } = require("../Controllers/Activities/activitiescontrollers");
 
 //################        invoice controllers      #########
@@ -125,25 +125,13 @@ router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
 router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
 
 //#############################  activities routers  ###########################
-router.post(
-  "/addActivity",
-  verifyAuthToken,
-  upload.single("image"),
-  addActivityController
-);
-router.get("/getActivity", verifyAuthToken, getActivityController);
-router.get(
-  "/getActivityDetails/:id",
-  verifyAuthToken,
-  getActivityDetailsController
-);
-router.put(
-  "/editActivity/:id",
-  verifyAuthToken,
-  upload.none(),
-  editactivitycontroller
-);
-router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
+// router.post("/addActivity", verifyAuthToken, addActivityController);
+router.get("/getActivity", getActivityController);
+router.get("/getActivityDetails/:id", getActivityDetailsController);
+router.put("/editActivity/:id", upload.none(), editActivityController);
+router.post("/addActivity", upload.none(), addActivityController);
+
+router.delete("/deleteActivity/:id", deleteActivityController);
 
 //#############################  invoice routers  ###########################
 

@@ -4,7 +4,7 @@ const mysqlconnection = require("../../DB/db.config.connection");
 
 module.exports = {
   //add activity controller
-  addactivitycontroller: (req, res) => {
+  addActivityController: (req, res) => {
     // if (!req.file) {
     //   return res.status(400).send({ message: "Image field is required" });
     // }
@@ -16,8 +16,16 @@ module.exports = {
     //     .status(400)
     //     .send({ message: "Please upload png and jpeg image formats " });
     // }
-    const { name, description, type, price, startdate, enddate, status } =
-      req.body;
+    const {
+      name,
+      description,
+      shortdescription,
+      type,
+      price,
+      startdate,
+      enddate,
+      status,
+    } = req.body;
     if (!name || !type || !price || !startdate || !enddate || !status) {
       return res.status(400).send({ message: "All field is required" });
     }
@@ -27,7 +35,7 @@ module.exports = {
       if (result.length > 0) {
         res.status(409).send({ message: "Activity Name already registred" });
       } else {
-        var sql = `INSERT INTO activites (name,type,price,startdate,enddate,status)VALUES("${name}","${type}",${price},"${startdate}","${enddate}","${status}")`;
+        var sql = `INSERT INTO activites (name,type,price,startdate,enddate,status,shortDescription,description)VALUES("${name}","${type}",${price},"${startdate}","${enddate}","${status}","${description}","${shortdescription}")`;
         mysqlconnection.query(sql, function (err, result) {
           if (err) throw err;
           res
@@ -40,7 +48,7 @@ module.exports = {
 
   //get activity controller
   getActivityController: (req, res) => {
-    var sql = `select name, type, status, startDate, endDate, price  from activites`;
+    var sql = `select id, name, type, status, startDate, endDate, price  from activites`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -50,10 +58,13 @@ module.exports = {
   //get activity details controller
   getActivityDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select name, type, status, startDate, endDate, price from activites where id = ${id}`;
+    var sql = `select id, name,shortDescription,description, type, status, startDate, endDate, price from activites where id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
-      if (err) throw err;
-      res.status(200).json({ message: "ok", data: result });
+      if (err) {
+        res.status(400).json({ message: "ok", data: result });
+      } else {
+        res.status(200).json({ message: "ok", data: result });
+      }
     });
   },
 
@@ -68,63 +79,19 @@ module.exports = {
     //     .status(400)
     //     .send({ message: "Please upload png and jpeg image formats " });
     // }
-    const { name, type, price, startdate, enddate, status } = req.body;
+    const {
+      name,
+      type,
+      price,
+      startdate,
+      enddate,
+      status,
+      shortDescription,
+      description,
+    } = req.body;
 
-    // var selectsql = `select *from activites where id = ${id}`;
-    // mysqlconnection.query(selectsql, function (err, result) {
-    //   if (result.length > 0) {
-    //     let new_name,
-    //       new_desc,
-    //       new_short_desc,
-    //       new_type,
-    //       new_price,
-    //       new_start_date,
-    //       new_end_date,
-    //       new_status;
-
-    //     if (name !== "") {
-    //       new_name = name;
-    //     } else {
-    //       new_name = result[0].name;
-    //     }
-    //     if (description !== "") {
-    //       new_desc = description;
-    //     } else {
-    //       new_desc = result[0].description;
-    //     }
-    //     if (shortdescription !== "") {
-    //       new_short_desc = shortdescription;
-    //     } else {
-    //       new_short_desc = result[0].shortdescription;
-    //     }
-    //     if (type !== "") {
-    //       new_type = type;
-    //     } else {
-    //       new_type = result[0].type;
-    //     }
-    //     if (price !== "") {
-    //       new_price = price;
-    //     } else {
-    //       new_price = result[0].price;
-    //     }
-    //     if (startdate !== "") {
-    //       new_start_date = startdate;
-    //     } else {
-    //       new_start_date = result[0].startdate;
-    //     }
-    //     if (enddate !== "") {
-    //       new_end_date = enddate;
-    //     } else {
-    //       new_end_date = result[0].enddate;
-    //     }
-    //     if (status !== "") {
-    //       new_status = status;
-    //     } else {
-    //       new_status = result[0].status;
-    //     }
-
-    const updt_query = `update activites set name = "${name}",type = "${type}", price = ${price}, startdate = "${startdate}", enddate = "${enddate}", status = "${status}" where id = ${id}`;
-    console.log(updt_query);
+    console.log(req.body, "bodyyyyyyyyyyyyyy");
+    const updt_query = `update activites set name = "${name}",type = "${type}", price = ${price}, startdate = "${startdate}", enddate = "${enddate}", status = "${status}",shortDescription="${shortDescription}",description="${description}" where id = ${id}`;
     mysqlconnection.query(updt_query, function (err, result) {
       if (err) throw err;
       res
