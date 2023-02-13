@@ -47,12 +47,36 @@ module.exports = {
             if (err) throw err;
             if (responce) {
               const insert_permition = `INSERT INTO metaOptions (userId,previlegs)VALUES(${responce.insertId},'${per}')`;
-              mysqlconnection.query(insert_permition, function (err, responce) {
-                if (err) throw err;
-                res.status(200).send({
-                  message: "User  Registration successfully.",
-                });
-              });
+              mysqlconnection.query(
+                insert_permition,
+                async function (err, responce) {
+                  if (err) throw err;
+                  const resetPasswordtoken = jwt.sign(
+                    { email1: email1, id: responce.insertId },
+                    process.env.JWT_SECRET_KEY
+                  );
+                  const dt = await ResetEmailFormat(resetPasswordtoken);
+                  sendmail(
+                    {
+                      from: process.env.emailFrom,
+                      to: email1,
+                      subject: "Reset Password Link From QIS✔",
+                      html: dt,
+                    },
+                    function (err, reply) {
+                      if (err) {
+                        res.status(400).json({
+                          message: "something went wrong to send mail",
+                        });
+                      } else {
+                        res.status(200).send({
+                          message: "User Registration successfully.",
+                        });
+                      }
+                    }
+                  );
+                }
+              );
             }
           });
         }
@@ -94,37 +118,37 @@ module.exports = {
                       if (err) throw err;
                       if (custResult) {
                         const updtCust = `update customers set customerId = "CUST-000${custResult.insertId}" where id =${custResult.insertId}`;
-                        mysqlconnection.query(updtCust, function (err, result) {
+                        mysqlconnection.query(updtCust, async function (err, result) {
                           if (err) throw err;
                           //create reset password token
                           const resetPasswordtoken = jwt.sign(
                             { email1: email1, id: responce.insertId },
                             process.env.JWT_SECRET_KEY
                           );
-                          // const dt = ResetEmailFormat(resetPasswordtoken);
-                          // sendmail(
-                          //   {
-                          //     from: process.env.emailFrom,
-                          //     to: process.env.emailTo,
-                          //     subject: "Reset Password Link From QIS✔",
-                          //     html: dt,
-                          //   },
-                          //   function (err, reply) {
-                          //     if (err) {
-                          //       res.status(400).json({
-                          //         message: "something went wrong to send mail",
-                          //       });
-                          //     } else {
-                          //       res.status(200).send({
-                          //         message:
-                          //           "Customer Registration successfully.",
-                          //       });
-                          //     }
-                          //   }
-                          // );
-                          res.status(200).send({
-                            message: "Customer Registration successfully.",
-                          });
+                          const dt = await ResetEmailFormat(resetPasswordtoken);
+                          sendmail(
+                            {
+                              from: process.env.emailFrom,
+                              to: email1,
+                              subject: "Reset Password Link From QIS✔",
+                              html: dt,
+                            },
+                            function (err, reply) {
+                              if (err) {
+                                res.status(400).json({
+                                  message: "something went wrong to send mail",
+                                });
+                              } else {
+                                res.status(200).send({
+                                  message:
+                                    "Customer Registration successfully.",
+                                });
+                              }
+                            }
+                          );
+                          // res.status(200).send({
+                          //   message: "Customer Registration successfully.",
+                          // });
                         });
                       }
                     }

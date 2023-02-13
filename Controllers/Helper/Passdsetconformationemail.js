@@ -1,4 +1,4 @@
-const Passdsetconformationemail = () => {
+const Passdsetconformationemail = async () => {
   return `<body
                   marginheight="0"
                   topmargin="0"

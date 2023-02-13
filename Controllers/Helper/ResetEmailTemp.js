@@ -1,4 +1,4 @@
-const ResetEmailFormat = (token) => {
+const ResetEmailFormat = async (token) => {
   return `<body
                 marginheight="0"
                 topmargin="0"
