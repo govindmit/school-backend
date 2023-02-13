@@ -42,6 +42,7 @@ const {
   editUserController,
   GetUserByPidController,
   GetUserByMultipleIdController,
+  GetLastInsertIdController,
 } = require("../Controllers/UserController/usercontroller");
 
 //############  Student controller  ##########################
@@ -115,6 +116,7 @@ router.get(
   verifyAuthToken,
   GetUserByMultipleIdController
 );
+router.get("/getLastInsertId", verifyAuthToken, GetLastInsertIdController);
 
 //##############################  students routes   ############################
 router.post("/addstudent", upload.none(), addstudentcontroller);

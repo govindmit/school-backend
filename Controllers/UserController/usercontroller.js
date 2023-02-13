@@ -205,7 +205,7 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, roles.name as "role", metaOptions.previlegs as "userPrevilegs" from users LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
+    var sql = `select users.id, users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, roles.name as "role", roles.id as "roleId", metaOptions.previlegs as "userPrevilegs" from users LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -225,9 +225,14 @@ module.exports = {
       status,
       typeId,
       parentId,
+      previlegs,
       updatedBy,
     } = req.body;
-    let sql = `select id, name, email1, email2, phone1, phone2, typeId, parentId, contactName, printUs, status from users where id=${id}`;
+
+    const user_permition = req.body.previlegs;
+    const per = JSON.stringify({ user_permition });
+
+    let sql = `select id, name, email1, email2, phone1, phone2, typeId, parentId, contactName, printUs, status, updatedBy from users where id=${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       const updt_query = `update users set name = "${
@@ -247,7 +252,13 @@ module.exports = {
       } where id = ${id}`;
       mysqlconnection.query(updt_query, function (err, result) {
         if (err) throw err;
-        res.status(200).json({ message: "data updated successfully" });
+        const update_permition = `update metaOptions set previlegs ='${per}' where userId = ${id}`;
+        mysqlconnection.query(update_permition, function (err, responce) {
+          if (err) throw err;
+          res.status(200).send({
+            message: "User updated successfully.",
+          });
+        });
       });
     });
   },
@@ -291,6 +302,15 @@ module.exports = {
   GetUserByMultipleIdController: (req, res) => {
     const ids = req.params.id;
     var sql = `select users.name, users.email1, users.email2, users.phone1, users.phone2, types.name as "CustomerType", users.contactName, users.status, users.printUs from users LEFT outer join types on types.id = users.typeId where users.id IN(${ids})`;
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
+    });
+  },
+
+  //get last insert id
+  GetLastInsertIdController: (req, res) => {
+    var sql = `select id from users order by id desc limit 1,1`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
