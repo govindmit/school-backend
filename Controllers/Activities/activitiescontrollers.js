@@ -26,7 +26,16 @@ module.exports = {
       enddate,
       status,
     } = req.body;
-    if (!name || !type || !price || !startdate || !enddate || !status) {
+    if (
+      !name ||
+      !type ||
+      !price ||
+      !startdate ||
+      !enddate ||
+      !status ||
+      !description ||
+      !shortdescription
+    ) {
       return res.status(400).send({ message: "All field is required" });
     }
     const check_name_query = `select id, name from  activites where name = "${name}"`;
@@ -90,7 +99,6 @@ module.exports = {
       description,
     } = req.body;
 
-    console.log(req.body, "bodyyyyyyyyyyyyyy");
     const updt_query = `update activites set name = "${name}",type = "${type}", price = ${price}, startdate = "${startdate}", enddate = "${enddate}", status = "${status}",shortDescription="${shortDescription}",description="${description}" where id = ${id}`;
     mysqlconnection.query(updt_query, function (err, result) {
       if (err) throw err;
