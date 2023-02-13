@@ -55,25 +55,27 @@ module.exports = {
   },
 
   //forgot password controller
-  forgotpasswordcontroller: (req, res) => {
+  forgotpasswordcontroller: async (req, res) => {
     const { email1 } = req.body;
     if (!email1) {
       return res.status(400).send({ message: "Email field is required" });
     }
     const check_email = `select id, email1 from users where email1 = "${email1}"`;
-    mysqlconnection.query(check_email, function (err, result) {
+    mysqlconnection.query(check_email, async function (err, result) {
       if (result.length > 0) {
         //create reset password token
         const resetPasswordtoken = jwt.sign(
           { email1: result[0].email1, id: result[0].id },
           process.env.JWT_SECRET_KEY
         );
+
+        const dt = await ResetEmailFormat(resetPasswordtoken);
         sendmail(
           {
             from: process.env.emailFrom,
             to: process.env.emailTo,
             subject: "Reset Password Link From QIS✔",
-            html: ResetEmailFormat(resetPasswordtoken),
+            html: dt,
           },
           function (err, reply) {
             if (err) {
@@ -111,14 +113,15 @@ module.exports = {
         mysqlconnection.query(check_email, function (err, result) {
           if (result.length > 0) {
             const updtsql = `update users set password ="${secure_pass}" where email1 = "${result[0].email1}" and id = ${result[0].id}`;
-            mysqlconnection.query(updtsql, function (err, result) {
+            mysqlconnection.query(updtsql, async function (err, result) {
               if (err) throw err;
+              const dt = await Passdsetconformationemail();
               sendmail(
                 {
                   from: process.env.emailFrom,
                   to: process.env.emailTo,
                   subject: "Login Link From QIS✔",
-                  html: Passdsetconformationemail(),
+                  html: dt,
                 },
                 function (err, reply) {
                   if (err) {

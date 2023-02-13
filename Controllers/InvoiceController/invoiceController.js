@@ -274,7 +274,6 @@ module.exports = {
       res.send(invoice);
     } else {
       let sql = `SELECT invoices.amount,invoices.invoiceId,invoices.status,invoices.customerId,invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND isDeleted = 0 AND status = 'pending' ORDER BY invoiceDate DESC LIMIT 2`;
-
       const invoice = await query(sql);
       res.send(invoice);
     }
