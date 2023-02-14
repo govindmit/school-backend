@@ -73,7 +73,7 @@ module.exports = {
         sendmail(
           {
             from: process.env.emailFrom,
-            to: process.env.emailTo,
+            to: email1,
             subject: "Reset Password Link From QIS✔",
             html: dt,
           },
@@ -119,7 +119,7 @@ module.exports = {
               sendmail(
                 {
                   from: process.env.emailFrom,
-                  to: process.env.emailTo,
+                  to: email1,
                   subject: "Login Link From QIS✔",
                   html: dt,
                 },
