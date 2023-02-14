@@ -19,7 +19,7 @@ module.exports = {
     const {
       name,
       description,
-      shortdescription,
+      shortDescription,
       type,
       price,
       startdate,
@@ -29,12 +29,12 @@ module.exports = {
     if (
       !name ||
       !type ||
-      !price ||
+      // !price ||
       !startdate ||
       !enddate ||
-      !status ||
-      !description ||
-      !shortdescription
+      !status 
+      // !description ||
+      // !shortDescription
     ) {
       return res.status(400).send({ message: "All field is required" });
     }
@@ -44,7 +44,7 @@ module.exports = {
       if (result.length > 0) {
         res.status(409).send({ message: "Activity Name already registred" });
       } else {
-        var sql = `INSERT INTO activites (name,type,price,startdate,enddate,status,shortDescription,description)VALUES("${name}","${type}",${price},"${startdate}","${enddate}","${status}","${description}","${shortdescription}")`;
+        var sql = `INSERT INTO activites (name,type,price,startdate,enddate,status,shortDescription,description)VALUES("${name}","${type}",${price},"${startdate}","${enddate}","${status}","${description}","${shortDescription}")`;
         mysqlconnection.query(sql, function (err, result) {
           if (err) throw err;
           res
@@ -57,7 +57,30 @@ module.exports = {
 
   //get activity controller
   getActivityController: (req, res) => {
-    var sql = `select id, name, type, status, startDate, endDate, price  from activites`;
+
+    const { status, type } =req.body;
+
+    let byStatus = "";
+    if (status === "Active") {
+      byStatus = ` and status = "${status}"`;
+    } else if (status === "Upcoming") {
+      byStatus = ` and status = "${status}"`;
+    } else if (status === "Draft") {
+      byStatus = ` and status = "${status}"`;
+    } else {
+      byStatus = "";
+    }
+
+    let byType = "";
+    if (type === "Free") {
+      byType = ` and type = "${type}"`;
+    } else if (type === "Paid") {
+      byType = ` and type = "${type}"`;
+    } else {
+      byType = "";
+    }
+
+    var sql = `select id, name, type, status,shortDescription, description,startDate, endDate, price  from activites where 1=1 ${byStatus}${byType}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
