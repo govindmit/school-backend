@@ -26,18 +26,18 @@ module.exports = {
       enddate,
       status,
     } = req.body;
-    if (
-      !name ||
-      !type ||
-      !price ||
-      !startdate ||
-      !enddate ||
-      !status ||
-      !description ||
-      !shortdescription
-    ) {
-      return res.status(400).send({ message: "All field is required" });
-    }
+    // if (
+    //   !name ||
+    //   !type ||
+    //   !price ||
+    //   !startdate ||
+    //   !enddate ||
+    //   !status ||
+    //   !description ||
+    //   !shortdescription
+    // ) {
+    //   return res.status(400).send({ message: "All field is required" });
+    // }
     const check_name_query = `select id, name from  activites where name = "${name}"`;
     mysqlconnection.query(check_name_query, function (err, result) {
       if (err) throw err;

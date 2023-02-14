@@ -21,6 +21,8 @@ module.exports = {
       userRole,
       createdBy,
       previlegs,
+      agegroup,
+      generatedId,
       updatedBy,
     } = req.body;
     const user_permition = req.body.previlegs;
@@ -28,14 +30,14 @@ module.exports = {
     //check email query
     const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
     //insert query
-    const insert_query = `INSERT INTO users (name,email1,email2,phone1,phone2,printUs,contactName,status,roleId,typeId,parentId,createdBy,updatedBy)VALUES("${name}", "${email1}",
+    const insert_query = `INSERT INTO users (name,email1,email2,phone1,phone2,printUs,contactName,status,agegroup,generatedId,roleId,typeId,parentId,createdBy,updatedBy)VALUES("${name}", "${email1}",
     "${email2 ? email2 : ""}",${phone1}, ${phone2 ? phone2 : 0}, "${
       contactName ? contactName : ""
-    }", "${printUs ? printUs : ""}", ${status}, ${roleId ? roleId : 2}, ${
-      typeId ? typeId : 0
-    }, ${parentId ? parentId : 0}, ${createdBy ? createdBy : 1}, ${
-      updatedBy ? updatedBy : 1
-    })`;
+    }", "${printUs ? printUs : ""}", ${status}, ${agegroup ? agegroup : 0}, "${
+      generatedId ? generatedId : ""
+    }", ${roleId ? roleId : 2}, ${typeId ? typeId : 0}, ${
+      parentId ? parentId : 0
+    }, ${createdBy ? createdBy : 1}, ${updatedBy ? updatedBy : 1})`;
 
     mysqlconnection.query(check_email_query, function (err, result) {
       if (err) throw err;
@@ -58,8 +60,8 @@ module.exports = {
                   const dt = await ResetEmailFormat(resetPasswordtoken);
                   sendmail(
                     {
-                      from: process.env.emailFrom,
-                      to: email1,
+                      from: process.env.emailFrom || "test@gmail.com",
+                      to: email1 || "qatar.school@yopmail.com",
                       subject: "Reset Password Link From QIS✔",
                       html: dt,
                     },
@@ -67,6 +69,7 @@ module.exports = {
                       if (err) {
                         res.status(400).json({
                           message: "something went wrong to send mail",
+                          err,
                         });
                       } else {
                         res.status(200).send({
@@ -118,38 +121,44 @@ module.exports = {
                       if (err) throw err;
                       if (custResult) {
                         const updtCust = `update customers set customerId = "CUST-000${custResult.insertId}" where id =${custResult.insertId}`;
-                        mysqlconnection.query(updtCust, async function (err, result) {
-                          if (err) throw err;
-                          //create reset password token
-                          const resetPasswordtoken = jwt.sign(
-                            { email1: email1, id: responce.insertId },
-                            process.env.JWT_SECRET_KEY
-                          );
-                          const dt = await ResetEmailFormat(resetPasswordtoken);
-                          sendmail(
-                            {
-                              from: process.env.emailFrom,
-                              to: email1,
-                              subject: "Reset Password Link From QIS✔",
-                              html: dt,
-                            },
-                            function (err, reply) {
-                              if (err) {
-                                res.status(400).json({
-                                  message: "something went wrong to send mail",
-                                });
-                              } else {
-                                res.status(200).send({
-                                  message:
-                                    "Customer Registration successfully.",
-                                });
+                        mysqlconnection.query(
+                          updtCust,
+                          async function (err, result) {
+                            if (err) throw err;
+                            //create reset password token
+                            const resetPasswordtoken = jwt.sign(
+                              { email1: email1, id: responce.insertId },
+                              process.env.JWT_SECRET_KEY
+                            );
+                            const dt = await ResetEmailFormat(
+                              resetPasswordtoken
+                            );
+                            sendmail(
+                              {
+                                from: process.env.emailFrom,
+                                to: email1,
+                                subject: "Reset Password Link From QIS✔",
+                                html: dt,
+                              },
+                              function (err, reply) {
+                                if (err) {
+                                  res.status(400).json({
+                                    message:
+                                      "something went wrong to send mail",
+                                  });
+                                } else {
+                                  res.status(200).send({
+                                    message:
+                                      "Customer Registration successfully.",
+                                  });
+                                }
                               }
-                            }
-                          );
-                          // res.status(200).send({
-                          //   message: "Customer Registration successfully.",
-                          // });
-                        });
+                            );
+                            // res.status(200).send({
+                            //   message: "Customer Registration successfully.",
+                            // });
+                          }
+                        );
                       }
                     }
                   );
@@ -229,7 +238,7 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, roles.name as "role", roles.id as "roleId", metaOptions.previlegs as "userPrevilegs" from users LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
+    var sql = `select users.id, users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, agegroup, generatedId, roles.name as "role", roles.id as "roleId", metaOptions.previlegs as "userPrevilegs" from users LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -251,12 +260,14 @@ module.exports = {
       parentId,
       previlegs,
       updatedBy,
+      agegroup,
+      pregeneratedid,
     } = req.body;
 
     const user_permition = req.body.previlegs;
     const per = JSON.stringify({ user_permition });
 
-    let sql = `select id, name, email1, email2, phone1, phone2, typeId, parentId, contactName, printUs, status, updatedBy from users where id=${id}`;
+    let sql = `select id, name, email1, email2, phone1, phone2, typeId, parentId, contactName, printUs, status, generatedId, agegroup, updatedBy from users where id=${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       const updt_query = `update users set name = "${
@@ -269,9 +280,13 @@ module.exports = {
         contactName ? contactName : result[0].contactName
       }",printUs = "${
         printUs ? printUs : result[0].printUs
-      }", status= ${status} , typeId= ${
-        typeId ? typeId : result[0].typeId
-      }, parentId = ${parentId ? parentId : result[0].parentId}, updatedBy = ${
+      }", status= ${status} , agegroup = ${
+        agegroup ? agegroup : result[0].agegroup
+      }, generatedId = "${
+        pregeneratedid ? pregeneratedid : result[0].generatedId
+      }", typeId= ${typeId ? typeId : result[0].typeId}, parentId = ${
+        parentId ? parentId : result[0].parentId
+      }, updatedBy = ${
         updatedBy ? updatedBy : result[0].updatedBy
       } where id = ${id}`;
       mysqlconnection.query(updt_query, function (err, result) {
@@ -334,7 +349,7 @@ module.exports = {
 
   //get last insert id
   GetLastInsertIdController: (req, res) => {
-    var sql = `select id from users order by id desc limit 1,1`;
+    var sql = `select id from users order by id desc limit 1`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });

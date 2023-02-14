@@ -1,4 +1,4 @@
-const ResetEmailFormat = async (token) => {
+const ResetEmailFormat = (token) => {
   return `<body
                 marginheight="0"
                 topmargin="0"
@@ -52,7 +52,7 @@ const ResetEmailFormat = async (token) => {
                             instructions.
                           </p>
                           <a
-                             href=${process.env.url}/auth/changePassword/${token}
+                             href=${process.env.url}/resetpassword/${token}
                             style="background:#057035;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;"
                           >
                             Reset Password
