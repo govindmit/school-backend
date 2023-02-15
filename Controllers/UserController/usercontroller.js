@@ -48,38 +48,35 @@ module.exports = {
           mysqlconnection.query(insert_query, function (err, responce) {
             if (err) throw err;
             if (responce) {
-              const insert_permition = `INSERT INTO metaOptions (userId,previlegs)VALUES(${responce.insertId},'${per}')`;
-              mysqlconnection.query(
-                insert_permition,
-                async function (err, responce) {
-                  if (err) throw err;
-                  const resetPasswordtoken = jwt.sign(
-                    { email1: email1, id: responce.insertId },
-                    process.env.JWT_SECRET_KEY
-                  );
-                  const dt = await ResetEmailFormat(resetPasswordtoken);
-                  sendmail(
-                    {
-                      from: process.env.emailFrom || "test@gmail.com",
-                      to: email1 || "qatar.school@yopmail.com",
-                      subject: "Reset Password Link From QIS✔",
-                      html: dt,
-                    },
-                    function (err, reply) {
-                      if (err) {
-                        res.status(400).json({
-                          message: "something went wrong to send mail",
-                          err,
-                        });
-                      } else {
-                        res.status(200).send({
-                          message: "User Registration successfully.",
-                        });
-                      }
-                    }
-                  );
-                }
+              const resetPasswordtoken = jwt.sign(
+                { email1: email1, id: responce.insertId },
+                process.env.JWT_SECRET_KEY
               );
+              const dt = ResetEmailFormat(resetPasswordtoken);
+              const insert_permition = `INSERT INTO metaOptions (userId,previlegs)VALUES(${responce.insertId},'${per}')`;
+              mysqlconnection.query(insert_permition, function (err, responce) {
+                if (err) throw err;
+                sendmail(
+                  {
+                    from: process.env.emailFrom || "test@gmail.com",
+                    to: email1 || "qatar.school@yopmail.com",
+                    subject: "Reset Password Link From QIS✔",
+                    html: dt,
+                  },
+                  function (err, reply) {
+                    if (err) {
+                      res.status(400).json({
+                        message: "something went wrong to send this mail",
+                        err,
+                      });
+                    } else {
+                      res.status(200).send({
+                        message: "User Registration successfully.",
+                      });
+                    }
+                  }
+                );
+              });
             }
           });
         }
@@ -154,9 +151,6 @@ module.exports = {
                                 }
                               }
                             );
-                            // res.status(200).send({
-                            //   message: "Customer Registration successfully.",
-                            // });
                           }
                         );
                       }

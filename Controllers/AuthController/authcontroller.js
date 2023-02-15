@@ -68,19 +68,18 @@ module.exports = {
           { email1: result[0].email1, id: result[0].id },
           process.env.JWT_SECRET_KEY
         );
-
         const dt = await ResetEmailFormat(resetPasswordtoken);
         sendmail(
           {
             from: process.env.emailFrom,
-            to: email1,
+            to: process.env.emailTo,
             subject: "Reset Password Link From QIS✔",
             html: dt,
           },
           function (err, reply) {
             if (err) {
               res.status(400).json({
-                message: "something went wrong to send mail",
+                message: "something went wrong to send mail this",
               });
             } else {
               res
