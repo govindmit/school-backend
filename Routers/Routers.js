@@ -129,7 +129,7 @@ router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
 router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
 
 //#############################  activities routers  ###########################
-router.get("/getActivity", getActivityController);
+router.post("/getActivity", getActivityController);
 router.get("/getActivityDetails/:id", getActivityDetailsController);
 router.put("/editActivity/:id", upload.none(), editActivityController);
 router.post("/addActivity", upload.none(), addActivityController);
