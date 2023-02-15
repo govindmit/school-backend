@@ -251,6 +251,7 @@ module.exports = {
       contactName,
       status,
       typeId,
+      roleId,
       parentId,
       previlegs,
       updatedBy,
@@ -261,7 +262,7 @@ module.exports = {
     const user_permition = req.body.previlegs;
     const per = JSON.stringify({ user_permition });
 
-    let sql = `select id, name, email1, email2, phone1, phone2, typeId, parentId, contactName, printUs, status, generatedId, agegroup, updatedBy from users where id=${id}`;
+    let sql = `select id, name, email1, email2, phone1, phone2, typeId, parentId, contactName, printUs, status, generatedId, agegroup, roleId, updatedBy from users where id=${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       const updt_query = `update users set name = "${
@@ -278,9 +279,9 @@ module.exports = {
         agegroup ? agegroup : result[0].agegroup
       }, generatedId = "${
         pregeneratedid ? pregeneratedid : result[0].generatedId
-      }", typeId= ${typeId ? typeId : result[0].typeId}, parentId = ${
-        parentId ? parentId : result[0].parentId
-      }, updatedBy = ${
+      }", typeId= ${typeId ? typeId : result[0].typeId}, roleId = ${
+        roleId ? roleId : result[0].roleId
+      }, parentId = ${parentId ? parentId : result[0].parentId}, updatedBy = ${
         updatedBy ? updatedBy : result[0].updatedBy
       } where id = ${id}`;
       mysqlconnection.query(updt_query, function (err, result) {
