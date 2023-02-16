@@ -1,7 +1,6 @@
-const ResetEmailFormat = require("../Controllers/Helper/ResetEmailTemp");
 const sendEmails = require("../Controllers/Helper/sendEmails");
 const jwt = require("jsonwebtoken");
-
+const ResetEmailFormat = require("../Controllers/Helper/ResetEmailTemp");
 module.exports = {
   CheckEmails: async (req, res) => {
     const resetPasswordtoken = jwt.sign(

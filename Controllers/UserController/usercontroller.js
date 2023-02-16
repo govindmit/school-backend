@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const mysqlconnection = require("../../DB/db.config.connection");
+const ResetEmailFormat = require("../Helper/ResetEmailTemp");
+const sendEmails = require("../Helper/sendEmails");
 module.exports = {
   // Add user Controller
   addUserController: async (req, res) => {
@@ -53,6 +55,7 @@ module.exports = {
               const insert_permition = `INSERT INTO metaOptions (userId,previlegs)VALUES(${responce.insertId},'${per}')`;
               mysqlconnection.query(insert_permition, function (err, responce) {
                 if (err) throw err;
+                sendEmails(email1, "Reset Password Link From QIS✔", dt);
                 res.status(200).send({
                   message: "User Registration successfully.",
                 });
@@ -109,6 +112,11 @@ module.exports = {
                             );
                             const dt = await ResetEmailFormat(
                               resetPasswordtoken
+                            );
+                            sendEmails(
+                              email1,
+                              "Reset Password Link From QIS✔",
+                              dt
                             );
                             res.status(200).send({
                               message: "Customer Registration successfully.",

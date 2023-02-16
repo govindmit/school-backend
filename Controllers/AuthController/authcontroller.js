@@ -1,11 +1,9 @@
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
-const express = require("express");
-const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
 const ResetEmailFormat = require("../Helper/ResetEmailTemp");
 const Passdsetconformationemail = require("../Helper/Passdsetconformationemail");
+const sendEmails = require("../Helper/sendEmails");
 module.exports = {
   // user login controller
   userlogincontroller: (req, res) => {
@@ -15,7 +13,6 @@ module.exports = {
         .status(400)
         .send({ message: "Email and Password field is required" });
     }
-
     const check_email_query = `select id, name, email1, password, status, roleId from  users where email1 = "${email1}" `;
     mysqlconnection.query(check_email_query, function (err, result) {
       if (result) {
@@ -68,39 +65,7 @@ module.exports = {
           process.env.JWT_SECRET_KEY
         );
         const dt = await ResetEmailFormat(resetPasswordtoken);
-        // async function main() {
-        //   // Generate test SMTP service account from ethereal.email
-        //   // Only needed if you don't have a real mail account for testing
-        //   let testAccount = await nodemailer.createTestAccount();
-
-        //   // create reusable transporter object using the default SMTP transport
-        //   let transporter = nodemailer.createTransport({
-        //     host: "smtp-relay.sendinblue.com",
-        //     port: 587,
-        //     secure: false, // true for 465, false for other ports
-        //     auth: {
-        //       user: "govind.mangoitsolutions@gmail.com", // generated ethereal user
-        //       pass: "cI1J58ZNPKRxadQz", // generated ethereal password
-        //     },
-        //   });
-
-        //   // send mail with defined transport object
-        //   let info = await transporter.sendMail({
-        //     from: '"Fred Foo 👻" <govind@mangoitsolutions.com>', // sender address
-        //     to: "govind@mangoitsolutions.com", // list of receivers
-        //     subject: "Reset Password Link From QIS ✔", // Subject line
-        //     text: dt, // plain text body
-        //     html: dt, // html body
-        //   });
-
-        //   // console.log("Message sent: %s", info.messageId);
-        //   // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-
-        //   // Preview only available when sending through an Ethereal account
-        //   // console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-        //   // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-        // }
-        // main().catch(" smtp error ---- ", console.error);
+        sendEmails(email1, "Reset Password Link From QIS✔", dt);
         res
           .status(200)
           .json({ msg: "Link send successfully for reset password" });
@@ -131,25 +96,10 @@ module.exports = {
             mysqlconnection.query(updtsql, async function (err, result) {
               if (err) throw err;
               const dt = await Passdsetconformationemail();
-              sendmail(
-                {
-                  from: process.env.emailFrom,
-                  to: email1,
-                  subject: "Login Link From QIS✔",
-                  html: dt,
-                },
-                function (err, reply) {
-                  if (err) {
-                    res.status(400).json({
-                      message: "something went wrong to send mail",
-                    });
-                  } else {
-                    res.status(200).json({
-                      message: "Password updated successfully",
-                    });
-                  }
-                }
-              );
+              sendEmails(email1, "Login Link From QIS✔", dt);
+              res.status(200).json({
+                message: "Password updated successfully",
+              });
             });
           } else {
             res.status(400).json({ message: "Link Experied" });

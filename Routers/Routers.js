@@ -156,6 +156,6 @@ router.post("/getItembyid", upload.none(), GetItembyid);
 router.get("/getItem", GetItem);
 router.get("/getItems", GetItemData);
 
-router.post("/checkEmails", upload.none(), CheckEmails);
+router.post("/checkEmails", CheckEmails);
 
 module.exports = router;
