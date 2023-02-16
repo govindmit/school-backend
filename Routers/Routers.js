@@ -68,7 +68,7 @@ const {
   addActivityController,
 } = require("../Controllers/Activities/activitiescontrollers");
 
-//################        invoice controllers      #########
+//################   invoice controllers      #########
 const {
   CreateInvoice,
   getInvoice,
@@ -79,6 +79,8 @@ const {
   getInvoiceNo,
   editInvoice,
 } = require("../Controllers/InvoiceController/invoiceController");
+
+//################  items controllers ########################
 const {
   CreateItem,
   GetItem,
@@ -86,6 +88,15 @@ const {
   GetItemData,
 } = require("../Controllers/InvoiceController/itemController");
 
+//################  credit notes controllers ########################
+const {
+  addCreditNotesController,
+  getCreditNotesController,
+  getCreditNotesDetailsController,
+  editCreditNotesController,
+} = require("../Controllers/CreditNotes/creditNotesController");
+
+//################        check emails controllers ########################
 const { CheckEmails } = require("../Controllers/CheckEmails");
 
 //#######################################################################################
@@ -131,12 +142,26 @@ router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
 router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
 
 //#############################  activities routers  ###########################
-router.post("/getActivity", getActivityController);
-router.get("/getActivityDetails/:id", getActivityDetailsController);
-router.put("/editActivity/:id", upload.none(), editActivityController);
-router.post("/addActivity", upload.none(), addActivityController);
+router.post("/getActivity", verifyAuthToken, getActivityController);
+router.get(
+  "/getActivityDetails/:id",
+  verifyAuthToken,
+  getActivityDetailsController
+);
+router.put(
+  "/editActivity/:id",
+  upload.none(),
+  verifyAuthToken,
+  editActivityController
+);
+router.post(
+  "/addActivity",
+  upload.none(),
+  verifyAuthToken,
+  addActivityController
+);
 
-router.delete("/deleteActivity/:id", deleteActivityController);
+router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
 
 //#############################  invoice routers  ###########################
 
@@ -156,6 +181,17 @@ router.post("/getItembyid", upload.none(), GetItembyid);
 router.get("/getItem", GetItem);
 router.get("/getItems", GetItemData);
 
+//######################### credit notes routesr #######################
+router.post("/addCreditNotes", verifyAuthToken, addCreditNotesController);
+router.post("/getCreditNotes", verifyAuthToken, getCreditNotesController);
+router.put("/editCreditNotes/:id", verifyAuthToken, editCreditNotesController);
+router.get(
+  "/getCreditNotesDetails/:id",
+  verifyAuthToken,
+  getCreditNotesDetailsController
+);
+
+//######################### check emails #######################
 router.post("/checkEmails", CheckEmails);
 
 module.exports = router;

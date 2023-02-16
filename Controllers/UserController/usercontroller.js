@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const mysqlconnection = require("../../DB/db.config.connection");
-const ResetEmailFormat = require("../Helper/ResetEmailTemp");
+const ResetEmailFormat = require("../Helper/templates/ResetEmailTemp");
 const sendEmails = require("../Helper/sendEmails");
 module.exports = {
   // Add user Controller
@@ -32,11 +32,13 @@ module.exports = {
     const insert_query = `INSERT INTO users (name,email1,email2,phone1,phone2,printUs,contactName,status,agegroup,generatedId,roleId,typeId,parentId,createdBy,updatedBy)VALUES("${name}", "${email1}",
     "${email2 ? email2 : ""}",${phone1}, ${phone2 ? phone2 : 0}, "${
       contactName ? contactName : ""
-    }", "${printUs ? printUs : ""}", ${status}, ${agegroup ? agegroup : 0}, "${
-      generatedId ? generatedId : ""
-    }", ${roleId ? roleId : 2}, ${typeId ? typeId : 0}, ${
-      parentId ? parentId : 0
-    }, ${createdBy ? createdBy : 1}, ${updatedBy ? updatedBy : 1})`;
+    }", "${printUs ? printUs : ""}", ${status ? status : 0}, ${
+      agegroup ? agegroup : 0
+    }, "${generatedId ? generatedId : ""}", ${roleId ? roleId : 2}, ${
+      typeId ? typeId : 0
+    }, ${parentId ? parentId : 0}, ${createdBy ? createdBy : 1}, ${
+      updatedBy ? updatedBy : 1
+    })`;
 
     mysqlconnection.query(check_email_query, function (err, result) {
       if (err) throw err;
@@ -243,9 +245,9 @@ module.exports = {
         phone2 ? phone2 : result[0].phone2
       }, contactName="${
         contactName ? contactName : result[0].contactName
-      }",printUs = "${
-        printUs ? printUs : result[0].printUs
-      }", status= ${status} , agegroup = ${
+      }",printUs = "${printUs ? printUs : result[0].printUs}", status= ${
+        status ? status : 0
+      } , agegroup = ${
         agegroup ? agegroup : result[0].agegroup
       }, generatedId = "${
         pregeneratedid ? pregeneratedid : result[0].generatedId

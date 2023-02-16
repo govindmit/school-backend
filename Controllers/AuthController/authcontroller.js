@@ -1,8 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const mysqlconnection = require("../../DB/db.config.connection");
-const ResetEmailFormat = require("../Helper/ResetEmailTemp");
-const Passdsetconformationemail = require("../Helper/Passdsetconformationemail");
+const ResetEmailFormat = require("../Helper/templates/ResetEmailTemp");
+const Passdsetconformationemail = require("../Helper/templates/Passdsetconformationemail");
 const sendEmails = require("../Helper/sendEmails");
 module.exports = {
   // user login controller
