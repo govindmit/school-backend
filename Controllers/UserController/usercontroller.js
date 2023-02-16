@@ -1,8 +1,5 @@
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
-const ResetEmailFormat = require("../Helper/ResetEmailTemp");
 const mysqlconnection = require("../../DB/db.config.connection");
-const sendmail = require("sendmail")();
 module.exports = {
   // Add user Controller
   addUserController: async (req, res) => {
@@ -56,26 +53,9 @@ module.exports = {
               const insert_permition = `INSERT INTO metaOptions (userId,previlegs)VALUES(${responce.insertId},'${per}')`;
               mysqlconnection.query(insert_permition, function (err, responce) {
                 if (err) throw err;
-                sendmail(
-                  {
-                    from: process.env.emailFrom || "test@gmail.com",
-                    to: email1 || "qatar.school@yopmail.com",
-                    subject: "Reset Password Link From QIS✔",
-                    html: dt,
-                  },
-                  function (err, reply) {
-                    if (err) {
-                      res.status(400).json({
-                        message: "something went wrong to send this mail",
-                        err,
-                      });
-                    } else {
-                      res.status(200).send({
-                        message: "User Registration successfully.",
-                      });
-                    }
-                  }
-                );
+                res.status(200).send({
+                  message: "User Registration successfully.",
+                });
               });
             }
           });
@@ -130,27 +110,9 @@ module.exports = {
                             const dt = await ResetEmailFormat(
                               resetPasswordtoken
                             );
-                            sendmail(
-                              {
-                                from: process.env.emailFrom,
-                                to: email1,
-                                subject: "Reset Password Link From QIS✔",
-                                html: dt,
-                              },
-                              function (err, reply) {
-                                if (err) {
-                                  res.status(400).json({
-                                    message:
-                                      "something went wrong to send mail",
-                                  });
-                                } else {
-                                  res.status(200).send({
-                                    message:
-                                      "Customer Registration successfully.",
-                                  });
-                                }
-                              }
-                            );
+                            res.status(200).send({
+                              message: "Customer Registration successfully.",
+                            });
                           }
                         );
                       }
@@ -214,7 +176,7 @@ module.exports = {
       ByparentId = "";
     }
 
-    var sqlquery = `select users.id, customers.customerId, parents.parentId as 'GeneratedParentId', users.parentId, users.name, users.email1, users.email2, 
+    var sqlquery = `select users.id, roles.id as "roleId", customers.customerId, parents.parentId as 'GeneratedParentId', users.parentId, users.name, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
     users.status, users.printUs, roles.name as "UserRole" from users 
     LEFT outer join roles on roles.id = users.roleId 

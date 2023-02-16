@@ -86,6 +86,8 @@ const {
   GetItemData,
 } = require("../Controllers/InvoiceController/itemController");
 
+const { CheckEmails } = require("../Controllers/CheckEmails");
+
 //#######################################################################################
 //#                                    ROUTERS                                          #
 //#######################################################################################
@@ -153,5 +155,7 @@ router.post("/createItem", upload.none(), CreateItem);
 router.post("/getItembyid", upload.none(), GetItembyid);
 router.get("/getItem", GetItem);
 router.get("/getItems", GetItemData);
+
+router.post("/checkEmails", upload.none(), CheckEmails);
 
 module.exports = router;
