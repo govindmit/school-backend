@@ -62,8 +62,10 @@ module.exports = {
                 phoneNumber2:phone2,
                 active : active,
                 parentCustomerId: parentId || '10011',
+                customerTypeId: 'Consumer'
               }
                const instacctCustomer = await createIntacctCustomer(data);
+               console.log("instacctCustomer =>",instacctCustomer);
                const customerId = instacctCustomer._data[0]["CUSTOMERID"];
                const recordNo = parseInt(instacctCustomer.data[0]["RECORDNO"]);
 
