@@ -3,8 +3,6 @@ const acces_data_secret_key = process.env.JWT_SECRET_KEY;
 
 const verifyLoginAuthToken = async (req, res, next) => {
   const loginauthtoken = req.headers["x-access-token"];
-  //console.log(loginauthtoken);
-  //return false;
   if (!loginauthtoken) {
     return res
       .status(403)
@@ -12,11 +10,9 @@ const verifyLoginAuthToken = async (req, res, next) => {
   }
   try {
     const verifylogintoken = jwt.verify(loginauthtoken, acces_data_secret_key);
-    //console.log(verifylogintoken);
     next();
   } catch (err) {
     return res.status(401).send({ message: "Invalid login Token" });
   }
 };
-
 module.exports = { verifyLoginAuthToken };

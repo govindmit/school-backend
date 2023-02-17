@@ -50,47 +50,61 @@ module.exports = {
     },
 
 
-    createSageIntacctItem : async(req,res)=>{
+    createSageIntacctItem : async(data)=>{
         try{
             let record = new IA.Functions.InventoryControl.ItemCreate();
             // record.controlId = "unittest";
-            record.itemId = "I123456";
-            record.itemName = "hello world";
-            record.itemType = "Inventory";
-            record.itemGlGroupName = "Accessories"
-            record.produceLineId = ""
-            record.basePrice = '20.00'
+            record.itemId = `I${data.id}`;
+            record.itemName = data.name;
+            record.itemType = data.itemType;
+            record.itemGlGroupName = data.itemGlGroupName;
+            record.produceLineId = data.produceLineId;
+            record.basePrice = data.price
             const createResponse = await client.execute(record).catch((error)=>{
                 console.log("error =>",error.message);
-                res.send(error.message)
+                // res.send(error.message)
+                return error.message;
             })
            
 
             const createResult = createResponse.getResult();
-            console.log("createResult => ",createResult);
-            res.send(createResult)
+            return createResult
+            //res.send(createResult)
         }catch(error){
-            res.send(error.message);
+            // res.send(error.message);
+            console.log("error =>",error.message);
+            return error.message
         }
     },
 
     updateSageIntacctItem : async(req,res)=>{
         try{
+             const body = req.body;
+             const itemid = body.itemId;
+             if(!itemid){
+                res.status(201).send({message:"item id is required !"});
+                return
+             }
             let record = new IA.Functions.InventoryControl.ItemUpdate();
-            record.itemId = "I1234";
+            const keys = Object.keys(body);
+            for(var i=0 ; i<keys.length ; i++){
+                record[keys[i]]= body[keys[i]]
+            }
+            //record.itemId = "I1234";
             // record.recordNo = "62"
-            record.itemName = "hello world update";
-            record.itemType = "Inventory";
-            record.itemGlGroupName = "Accessories"
-            record.produceLineId = "Office Supplies"
-            record.active = false
-            record.basePrice = '25.00'
+            // record.itemName = "hello world update";
+            // record.itemType = "Inventory";
+            // record.itemGlGroupName = "Accessories"
+            // record.produceLineId = "Office Supplies"
+            // record.active = false
+            // record.basePrice = '25.00'
+            console.log("record =>",record);
             const createResponse = await client.execute(record).catch((error)=>{
                 console.log("error =>",error.message);
                 res.send(error.message)
+                return
             })
            const createResult = createResponse.getResult();
-            console.log("createResult => ",createResult);
             res.send(createResult)
         }catch(error){
             res.send(error.message)
@@ -98,28 +112,38 @@ module.exports = {
     },
     deleteSageIntacctItem : async(req,res)=>{
         try{
+             const itemid = req.body.itemid;
+             if(!itemid){
+                res.status(201).send({message:'item id is required !'});
+                return
+             }
             let record = new IA.Functions.InventoryControl.ItemDelete();
-            record.itemId = "I1234";
-            const createResponse = await client.execute(record).catch((error)=>{
-                console.log("error =>",error.message);
-                res.send(error.message)
-            })
+            record.itemId = itemid;
+            const createResponse = await client.execute(record);
+            // .catch((error)=>{
+            //     console.log("error =>",error.message);
+            //     res.status(400).send(error.message)
+            //     return
+            // })
            const createResult = createResponse.getResult();
-            console.log("createResult => ",createResult);
-            res.send(createResult)
+           res.status(200).send(createResult)
         }catch(error){
-            res.send(error.message)
+            res.status(400).send(error.message)
         }
     }
 }
 
 async function isItemsExistInDB(sageIntacctItems){
     try{
-        const alreadyItemsInDB = ['60200','60210']
-        const alreadyDBItem=`(SELECT itemID FROM items where itemID IS NOT NULL) order by ItemID ASC ;`
-        
+        let alreadyItemsInDB = []
         let sageIntacctItemsId = []
-        for(var i=0 ; i<sageIntacctItems.length ; i++){
+        const alreadyDBItem=`(SELECT itemID FROM items where itemID IS NOT NULL) order by ItemID ASC ;`
+        const DBitem = await query(alreadyDBItem);
+        for(var k=0; k < DBitem.length ; k++){
+            alreadyItemsInDB.push(DBitem[k]['itemID'])
+
+        }
+         for(var i=0 ; i<sageIntacctItems.length ; i++){
             sageIntacctItemsId.push(sageIntacctItems[i]['ITEMID'])
         }
        

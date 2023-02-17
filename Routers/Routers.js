@@ -7,8 +7,8 @@ const router = express.Router();
 //authorization middlewar
 const { verifyAuthToken } = require("../Middlewares/auth");
 //aunthontication middleware
-// const { verifyLoginAuthToken } = require("../Middlewares/loginauthtoken");
-//upload image
+//const { verifyLoginAuthToken } = require("../Middlewares/loginauthtoken");
+//upload
 const upload = require("../Middlewares/uploadmulter");
 
 //######################################################################################
@@ -21,12 +21,16 @@ const { getauthtoken } = require("../Controllers/GetAuthtoken/getauthtoken");
 //#############  Roles controllers  ###########################
 const {
   addRoleController,
+  getRoleController,
 } = require("../Controllers/RoleController/rolecontroller");
 
 //#############  types controllers  ###########################
 const {
   addTypeController,
   getTypeController,
+  deleteTypeController,
+  TypeDetController,
+  TypeEditController,
 } = require("../Controllers/TypeController/typecontroller");
 
 //#############  User controllers  ############################
@@ -36,6 +40,9 @@ const {
   deleteUserController,
   getUserDetailsController,
   editUserController,
+  GetUserByPidController,
+  GetUserByMultipleIdController,
+  GetLastInsertIdController,
 } = require("../Controllers/UserController/usercontroller");
 
 //############  Student controller  ##########################
@@ -54,11 +61,11 @@ const {
 
 //################        activities controllers      #########
 const {
-  addactivitycontroller,
-  getactivitycontroller,
-  getactivitydetailscontroller,
-  editactivitycontroller,
-  deleteactivitycontroller,
+  getActivityController,
+  getActivityDetailsController,
+  deleteActivityController,
+  editActivityController,
+  addActivityController,
 } = require("../Controllers/Activities/activitiescontrollers");
 
 //################        invoice controllers      #########
@@ -68,11 +75,15 @@ const {
   DeleteInvoice,
   updateInvoice,
   SendInvoiceEmail,
+  getInvoiceByUserId,
+  getInvoiceNo,
+  editInvoice,
 } = require("../Controllers/InvoiceController/invoiceController");
 const {
   CreateItem,
   GetItem,
   GetItembyid,
+  GetItemData,
 } = require("../Controllers/InvoiceController/itemController");
 
 
@@ -87,10 +98,14 @@ router.get("/get_authorization_token", getauthtoken);
 
 //############################## role routers    ###############################
 router.post("/addRole", verifyAuthToken, addRoleController);
+router.get("/getRole", verifyAuthToken, getRoleController);
 
 //############################## type routers    ###############################
 router.post("/addType", verifyAuthToken, addTypeController);
 router.get("/getType", verifyAuthToken, getTypeController);
+router.get("/getTypeDet/:id", verifyAuthToken, TypeDetController);
+router.put("/editType/:id", verifyAuthToken, TypeEditController);
+router.delete("/deleteType/:id", verifyAuthToken, deleteTypeController);
 
 //#############################  user routers ##################################
 router.post("/addUser", verifyAuthToken, addUserController);
@@ -98,6 +113,13 @@ router.post("/getUser", verifyAuthToken, getUserController);
 router.get("/getUserDetails/:id", verifyAuthToken, getUserDetailsController);
 router.put("/edituser/:id", verifyAuthToken, editUserController);
 router.delete("/deleteuser/:id", verifyAuthToken, deleteUserController);
+router.get("/getuserbypid/:id", verifyAuthToken, GetUserByPidController);
+router.get(
+  "/getuserbymultipleid/:id",
+  verifyAuthToken,
+  GetUserByMultipleIdController
+);
+router.get("/getLastInsertId", verifyAuthToken, GetLastInsertIdController);
 
 //##############################  students routes   ############################
 router.post("/addstudent", upload.none(), addstudentcontroller);
@@ -110,37 +132,30 @@ router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
 router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
 
 //#############################  activities routers  ###########################
-router.post(
-  "/addactivity",
-  verifyAuthToken,
-  upload.single("image"),
-  addactivitycontroller
-);
-router.get("/getactivity", verifyAuthToken, getactivitycontroller);
-router.get(
-  "/getactivitydetails/:id",
-  verifyAuthToken,
-  getactivitydetailscontroller
-);
-router.put(
-  "/editactivity/:id",
-  verifyAuthToken,
-  upload.single("image"),
-  editactivitycontroller
-);
-router.delete("/deleteactivity/:id", verifyAuthToken, deleteactivitycontroller);
+router.post("/getActivity", getActivityController);
+router.get("/getActivityDetails/:id", getActivityDetailsController);
+router.put("/editActivity/:id", upload.none(), editActivityController);
+router.post("/addActivity", upload.none(), addActivityController);
+
+router.delete("/deleteActivity/:id", deleteActivityController);
 
 //#############################  invoice routers  ###########################
 
 router.post("/createInvoice", upload.none(), CreateInvoice);
 router.post("/getInvoice/:id?", upload.none(), getInvoice);
 router.delete("/deleteInvoice/:id", upload.none(), DeleteInvoice);
-router.put("/updateInvoice/:id", updateInvoice);
+router.put("/updateInvoice/:id", upload.none(), updateInvoice);
+router.post("/editInvoice/:id", upload.none(), editInvoice);
+
 router.get("/sendInvoiceEmail/:id", SendInvoiceEmail);
+router.get("/getInvoicebyUser/:id", getInvoiceByUserId);
+router.get("/getInvoiceNo", getInvoiceNo);
+
 //############################ Item routers ############################
 router.post("/createItem", upload.none(), CreateItem);
 router.post("/getItembyid", upload.none(), GetItembyid);
 router.get("/getItem", GetItem);
+router.get("/getItems", GetItemData);
 
 
 
@@ -163,7 +178,7 @@ router.delete('/deleteSalesInvoice',deleteSalesInvoice)
 
 router.get('/getItemsLegacy',getListOfItems);
 router.get('/getFilterItemsLegacy',getListOfItemsByFilter);
-router.post('/createSageIntacctItem',createSageIntacctItem)
+// router.post('/createSageIntacctItem',createSageIntacctItem)
 router.put("/updateSageIntacctItem",updateSageIntacctItem)
 router.delete("/deleteSageIntacctItem",deleteSageIntacctItem)
 

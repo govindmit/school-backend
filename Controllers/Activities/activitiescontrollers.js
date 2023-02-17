@@ -1,26 +1,25 @@
-const bcrypt = require("bcryptjs");
 const express = require("express");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
 
 module.exports = {
   //add activity controller
-  addactivitycontroller: (req, res) => {
-    if (!req.file) {
-      return res.status(400).send({ message: "Image field is required" });
-    }
-    if (
-      req.file.originalname.split(".").pop() !== "png" &&
-      req.file.originalname.split(".").pop() !== "jpeg"
-    ) {
-      return res
-        .status(400)
-        .send({ message: "Please upload png and jpeg image formats " });
-    }
+  addActivityController: (req, res) => {
+    // if (!req.file) {
+    //   return res.status(400).send({ message: "Image field is required" });
+    // }
+    // if (
+    //   req.file.originalname.split(".").pop() !== "png" &&
+    //   req.file.originalname.split(".").pop() !== "jpeg"
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .send({ message: "Please upload png and jpeg image formats " });
+    // }
     const {
       name,
       description,
-      shortdescription,
+      shortDescription,
       type,
       price,
       startdate,
@@ -29,33 +28,59 @@ module.exports = {
     } = req.body;
     if (
       !name ||
-      !description ||
-      !shortdescription ||
       !type ||
-      !price ||
+      // !price ||
       !startdate ||
       !enddate ||
-      !status
+      !status 
+      // !description ||
+      // !shortDescription
     ) {
       return res.status(400).send({ message: "All field is required" });
     }
-    const check_name_query = `select * from  activites where name = "${name}" `;
+    const check_name_query = `select id, name from  activites where name = "${name}"`;
     mysqlconnection.query(check_name_query, function (err, result) {
+      if (err) throw err;
       if (result.length > 0) {
-        res.status(409).send({ message: "Activity already registred" });
+        res.status(409).send({ message: "Activity Name already registred" });
       } else {
-        var sql = `INSERT INTO activites (name,image,description,shortdescription,type,price,startdate,enddate,status)VALUES("${name}","${req.file.path}","${description}","${shortdescription}","${type}",${price},"${startdate}","${enddate}","${status}")`;
+        var sql = `INSERT INTO activites (name,type,price,startdate,enddate,status,shortDescription,description)VALUES("${name}","${type}",${price},"${startdate}","${enddate}","${status}","${description}","${shortDescription}")`;
         mysqlconnection.query(sql, function (err, result) {
           if (err) throw err;
-          res.status(201).json({ message: "data inserted", data: result });
+          res
+            .status(201)
+            .json({ message: "Data inserted successfully", data: result });
         });
       }
     });
   },
 
   //get activity controller
-  getactivitycontroller: (req, res) => {
-    var sql = `select * from activites`;
+  getActivityController: (req, res) => {
+
+    const { status, type } =req.body;
+
+    let byStatus = "";
+    if (status === "Active") {
+      byStatus = ` and status = "${status}"`;
+    } else if (status === "Upcoming") {
+      byStatus = ` and status = "${status}"`;
+    } else if (status === "Draft") {
+      byStatus = ` and status = "${status}"`;
+    } else {
+      byStatus = "";
+    }
+
+    let byType = "";
+    if (type === "Free") {
+      byType = ` and type = "${type}"`;
+    } else if (type === "Paid") {
+      byType = ` and type = "${type}"`;
+    } else {
+      byType = "";
+    }
+
+    var sql = `select id, name, type, status,shortDescription, description,startDate, endDate, price  from activites where 1=1 ${byStatus}${byType}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -63,104 +88,51 @@ module.exports = {
   },
 
   //get activity details controller
-  getactivitydetailscontroller: (req, res) => {
+  getActivityDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select * from activites where id = ${id}`;
+    var sql = `select id, name,shortDescription,description, type, status, startDate, endDate, price from activites where id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
-      if (err) throw err;
-      res.status(200).json({ message: "ok", data: result });
+      if (err) {
+        res.status(400).json({ message: "ok", data: result });
+      } else {
+        res.status(200).json({ message: "ok", data: result });
+      }
     });
   },
 
   //edit activity controller
-  editactivitycontroller: (req, res) => {
+  editActivityController: (req, res) => {
     const id = req.params.id;
-    if (
-      req.file.originalname.split(".").pop() !== "png" &&
-      req.file.originalname.split(".").pop() !== "jpeg"
-    ) {
-      return res
-        .status(400)
-        .send({ message: "Please upload png and jpeg image formats " });
-    }
+    // if (
+    //   req.file.originalname.split(".").pop() !== "png" &&
+    //   req.file.originalname.split(".").pop() !== "jpeg"
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .send({ message: "Please upload png and jpeg image formats " });
+    // }
     const {
       name,
-      description,
-      shortdescription,
       type,
       price,
       startdate,
       enddate,
       status,
+      shortDescription,
+      description,
     } = req.body;
 
-    var selectsql = `select *from activites where id = ${id}`;
-    mysqlconnection.query(selectsql, function (err, result) {
-      if (result.length > 0) {
-        let new_name,
-          new_desc,
-          new_short_desc,
-          new_type,
-          new_price,
-          new_start_date,
-          new_end_date,
-          new_status;
-
-        if (name !== "") {
-          new_name = name;
-        } else {
-          new_name = result[0].name;
-        }
-        if (description !== "") {
-          new_desc = description;
-        } else {
-          new_desc = result[0].description;
-        }
-        if (shortdescription !== "") {
-          new_short_desc = shortdescription;
-        } else {
-          new_short_desc = result[0].shortdescription;
-        }
-        if (type !== "") {
-          new_type = type;
-        } else {
-          new_type = result[0].type;
-        }
-        if (price !== "") {
-          new_price = price;
-        } else {
-          new_price = result[0].price;
-        }
-        if (startdate !== "") {
-          new_start_date = startdate;
-        } else {
-          new_start_date = result[0].startdate;
-        }
-        if (enddate !== "") {
-          new_end_date = enddate;
-        } else {
-          new_end_date = result[0].enddate;
-        }
-        if (status !== "") {
-          new_status = status;
-        } else {
-          new_status = result[0].status;
-        }
-
-        const updt_query = `update activites set name = "${new_name}", description = "${new_desc}", shortdescription = "${new_short_desc}", type = "${new_type}", price = ${new_price}, startdate = "${new_start_date}", enddate = "${new_end_date}", status = "${new_status}" where id = ${id}`;
-        console.log(updt_query);
-        mysqlconnection.query(updt_query, function (err, result) {
-          if (err) throw err;
-          res
-            .status(200)
-            .json({ message: "data updated successfully", data: result });
-        });
-      }
+    const updt_query = `update activites set name = "${name}",type = "${type}", price = ${price}, startdate = "${startdate}", enddate = "${enddate}", status = "${status}",shortDescription="${shortDescription}",description="${description}" where id = ${id}`;
+    mysqlconnection.query(updt_query, function (err, result) {
+      if (err) throw err;
+      res
+        .status(200)
+        .json({ message: "data updated successfully", data: result });
     });
   },
 
   //delete user controller
-  deleteactivitycontroller: (req, res) => {
+  deleteActivityController: (req, res) => {
     const id = req.params.id;
     var sql = `delete from activites where id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
