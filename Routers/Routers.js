@@ -68,6 +68,15 @@ const {
   addActivityController,
 } = require("../Controllers/Activities/activitiescontrollers");
 
+//################    salesordercontrollers      #########
+const {
+  addSalesOrder,
+  getSalesOrder,
+  getSalesDetails,
+  editSalesOrder,
+  deleteSalesOrder,
+} = require("../Controllers/SalesOrderController/salesordercontrollers");
+
 //################        invoice controllers      #########
 const {
   CreateInvoice,
@@ -138,6 +147,16 @@ router.put("/editActivity/:id", upload.none(), editActivityController);
 router.post("/addActivity", upload.none(), addActivityController);
 
 router.delete("/deleteActivity/:id", deleteActivityController);
+
+
+//#############################  SalesOrders routers  ###########################
+router.post("/addSalesOrders", upload.none(), addSalesOrder);
+router.post("/getSalesOrders", getSalesOrder);
+router.get("/getSalesOrdersDetails/:id", getSalesDetails);
+router.put("/editSalesOrders/:id", upload.none(), editSalesOrder);
+router.delete("/deleteSalesOrders/:id", deleteSalesOrder);
+
+
 
 //#############################  invoice routers  ###########################
 
