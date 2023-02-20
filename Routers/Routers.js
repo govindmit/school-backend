@@ -88,6 +88,8 @@ const {
   getInvoiceNo,
   editInvoice,
 } = require("../Controllers/InvoiceController/invoiceController");
+
+//################  items controllers ########################
 const {
   CreateItem,
   GetItem,
@@ -97,6 +99,16 @@ const {
 
 
 
+//################  credit notes controllers ########################
+const {
+  addCreditNotesController,
+  getCreditNotesController,
+  getCreditNotesDetailsController,
+  editCreditNotesController,
+} = require("../Controllers/CreditNotes/creditNotesController");
+
+//################        check emails controllers ########################
+const { CheckEmails } = require("../Controllers/CheckEmails");
 
 //#######################################################################################
 //#                                    ROUTERS                                          #
@@ -141,12 +153,26 @@ router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
 router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
 
 //#############################  activities routers  ###########################
-router.post("/getActivity", getActivityController);
-router.get("/getActivityDetails/:id", getActivityDetailsController);
-router.put("/editActivity/:id", upload.none(), editActivityController);
-router.post("/addActivity", upload.none(), addActivityController);
+router.post("/getActivity", verifyAuthToken, getActivityController);
+router.get(
+  "/getActivityDetails/:id",
+  verifyAuthToken,
+  getActivityDetailsController
+);
+router.put(
+  "/editActivity/:id",
+  upload.none(),
+  verifyAuthToken,
+  editActivityController
+);
+router.post(
+  "/addActivity",
+  upload.none(),
+  verifyAuthToken,
+  addActivityController
+);
 
-router.delete("/deleteActivity/:id", deleteActivityController);
+router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
 
 
 //#############################  SalesOrders routers  ###########################
@@ -156,9 +182,9 @@ router.get("/getSalesOrdersDetails/:id", getSalesDetails);
 router.put("/editSalesOrders/:id", upload.none(), editSalesOrder);
 router.delete("/deleteSalesOrders/:id", deleteSalesOrder);
 
+                               
 
-
-//#############################  invoice routers  ###########################
+//#########################  invoice routers  ###########################
 
 router.post("/createInvoice", upload.none(), CreateInvoice);
 router.post("/getInvoice/:id?", upload.none(), getInvoice);
@@ -210,4 +236,17 @@ router.get('/getSalesOrderLegacy',getListOfSalesOrder);
 // router.post('/createIntacctCustomer' ,createIntacctCustomer);
 // router.put('/updateIntacctCustomer' ,updateIntacctCustomer);
 // router.delete('/deleteIntacctCustomer' ,deleteIntacctCustomer);
+//######################### credit notes routesr #######################
+router.post("/addCreditNotes", verifyAuthToken, addCreditNotesController);
+router.post("/getCreditNotes", verifyAuthToken, getCreditNotesController);
+router.put("/editCreditNotes/:id", verifyAuthToken, editCreditNotesController);
+router.get(
+  "/getCreditNotesDetails/:id",
+  verifyAuthToken,
+  getCreditNotesDetailsController
+);
+
+//######################### check emails #######################
+router.post("/checkEmails", CheckEmails);
+
 module.exports = router;

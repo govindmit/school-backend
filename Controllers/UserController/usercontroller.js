@@ -1,6 +1,4 @@
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
-const ResetEmailFormat = require("../Helper/ResetEmailTemp");
 const mysqlconnection = require("../../DB/db.config.connection");
 const { createIntacctCustomer, deleteIntacctCustomer, updateIntacctCustomer } = require("../../SageIntacctAPIs/CustomerServices");
 // const { query } = require("express");
@@ -8,6 +6,8 @@ const { createIntacctCustomer, deleteIntacctCustomer, updateIntacctCustomer } = 
 const util = require("util");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 const sendmail = require("sendmail")();
+const ResetEmailFormat = require("../Helper/templates/ResetEmailTemp");
+const sendEmails = require("../Helper/sendEmails");
 module.exports = {
   // Add user Controller
   addUserController: async (req, res) => {
@@ -57,39 +57,10 @@ console.log("insert_query =>",insert_query);
           mysqlconnection.query(insert_query, function (err, responce) {
             if (err) throw err;
             if (responce) {
-              const insert_permition = `INSERT INTO metaOptions (userId,previlegs)VALUES(${responce.insertId},'${per}')`;
-              mysqlconnection.query(
-                insert_permition,
-                async function (err, responce) {
-                  if (err) throw err;
-                  const resetPasswordtoken = jwt.sign(
-                    { email1: email1, id: responce.insertId },
-                    process.env.JWT_SECRET_KEY
-                  );
-                  const dt = await ResetEmailFormat(resetPasswordtoken);
-                  sendmail(
-                    {
-                      from: process.env.emailFrom || "test@gmail.com",
-                      to: email1 || "qatar.school@yopmail.com",
-                      subject: "Reset Password Link From QIS✔",
-                      html: dt,
-                    },
-                    function (err, reply) {
-                      if (err) {
-                        res.status(400).json({
-                          message: "something went wrong to send mail",
-                          err,
-                        });
-                      } else {
-                        res.status(200).send({
-                          message: "User Registration successfully.",
-                        });
-                      }
-                    }
-                  );
-                }
+              const resetPasswordtoken = jwt.sign(
+                { email1: email1, id: responce.insertId },
+                process.env.JWT_SECRET_KEY
               );
-
             }
 
           });
@@ -187,26 +158,10 @@ console.log("insert_query =>",insert_query);
                             const dt = await ResetEmailFormat(
                               resetPasswordtoken
                             );
-                            sendmail(
-                              {
-                                from: process.env.emailFrom,
-                                to: email1,
-                                subject: "Reset Password Link From QIS✔",
-                                html: dt,
-                              },
-                              function (err, reply) {
-                                if (err) {
-                                  res.status(400).json({
-                                    message:
-                                      "something went wrong to send mail",
-                                  });
-                                } else {
-                                  res.status(200).send({
-                                    message:
-                                      "Customer Registration successfully.",
-                                  });
-                                }
-                              }
+                            sendEmails(
+                              email1,
+                              "Reset Password Link From QIS✔",
+                              dt
                             );
                             res.status(200).send({
                               message: "Customer Registration successfully.",
@@ -274,7 +229,7 @@ console.log("insert_query =>",insert_query);
       ByparentId = "";
     }
 
-    var sqlquery = `select users.id, customers.customerId, parents.parentId as 'GeneratedParentId', users.parentId, users.name, users.email1, users.email2, 
+    var sqlquery = `select users.id, roles.id as "roleId", customers.customerId, parents.parentId as 'GeneratedParentId', users.parentId, users.name, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
     users.status, users.printUs, roles.name as "UserRole" from users 
     LEFT outer join roles on roles.id = users.roleId 
@@ -311,6 +266,7 @@ console.log("insert_query =>",insert_query);
       contactName,
       status,
       typeId,
+      roleId,
       parentId,
       previlegs,
       updatedBy,
@@ -357,15 +313,15 @@ console.log("insert_query =>",insert_query);
         phone2 ? phone2 : result[0].phone2
       }, contactName="${
         contactName ? contactName : result[0].contactName
-      }",printUs = "${
-        printUs ? printUs : result[0].printUs
-      }", status= ${status} , agegroup = ${
+      }",printUs = "${printUs ? printUs : result[0].printUs}", status= ${
+        status ? status : 0
+      } , agegroup = ${
         agegroup ? agegroup : result[0].agegroup
       }, generatedId = "${
         pregeneratedid ? pregeneratedid : result[0].generatedId
-      }", typeId= ${typeId ? typeId : result[0].typeId}, parentId = ${
-        parentId ? parentId : result[0].parentId
-      }, updatedBy = ${
+      }", typeId= ${typeId ? typeId : result[0].typeId}, roleId = ${
+        roleId ? roleId : result[0].roleId
+      }, parentId = ${parentId ? parentId : result[0].parentId}, updatedBy = ${
         updatedBy ? updatedBy : result[0].updatedBy
       } where id = ${id}`;
       mysqlconnection.query(updt_query, function (err, result) {

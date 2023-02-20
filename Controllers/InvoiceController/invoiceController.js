@@ -1,5 +1,3 @@
-const express = require("express");
-const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
 const util = require("util");
 const moment = require("moment");
@@ -7,8 +5,11 @@ const nodemailer = require("nodemailer");
 const InvoiceEmailFormat = require("../Helper/InvoiceEmailTemp");
 const { createSalesInvoice, deleteSalesInvoice, updateSalesInvoice } = require("../../SageIntacctAPIs/SalesInvoiceService");
 const sendmail = require("sendmail")();
+const InvoiceEmailFormat = require("../Helper/templates/InvoiceEmailTemp");
+const sendEmails = require("../Helper/sendEmails");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
+  //create invoice
   CreateInvoice: async (req, res) => {
     const body = req.body;
     var customerId = req.body.customerId;
@@ -24,7 +25,6 @@ module.exports = {
     let sqls = `SELECT invoiceId FROM invoices WHERE isDeleted = 0 and invoiceId = '${invoiceNo}'`;
 
     var invoiceNos = await query(sqls);
-
     if (!customerId) {
       return res.status(400).send({ message: "customer field is required" });
     } else if (!amount) {
@@ -66,25 +66,8 @@ module.exports = {
       let sqld = `SELECT users.name,items.name as itemname,items.description,invoices.amount,invoices.status,invoices.invoiceId,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${invoice.insertId}`;
       const Getinvoice = await query(sqld);
       const hh = await InvoiceEmailFormat(Getinvoice);
-
       if (invoice && status === "pending") {
-        sendmail(
-          {
-            from: "test@gmail.com",
-            to: "qatar.school@yopmail.com",
-            subject: "test sendmail",
-            html: hh,
-          },
-          function (err, reply) {
-            if (err) {
-              res
-                .status(400)
-                .json({ message: "something went wrong to send mail" });
-            } else {
-              console.log("mail send successfully");
-            }
-          }
-        );
+        sendEmails("sj2585097@gmail.com", "Invoice Details Link From QIS✔", hh);
         res
           .status(200)
           .json({ message: "Invoice created successfully", data: invoice });
@@ -98,6 +81,7 @@ module.exports = {
     }
   },
 
+  //get invoice
   getInvoice: async (req, res) => {
     var invoiceData = [];
     var startDate = req.body.startDate;
@@ -123,7 +107,6 @@ module.exports = {
     if (startDate && endDate && req.body.status) {
       date = `AND invoices.invoiceDate BETWEEN '${startDate}' AND '${endDate}'`;
     }
-
     if (req.body.amount) {
       amount = `AND invoices.amount = ${req.body.amount}`;
     }
@@ -147,7 +130,6 @@ module.exports = {
     } else {
       isdeleted = `WHERE invoices.isDeleted = 0`;
     }
-
     if (!req.params.id) {
       let sql = `SELECT users.name,items.name as itemname,items.description,invoices.invoiceId,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id ${status} ${date} ${amount} ${customer} ${isdeleted} ${order}`;
       const invoice = await query(sql);
@@ -173,6 +155,8 @@ module.exports = {
       res.status(200).json({ data: invoicess });
     }
   },
+
+  //update invoice
   updateInvoice: async (req, res) => {
     let sqls = `SELECT invoices.amount,invoices.customerId,invoices.status,invoices.createdBy,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices WHERE invoices.id = ${req.params.id}`;
     const invoice = await query(sqls);
@@ -200,6 +184,7 @@ module.exports = {
     }
   },
 
+  //edit invoice
   editInvoice: async (req, res) => {
     let sqls = `SELECT invoices.amount,invoices.customerId,invoices.status,invoices.createdBy,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId ,invoiceId FROM invoices WHERE isDeleted = 0 and invoices.id = ${req.params.id}`;
     const invoice = await query(sqls);
@@ -258,29 +243,26 @@ module.exports = {
     res.send(invoices);
   },
 
+  //get invoice number
   getInvoiceNo: async (req, res) => {
     let sql = `SELECT id FROM invoices ORDER BY id DESC`;
     const invoices = await query(sql);
-
     let invoiceNo = `INV000${invoices[0]?.id + 1}`;
-
     res.status(201).json({ invoiceNo: invoiceNo });
   },
 
+  //delete invoice
   DeleteInvoice: async (req, res) => {
     const { userId } = req.body;
     const date = new Date();
-
     let day = date.getDate();
     let month = date.getMonth() + 1;
     let year = date.getFullYear();
-
     // This arrangement can be altered based on how we want the date's format to appear.
     let currentDate = `${day}/${month}/${year}`;
     if (!userId) {
       return res.status(400).send({ message: "userId is required" });
     }
-
     var sqls = `UPDATE invoices SET isDeleted='1',deletedBy='${userId}',deletedDate='${currentDate}' WHERE id = ${req.params.id}`;
     const updateInvoice = await query(sqls);
    
@@ -291,32 +273,21 @@ module.exports = {
     res.status(200).json({ message: "Deleted Successfully" });
   },
 
+  //send invoice email
   SendInvoiceEmail: async (req, res) => {
     let sqld = `SELECT users.name,users.email1,items.description,items.name,invoices.amount,invoices.status,invoices.invoiceId, invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${req.params.id}`;
     const Getinvoice = await query(sqld);
     const hh = await InvoiceEmailFormat(Getinvoice);
-
-    return sendmail(
-      {
-        from: "test@gmail.com",
-        to: "qatar.school@yopmail.com",
-        subject: "test sendmail",
-        html: hh,
-      },
-      function (err, reply) {
-        if (!err) {
-          res.status(200).json({ message: "send invoice email successfully" });
-        }
-      }
-    );
+    sendEmails("sj2585097@gmail.com", "Invoice Details From QIS✔", hh);
+    res.status(200).json({ message: "send invoice email successfully" });
   },
+
+  //get invoice by user id
   getInvoiceByUserId: async (req, res) => {
     let date = moment(new Date()).format("DD/MM/YYYY");
     if (req.query.key == "close") {
       let sql = `SELECT invoices.amount,invoices.invoiceId,invoices.isDeleted,invoices.customerId,invoices.status,invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND status ='paid' AND isDeleted = 0 ORDER BY invoiceDate DESC LIMIT 2 `;
-
       const invoice = await query(sql);
-
       res.send(invoice);
     } else {
       let sql = `SELECT invoices.amount,invoices.invoiceId,invoices.status,invoices.customerId,invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND isDeleted = 0 AND status = 'pending' ORDER BY invoiceDate DESC LIMIT 2`;
