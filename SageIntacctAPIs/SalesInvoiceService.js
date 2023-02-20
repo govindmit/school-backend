@@ -160,19 +160,22 @@ async function isSalesInvoiceExistInDB(sageIntacctInovice){
                     const responsebyname = await client.execute(read);
                     const invoiceResponse = responsebyname.getResult();
                     const invoice = invoiceResponse._data[0]
+                    const queryUserId = `select userId from customers where customerId = "${invoice['CUSTVENDID']}"`
+                    const userIdResponse = await query(queryUserId)
+                    const userID = userIdResponse[0].userId;
                     // console.log("invoice=>",invoice);
                   if(alreadyinvoicesInDB.includes(sageIntacctinvoicesId[j])){
                     console.log("invoice Already exist in DB =>",sageIntacctinvoicesId[j]);
                     // const updateSql = `UPDATE invoices SET  status = "${invoice['STATE']}",amount="${item['PODESCRIPTION']}",price="${item['BASEPRICE']}" WHERE itemID="${item['ITEMID']}"`
-                    var updateSql = `UPDATE invoices SET customerId = '${invoice['CUSTVENDID']}',invoiceId = '${invoice['DOCNO']}', amount='${invoice['TOTALENTERED']}',status='${invoice['STATE']}' WHERE invoiceId = ${invoice['DOCNO']}`;
-                    //  console.log("update",updateSql);
+                    var updateSql = `UPDATE invoices SET customerId = '${userID}',invoiceId = '${invoice['DOCNO']}', amount='${invoice['TOTALENTERED']}',status='${invoice['STATE']}' WHERE invoiceId = "${invoice['DOCNO']}"`;
+                     console.log("update",updateSql);
                     const update = await query(updateSql);
                     
                     
                 }else{
                     console.log("Item Not exist in DB =>",sageIntacctinvoicesId[j]);
                     // const InsertSql = `INSERT INTO invoices (name,description,price,itemID) VALUES('${item['NAME']}','${item['PODESCRIPTION']}','${item['BASEPRICE']}','${item['ITEMID']}')`;
-                    var InsertSql = `INSERT INTO invoices (customerId,amount,status,createdDate,createdBy,invoiceDate,invoiceId) VALUES('${invoice['CUSTVENDID']}','${invoice['TOTALENTERED']}','${invoice['STATE']}','${invoice['WHENCREATED']}','${invoice['CREATEDBY']}','${invoice['WHENCREATED']}','${invoice['DOCNO']}')`;
+                    var InsertSql = `INSERT INTO invoices (customerId,amount,status,createdDate,createdBy,invoiceDate,invoiceId) VALUES('${userID}','${invoice['TOTALENTERED']}','${invoice['STATE']}','${invoice['WHENCREATED']}','${invoice['CREATEDBY']}','${invoice['WHENCREATED']}','${invoice['DOCNO']}')`;
                     // console.log("InsertSql =>",InsertSql);
                     const insert = await query(InsertSql);
                     

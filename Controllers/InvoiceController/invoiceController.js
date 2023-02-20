@@ -43,13 +43,14 @@ module.exports = {
         .send({ message: "please enter unique invoice no" });
     } else {
       var sql = `INSERT INTO invoices (customerId,amount,itemId,status,createdDate,createdBy,invoiceDate,invoiceId) VALUES('${customerId}','${amount}','${itemId}','${status}','${createdDate}','${createdBy}','${invoiceDate}','${invoiceNo}')`;
-
+      const getCustomerIDQuery = `select customerId from customers where userId = "${customerId}"`
+      const customerIdResponse = await query(getCustomerIDQuery);
       const invoice = await query(sql);
 
       // sage intacct
       const data ={
         createDate:createdDate,
-        customerId:customerId,
+        customerId:customerIdResponse[0].customerId,
         itemId:itemId,
         quantity:quantity
       }
@@ -235,6 +236,10 @@ module.exports = {
     let quantity = req.body.quantity
      var sql = `UPDATE invoices SET customerId = '${customerIds}',invoiceId = '${invoiceNos}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',updatedAt='${updatedAts}',updatedBy='${updatedBys}',status='${statuss}' WHERE id = ${req.params.id}`;
     const invoices = await query(sql);
+    const getCustomerIDQuery = `select customerId from customers where userId = "${customerId}"`
+    const customerIdResponse = await query(getCustomerIDQuery);
+    console.log("customerIdResponse[0].customerId =>",customerIdResponse[0].customerId);
+
 
     var InvoiceSql = `SELECT invoiceId FROM invoices where id=${req.params.id};`
     const sageIntacctInvoiveId = await query(InvoiceSql);
@@ -244,7 +249,7 @@ module.exports = {
     const data = {
       invoiceID : invoiceID,
       dueDate:req.body.dueDate ? req.body.dueDate :'02/24/2027',
-      customerId:customerId,
+      customerId:customerIdResponse[0].customerId,
       state: status==="paid"?"Closed":"pending",
       itemId:itemId,
       quantity:quantity

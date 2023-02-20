@@ -183,7 +183,7 @@ const { getListCustomersLegacy, createIntacctCustomer, updateIntacctCustomer, de
 const { getInvoiceList, createInstacctInvoice, deleteInstacctInvoice, updateInstacctInvoice } = require("../SageIntacctAPIs/InvoiceService");
 const { getListOfItems, getListOfItemsByFilter, createSageIntacctItem, updateSageIntacctItem, deleteSageIntacctItem } = require("../SageIntacctAPIs/ItemServices");
 const { getListOfSalesInovice, createSalesInvoice, updateSalesInvoice, deleteSalesInvoice } = require("../SageIntacctAPIs/SalesInvoiceService");
-const { getListOfSalesOrder, createSalesOrder, updateSalesOrder, deleteSalesOrder } = require("../SageIntacctAPIs/SalesOrderService");
+const { getListOfSalesOrder, createSalesOrder, updateSalesOrder, deleteSageIntacctSalesOrder } = require("../SageIntacctAPIs/SalesOrderService");
 
 
 router.get('/getListCustomersLegacy' , getListCustomersLegacy);
@@ -202,9 +202,9 @@ router.put("/updateSageIntacctItem",updateSageIntacctItem)
 router.delete("/deleteSageIntacctItem",deleteSageIntacctItem)
 
 router.get('/getSalesOrderLegacy',getListOfSalesOrder);
-router.post('/createSalesOrder',createSalesOrder)
-router.put('/updateSalesOrder',updateSalesOrder)
-router.delete('/deleteSalesOrder',deleteSalesOrder)
+// router.post('/createSalesOrder',createSalesOrder)
+// router.put('/updateSalesOrder',updateSalesOrder)
+// router.delete('/deleteSalesOrder',deleteSageIntacctSalesOrder)
 
 
 // router.post('/createIntacctCustomer' ,createIntacctCustomer);

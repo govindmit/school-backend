@@ -30,7 +30,6 @@ module.exports = {
       generatedId,
       updatedBy,
     } = req.body;
-console.log("body =>",req.body);
     const user_permition = req.body.previlegs;
     const per = JSON.stringify({ user_permition });
 
@@ -68,26 +67,26 @@ console.log("insert_query =>",insert_query);
                     process.env.JWT_SECRET_KEY
                   );
                   const dt = await ResetEmailFormat(resetPasswordtoken);
-                  // sendmail(
-                  //   {
-                  //     from: process.env.emailFrom || "test@gmail.com",
-                  //     to: email1 || "qatar.school@yopmail.com",
-                  //     subject: "Reset Password Link From QIS✔",
-                  //     html: dt,
-                  //   },
-                  //   function (err, reply) {
-                  //     if (err) {
-                  //       res.status(400).json({
-                  //         message: "something went wrong to send mail",
-                  //         err,
-                  //       });
-                  //     } else {
-                  //       res.status(200).send({
-                  //         message: "User Registration successfully.",
-                  //       });
-                  //     }
-                  //   }
-                  // );
+                  sendmail(
+                    {
+                      from: process.env.emailFrom || "test@gmail.com",
+                      to: email1 || "qatar.school@yopmail.com",
+                      subject: "Reset Password Link From QIS✔",
+                      html: dt,
+                    },
+                    function (err, reply) {
+                      if (err) {
+                        res.status(400).json({
+                          message: "something went wrong to send mail",
+                          err,
+                        });
+                      } else {
+                        res.status(200).send({
+                          message: "User Registration successfully.",
+                        });
+                      }
+                    }
+                  );
                 }
               );
 
@@ -99,7 +98,7 @@ console.log("insert_query =>",insert_query);
           mysqlconnection.query(insert_query, async function (err, responce) {
             if (err) throw err;
             if (responce) {
-
+              
               const active = status===0?false:true
               const data ={
                 name,
@@ -108,7 +107,7 @@ console.log("insert_query =>",insert_query);
                 phoneNumber1:phone1,
                 phoneNumber2:phone2,
                 active : active,
-                parentCustomerId: "10003",
+                // parentCustomerId: "",
                 customerTypeId: 'Consumer'
               }
                const instacctCustomer = await createIntacctCustomer(data);
@@ -140,12 +139,11 @@ console.log("insert_query =>",insert_query);
             if (err) throw err;
             if (responce) {
               //create customer
-              var getParentId = "10003";
+              var getParentId = "";
               if(parentId > 0){
                   const sqlToGetCustomerid = `select customerId from customers where userId = ${parentId}`
                    mysqlconnection.query(sqlToGetCustomerid, function (err, result) {
-                    console.log("result =>",result);
-                    getParentId = result[0].customerId;
+                   getParentId = result[0].customerId;
                   });
               }
               
@@ -189,27 +187,27 @@ console.log("insert_query =>",insert_query);
                             const dt = await ResetEmailFormat(
                               resetPasswordtoken
                             );
-                            // sendmail(
-                            //   {
-                            //     from: process.env.emailFrom,
-                            //     to: email1,
-                            //     subject: "Reset Password Link From QIS✔",
-                            //     html: dt,
-                            //   },
-                            //   function (err, reply) {
-                            //     if (err) {
-                            //       res.status(400).json({
-                            //         message:
-                            //           "something went wrong to send mail",
-                            //       });
-                            //     } else {
-                            //       res.status(200).send({
-                            //         message:
-                            //           "Customer Registration successfully.",
-                            //       });
-                            //     }
-                            //   }
-                            // );
+                            sendmail(
+                              {
+                                from: process.env.emailFrom,
+                                to: email1,
+                                subject: "Reset Password Link From QIS✔",
+                                html: dt,
+                              },
+                              function (err, reply) {
+                                if (err) {
+                                  res.status(400).json({
+                                    message:
+                                      "something went wrong to send mail",
+                                  });
+                                } else {
+                                  res.status(200).send({
+                                    message:
+                                      "Customer Registration successfully.",
+                                  });
+                                }
+                              }
+                            );
                             res.status(200).send({
                               message: "Customer Registration successfully.",
                             });

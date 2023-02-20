@@ -28,15 +28,13 @@ getListCustomersLegacy : async (req, res)=>{
 createIntacctCustomer : async(data)=>{
      try{
         const {email1,email2 ,phoneNumber1,phoneNumber2 , active ,name ,parentCustomerId,customerTypeId}= data
-         if( !email1 || !phoneNumber1 || !name || !parentCustomerId){
+         if( !email1 || !phoneNumber1 || !name ){
                    return {message:'required data not provided !'}
                  }
        
         let create = new IA.Functions.AccountsReceivable.CustomerCreate();
         create.customerName = name;
         create.active = active;
-        // create.firstName = firstName;
-        // create.lastName = lastName;
         create.primaryEmailAddress = email1 ;
         create.secondaryEmailAddress = email2;
         create.primaryPhoneNo = phoneNumber1;
@@ -44,6 +42,11 @@ createIntacctCustomer : async(data)=>{
         create.parentCustomerId = parentCustomerId;
         create.customerTypeId = customerTypeId;
         // create.primaryContactName =primaryContactName;
+        create.addressLine1 = "300 Park Ave";
+        create.addressLine2 = "Ste 1400";
+        create.city = "San Jose";
+        create.stateProvince = "CA";
+        create.zipPostalCode = "95110";
         const createResponse = await client.execute(create).catch((err)=>{console.log(err.messge);});
         const createResult = createResponse.getResult();
         return createResult;
