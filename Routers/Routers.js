@@ -153,9 +153,9 @@ router.get("/getSalesOrdersDetails/:id", getSalesDetails);
 router.put("/editSalesOrders/:id", upload.none(), editSalesOrder);
 router.delete("/deleteSalesOrders/:id", deleteSalesOrder);
 
+                               
 
-
-//#############################  invoice routers  ###########################
+//#########################  invoice routers  ###########################
 
 router.post("/createInvoice", upload.none(), CreateInvoice);
 router.post("/getInvoice/:id?", upload.none(), getInvoice);
