@@ -1,5 +1,10 @@
 const mysqlconnection = require("../../DB/db.config.connection");
 const util = require("util");
+<<<<<<< HEAD
+const nodemailer = require("nodemailer");
+const { createSageIntacctItem } = require("../../SageIntacctAPIs/ItemServices");
+=======
+>>>>>>> 311057c911e55953bc32d157b7d183462587be1a
 
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
@@ -10,6 +15,21 @@ module.exports = {
     let price = req.body.price;
     var sql = `INSERT INTO items (name,description,price) VALUES('${name}','${description}','${price}')`;
     const item = await query(sql);
+
+    const intacctItem = {
+      id:item.insertId,
+      name:name,
+      price:price,
+      itemType:"Inventory",
+      produceLineId:"",
+      itemGlGroupName:"Accessories"
+
+    }
+    const sageIntacctItem = await createSageIntacctItem(intacctItem);
+    const itemId = sageIntacctItem._data[0]["ITEMID"];
+    const updateSql = `UPDATE items SET  itemID = "${itemId}" WHERE id="${item.insertId}"`
+    const updateItem = await query(updateSql);
+
     res.status(200).json({ message: "Item created successfully", data: item });
   },
 
@@ -29,7 +49,7 @@ module.exports = {
   },
 
   GetItemData: async (req, res) => {
-    var sql = `SELECT id,name,price,description FROM items`;
+    var sql = `SELECT id,name,price,description,itemID FROM items`;
     const item = await query(sql);
     res.status(200).json({ data: item });
   },
