@@ -1,10 +1,7 @@
 const mysqlconnection = require("../../DB/db.config.connection");
 const util = require("util");
-<<<<<<< HEAD
 const nodemailer = require("nodemailer");
 const { createSageIntacctItem } = require("../../SageIntacctAPIs/ItemServices");
-=======
->>>>>>> 311057c911e55953bc32d157b7d183462587be1a
 
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
