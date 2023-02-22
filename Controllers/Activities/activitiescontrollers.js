@@ -63,7 +63,7 @@ module.exports = {
       
           }
           const sageIntacctItem = await createSageIntacctItem(intacctItem);
-          const itemId = sageIntacctItem._data[0]["ITEMID"];
+          const itemId = sageIntacctItem?._data[0]["ITEMID"];
           const updateSql = `UPDATE items SET  itemID = "${itemId}",activityID = "${result.insertId}" WHERE id="${item.insertId}"`
           const updateItem = await query(updateSql);
 
