@@ -1,5 +1,11 @@
 const jwt = require("jsonwebtoken");
 const mysqlconnection = require("../../DB/db.config.connection");
+const { createIntacctCustomer, deleteIntacctCustomer, updateIntacctCustomer } = require("../../SageIntacctAPIs/CustomerServices");
+// const { query } = require("express");
+
+const util = require("util");
+const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
+const sendmail = require("sendmail")();
 const ResetEmailFormat = require("../Helper/templates/ResetEmailTemp");
 const sendEmails = require("../Helper/sendEmails");
 module.exports = {
@@ -26,6 +32,10 @@ module.exports = {
     } = req.body;
     const user_permition = req.body.previlegs;
     const per = JSON.stringify({ user_permition });
+
+    var customerId ;
+    var recordNo ;
+
     //check email query
     const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
     //insert query
@@ -63,18 +73,37 @@ module.exports = {
                 });
               });
             }
+
           });
         }
         if (parentId === 0 && userRole === "parent") {
-          mysqlconnection.query(insert_query, function (err, responce) {
+          mysqlconnection.query(insert_query, async function (err, responce) {
             if (err) throw err;
             if (responce) {
+              
+              const active = status===0?false:true
+              const data ={
+                name,
+                email1,
+                email2,
+                phoneNumber1:phone1,
+                phoneNumber2:phone2,
+                active : active,
+                // parentCustomerId: "",
+                customerTypeId: 'Consumer'
+              }
+               const instacctCustomer = await createIntacctCustomer(data);
+               console.log("instacctCustomer =>",instacctCustomer);
+               customerId = instacctCustomer._data[0]["CUSTOMERID"];
+               recordNo = parseInt(instacctCustomer.data[0]["RECORDNO"]);
+
               //create parent
               const insert_parnt = `INSERT INTO parents (userId)VALUES(${responce.insertId})`;
-              mysqlconnection.query(insert_parnt, function (err, parntResult) {
+              mysqlconnection.query(insert_parnt, async function (err, parntResult) {
                 if (err) throw err;
                 if (parntResult) {
-                  const updtparnt = `update parents set parentId = "PARNT-000${parntResult.insertId}" where id =${parntResult.insertId}`;
+                  // const updtparnt = `update parents set parentId = "PARNT-000${parntResult.insertId}" where id =${parntResult.insertId}`;
+                  const updtparnt = `update parents set parentId = "${customerId}",record_no="${recordNo}" where id =${parntResult.insertId}`;
                   mysqlconnection.query(updtparnt, function (err, result) {
                     if (err) throw err;
                     res.status(200).json({
@@ -88,10 +117,34 @@ module.exports = {
         }
         if ((parentId === 0 || parentId > 0) && userRole === "customer") {
           //create customer
-          mysqlconnection.query(insert_query, function (err, responce) {
+          mysqlconnection.query(insert_query, async function (err, responce) {
             if (err) throw err;
             if (responce) {
               //create customer
+              var getParentId = "";
+              if(parentId > 0){
+                  const sqlToGetCustomerid = `select customerId from customers where userId = ${parentId}`
+                   mysqlconnection.query(sqlToGetCustomerid, function (err, result) {
+                   getParentId = result[0].customerId;
+                  });
+              }
+              
+              const active = status===0?false:true
+              const data ={
+                name,
+                email1,
+                email2,
+                phoneNumber1:phone1,
+                phoneNumber2:phone2,
+                active : active,
+                parentCustomerId: getParentId,
+                customerTypeId: 'Consumer'
+              }
+               const instacctCustomer = await createIntacctCustomer(data);
+               console.log("instacctCustomer =>",instacctCustomer);
+               customerId = instacctCustomer._data[0]["CUSTOMERID"];
+               recordNo = parseInt(instacctCustomer.data[0]["RECORDNO"]);
+
               const getCustuser = `select id from users where roleId = 2 and id = ${responce.insertId}`;
               mysqlconnection.query(getCustuser, function (err, result) {
                 if (err) throw err;
@@ -102,7 +155,8 @@ module.exports = {
                     function (err, custResult) {
                       if (err) throw err;
                       if (custResult) {
-                        const updtCust = `update customers set customerId = "CUST-000${custResult.insertId}" where id =${custResult.insertId}`;
+                        // const updtCust = `update customers set customerId = "CUST-000${custResult.insertId}" where id =${custResult.insertId}`;
+                        const updtCust = `update customers set customerId = "${customerId}",record_no="${recordNo}" where id =${custResult.insertId}`;
                         mysqlconnection.query(
                           updtCust,
                           async function (err, result) {
@@ -234,9 +288,34 @@ module.exports = {
     const user_permition = req.body.previlegs;
     const per = JSON.stringify({ user_permition });
 
-    let sql = `select id, name, email1, email2, phone1, phone2, typeId, parentId, contactName, printUs, status, generatedId, agegroup, roleId, updatedBy from users where id=${id}`;
-    mysqlconnection.query(sql, function (err, result) {
+    let sql = `select id, name, email1, email2, phone1, phone2, typeId, parentId, contactName, printUs, status, generatedId, agegroup, updatedBy from users where id=${id}`;
+    mysqlconnection.query(sql, async function (err, result) {
+      console.log("result =>",result);
+
       if (err) throw err;
+      const customerquery =`select customerId from customers where userId = ${id}` 
+      const parentquery =`select customerId from customers where userId = ${parentId}` 
+      const customerData =  mysqlconnection.query(customerquery,async  function (err, resu) {
+        const parentIdOfCustomer = await query(parentquery);
+
+        if(result){
+             const data ={
+            customerId:resu[0].customerId,
+            customerName:name,
+            active:status === 1 ? true :false,
+            primaryEmailAddress:email1 ,
+            secondaryEmailAddress:  email2 ,
+            primaryPhoneNo:phone1 ,
+            secondaryPhoneNo : phone2 ,
+            parentCustomerId:  parentIdOfCustomer[0].customerId
+           }
+     
+          const updateInstacctCustomer = await updateIntacctCustomer(data);
+  
+      }
+
+      })
+    
       const updt_query = `update users set name = "${
         name ? name : result[0].name
       }", email1 = "${email1 ? email1 : result[0].email1}", email2 = "${
@@ -272,9 +351,23 @@ module.exports = {
   //delete user controller
   deleteUserController: (req, res) => {
     const id = req.params.id;
+    var sql = `delete from users where id = ${id}`;
+
+    var sqlquery = `SELECT * FROM customers where userId = ${id}`;
+
+ 
     var sql = `update users set isDeleted = 1 where id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
+
+      // delete the Instacct customer
+      mysqlconnection.query(sqlquery, async function (err, result) {
+        if (err) throw err;
+        if(result){
+              console.log("result =>",result[0].customerId);
+              await deleteIntacctCustomer({customerId:result[0].customerId})
+          }
+      });
       res
         .status(200)
         .json({ message: "Data deleted successfully", responce: result });
