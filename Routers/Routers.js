@@ -103,8 +103,8 @@ const {
   getCreditNotesController,
   getCreditNotesDetailsController,
   editCreditNotesController,
-  getcredirballanceCont,
-  updateCreditBallance,
+  getCredirBallanceController,
+  insertAmount,
 } = require("../Controllers/CreditNotes/creditNotesController");
 
 //################        check emails controllers ########################
@@ -266,8 +266,8 @@ router.get(
   verifyAuthToken,
   getCreditNotesDetailsController
 );
-router.get("/creditballance/:id", verifyAuthToken, getcredirballanceCont);
-router.put("/updatecreditballance/:id", verifyAuthToken, updateCreditBallance);
+router.get("/creditballance/:id", verifyAuthToken, getCredirBallanceController);
+router.put("/insertAmount", verifyAuthToken, insertAmount);
 
 //######################### check emails #######################
 router.post("/checkEmails", CheckEmails);
