@@ -255,6 +255,7 @@ module.exports = {
     });
   },
 
+
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
