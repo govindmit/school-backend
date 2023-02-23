@@ -38,14 +38,14 @@ module.exports = {
       let transactionDate =  (objectDate.getMonth()+1) + "/" + objectDate.getDate() + "/" + objectDate.getFullYear();
      
       const data ={
-        customerId:customerIdQueryResponse[0].customerId,
+        customerId:customerIdQueryResponse[0]?.customerId,
         transactionDate:transactionDate,
-        itemId:itemId[0].itemID
+        itemId:itemId[0]?.itemID
       }
      
         const sageIntacctSalesOrder = await createSalesOrder(data);
         const SalesorderId = sageIntacctSalesOrder._key;
-        const sageIntacctorderID = SalesorderId.split("-")[1];
+        const sageIntacctorderID = SalesorderId?.split("-")[1];
         const updateSql = `UPDATE sales_order SET  transactionId = "${sageIntacctorderID}" WHERE id="${result.insertId}"`
         const updateInvoice = await query(updateSql);
 
