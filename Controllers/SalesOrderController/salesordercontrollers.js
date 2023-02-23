@@ -15,18 +15,22 @@ module.exports = {
       transactionId,
       orderId,
       createdBy,
+      createdDate,
+      paymentMethod
     } = req.body;
-    if (
-      !amount ||
-      !status ||
-      !userId ||
-      !activityId ||
-      !transactionId ||
-      !createdBy
-    ) {
-      return res.status(400).send({ message: "All field is required" });
-    }
-    var sql = `INSERT INTO sales_order (amount,status,userId,activityId,transactionId,orderId,createdBy)VALUES("${amount}","${status}","${userId}","${activityId}","${transactionId}","${orderId}","${createdBy}")`;
+    // if (
+    //   !amount ||
+    //   !status ||
+    //   !userId ||
+    //   !activityId ||
+    //   !transactionId ||
+    //   !createdBy||
+    //   !createdDate||
+    //   !paymentMethod
+    // ) {
+    //   return res.status(400).send({ message: "All field is required" });
+    // }
+    var sql = `INSERT INTO sales_order (amount,status,userId,activityId,transactionId,orderId,createdBy,createdDate,paymentMethod)VALUES("${amount}","${status}","${userId}","${activityId}","${transactionId}","${orderId}","${createdBy}","${createdDate}","${paymentMethod}")`;
     mysqlconnection.query(sql, async function (err, result) {
       if (err) throw err;
       const queryForCustomerId = `SELECT customerId FROM customers where userId = "${userId}"`;
@@ -42,7 +46,6 @@ module.exports = {
         transactionDate:transactionDate,
         itemId:itemId[0]?.itemID
       }
-     
         const sageIntacctSalesOrder = await createSalesOrder(data);
         const SalesorderId = sageIntacctSalesOrder._key;
         const sageIntacctorderID = SalesorderId?.split("-")[1];
