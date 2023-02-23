@@ -2,7 +2,11 @@ const express = require("express");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
 const util = require("util");
-const { createSageIntacctItem, deleteSageIntacctItemAsActivity, updateSageIntacctItemAsActivity } = require("../../SageIntacctAPIs/ItemServices");
+const {
+  createSageIntacctItem,
+  deleteSageIntacctItemAsActivity,
+  updateSageIntacctItemAsActivity,
+} = require("../../SageIntacctAPIs/ItemServices");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
   //add activity controller
@@ -34,7 +38,7 @@ module.exports = {
       // !price ||
       !startdate ||
       !enddate ||
-      !status 
+      !status
       // !description ||
       // !shortDescription
     ) {
@@ -47,26 +51,24 @@ module.exports = {
         res.status(409).send({ message: "Activity Name already registred" });
       } else {
         var sql = `INSERT INTO activites (name,type,price,startdate,enddate,status,shortDescription,description)VALUES("${name}","${type}",${price},"${startdate}","${enddate}","${status}","${description}","${shortDescription}")`;
-        mysqlconnection.query(sql,async function (err, result) {
+        mysqlconnection.query(sql, async function (err, result) {
           if (err) throw err;
 
           var sql = `INSERT INTO items (name,description,price) VALUES('${name}','${description}','${price}')`;
           const item = await query(sql);
-      
+
           const intacctItem = {
-            id:item.insertId,
-            name:name,
-            price:price,
-            itemType:"Inventory",
-            produceLineId:"General Purchases",
-            itemGlGroupName:"Accessories"
-      
-          }
+            id: item.insertId,
+            name: name,
+            price: price,
+            itemType: "Inventory",
+            produceLineId: "General Purchases",
+            itemGlGroupName: "Accessories",
+          };
           const sageIntacctItem = await createSageIntacctItem(intacctItem);
           const itemId = sageIntacctItem._data[0]["ITEMID"];
-          const updateSql = `UPDATE items SET  itemID = "${itemId}",activityID = "${result.insertId}" WHERE id="${item.insertId}"`
+          const updateSql = `UPDATE items SET  itemID = "${itemId}",activityID = "${result.insertId}" WHERE id="${item.insertId}"`;
           const updateItem = await query(updateSql);
-
 
           res
             .status(201)
@@ -78,8 +80,7 @@ module.exports = {
 
   //get activity controller
   getActivityController: (req, res) => {
-
-    const { status, type } =req.body;
+    const { status, type } = req.body;
 
     let byStatus = "";
     if (status === "Active") {
@@ -146,17 +147,17 @@ module.exports = {
     const updt_query = `update activites set name = "${name}",type = "${type}", price = ${price}, startdate = "${startdate}", enddate = "${enddate}", status = "${status}",shortDescription="${shortDescription}",description="${description}" where id = ${id}`;
     mysqlconnection.query(updt_query, async function (err, result) {
       if (err) throw err;
-      const getItemIDQuery = `SELECT itemID FROM items where activityId = "${id}"`
+      const getItemIDQuery = `SELECT itemID FROM items where activityId = "${id}"`;
       const itemId = await query(getItemIDQuery);
-      const itemUpdateQuery = `update items set name="${name}",description="${description}",price =${price} where activityId ="${id}"`
-     const updateItemAsActivity = await query(itemUpdateQuery);
-      const active  = status==="active" ? true : false ;
-      const data={
-        itemId:itemId[0].itemID,
-        itemName:name,
-        active:active,
-        basePrice:price
-      }
+      const itemUpdateQuery = `update items set name="${name}",description="${description}",price =${price} where activityId ="${id}"`;
+      const updateItemAsActivity = await query(itemUpdateQuery);
+      const active = status === "active" ? true : false;
+      const data = {
+        itemId: itemId[0].itemID,
+        itemName: name,
+        active: active,
+        basePrice: price,
+      };
       const update = await updateSageIntacctItemAsActivity(data);
 
       res
@@ -169,15 +170,15 @@ module.exports = {
   deleteActivityController: async (req, res) => {
     const id = req.params.id;
     var sql = `delete from activites where id = ${id}`;
-    const deleteItemAsActivity = `delete from items where  activityId = "${id}"`
-    const getItemIDQuery = `SELECT itemID FROM items where activityId = "${id}"`
+    const deleteItemAsActivity = `delete from items where  activityId = "${id}"`;
+    const getItemIDQuery = `SELECT itemID FROM items where activityId = "${id}"`;
     mysqlconnection.query(sql, async function (err, result) {
       if (err) throw err;
       const itemId = await query(getItemIDQuery);
 
-     await deleteSageIntacctItemAsActivity(itemId[0].itemID)
-  
-     const deleteActivityItem = await query(deleteItemAsActivity)
+      await deleteSageIntacctItemAsActivity(itemId[0].itemID);
+
+      const deleteActivityItem = await query(deleteItemAsActivity);
       res
         .status(200)
         .json({ message: "data deleted successfully", responce: result });

@@ -21,7 +21,7 @@ module.exports = {
         mysqlconnection.query(creditRequestMsgquery, function (err, rest) {
           if (err) throw err;
           if (rest) {
-            const creditNotesquery = `INSERT INTO creditNotes (customerId,creditRequestId,createdBy)VALUES(${userId},${result.insertId},${createdBy})`;
+            const creditNotesquery = `INSERT INTO creditNotes (customerId,creditRequestId)VALUES(${userId},${result.insertId})`;
             mysqlconnection.query(creditNotesquery, function (err, results) {
               if (err) throw err;
               res.status(200).send({
