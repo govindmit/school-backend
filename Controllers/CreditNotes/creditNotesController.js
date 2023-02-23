@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const mysqlconnection = require("../../DB/db.config.connection");
+const util = require("util");
+const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
   // Add credit notes Controller
   addCreditNotesController: async (req, res) => {
@@ -7,28 +9,22 @@ module.exports = {
       userId,
       status,
       amount,
+      activityId,
       salesOrderId,
       createdBy,
       message,
-      amountMode,
     } = req.body;
     //insert query
-    const creditRequestsquery = `INSERT INTO creditRequests (userId,salesOrderId,status,amount,createdBy)VALUES(${userId},${salesOrderId},${status},${amount},${createdBy})`;
+    const creditRequestsquery = `INSERT INTO creditRequests (userId,salesOrderId,status,amount,createdBy,activityId)VALUES(${userId},${salesOrderId},${status},${amount},${createdBy},${activityId})`;
     mysqlconnection.query(creditRequestsquery, function (err, result) {
       if (err) throw err;
       if (result) {
-        const creditRequestMsgquery = `INSERT INTO creditRequestMsg (message,senderId,creditReqId)VALUES("${message}",${userId},${result.insertId})`;
+        const creditRequestMsgquery = `INSERT INTO creditRequestMsg (message,senderId,receiverId,creditReqId)VALUES("${message}",${userId},0,${result.insertId})`;
         mysqlconnection.query(creditRequestMsgquery, function (err, rest) {
           if (err) throw err;
-          if (rest) {
-            const creditNotesquery = `INSERT INTO creditNotes (customerId,creditRequestId,createdBy)VALUES(${userId},${result.insertId},${createdBy})`;
-            mysqlconnection.query(creditNotesquery, function (err, results) {
-              if (err) throw err;
-              res.status(200).send({
-                message: "credit request created successfully.",
-              });
-            });
-          }
+          res.status(200).send({
+            message: "credit request created successfully.",
+          });
         });
       }
     });
@@ -79,7 +75,7 @@ module.exports = {
   //get credit notes details controller
   getCreditNotesDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.name, users.email1, creditRequests.status, creditNotes.creditRequestId, creditRequests.amount from creditNotes
+    var sql = `select users.name, users.email1, users.id, creditRequests.status, creditNotes.creditRequestId, creditRequests.amount from creditNotes
     LEFT OUTER JOIN users on users.id = creditNotes.customerId
     LEFT OUTER JOIN creditRequests on creditRequests.userId = creditNotes.customerId
     where creditNotes.id =  ${id}`;
@@ -97,9 +93,16 @@ module.exports = {
   editCreditNotesController: async (req, res) => {
     const id = req.params.id;
     const { status, amount, message, updatedBy } = req.body;
+    //console.log(req.body);
     const sel_query = `select creditRequestId from creditNotes where id = ${id}`;
     mysqlconnection.query(sel_query, function (err, result) {
       if (err) throw err;
+      if (status === 4) {
+        const sel_query = `update creditNotes set amount = ${amount} where id = ${id}`;
+        mysqlconnection.query(sel_query, function (err, result) {
+          if (err) throw err;
+        });
+      }
       const updatecreditRequestswuery = `update creditRequests set status = ${status} where id = ${result[0].creditRequestId}`;
       mysqlconnection.query(updatecreditRequestswuery, function (err, results) {
         if (err) throw err;
@@ -110,5 +113,34 @@ module.exports = {
         });
       });
     });
+  },
+
+  //get credit ballance
+  getCredirBallanceController: async (req, res) => {
+    const id = req.params.id;
+    const credit_ballance = `select sum(amount) as "creditAmount" from creditNotes where amountMode = 1 and  customerId = ${id}`;
+    const debit_ballance = `select sum(amount) as "debitAmount" from creditNotes where amountMode = 0 and  customerId = ${id}`;
+    const creditamt = await query(credit_ballance);
+    const debitamt = await query(debit_ballance);
+    const creditAmount = creditamt[0].creditAmount;
+    const debitAmount = debitamt[0].debitAmount;
+    const creditBal = creditAmount - debitAmount;
+    if (creditBal) {
+      res.status(200).json({ message: "ok", creditBal: creditBal });
+    } else {
+      res.status(200).json({ message: "ok", creditBal: 0 });
+    }
+  },
+
+  //insert amount
+  insertAmount: async (req, res) => {
+    const { customerId, Amount, amountMode } = req.body;
+    if (Amount > 0) {
+      const query = `insert into  creditNotes(customerId,amount,amountMode)values(${customerId},${Amount},${amountMode})`;
+      mysqlconnection.query(query, function (err, results) {
+        if (err) throw err;
+        res.status(200).json({ message: "amount debited successfully" });
+      });
+    }
   },
 };
