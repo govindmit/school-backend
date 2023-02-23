@@ -21,7 +21,7 @@ module.exports = {
         mysqlconnection.query(creditRequestMsgquery, function (err, rest) {
           if (err) throw err;
           if (rest) {
-            const creditNotesquery = `INSERT INTO creditNotes (customerId,creditRequestId,createdBy)VALUES(${userId},${result.insertId},${createdBy})`;
+            const creditNotesquery = `INSERT INTO creditNotes (customerId,creditRequestId)VALUES(${userId},${result.insertId})`;
             mysqlconnection.query(creditNotesquery, function (err, results) {
               if (err) throw err;
               res.status(200).send({
@@ -79,7 +79,7 @@ module.exports = {
   //get credit notes details controller
   getCreditNotesDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.name, users.email1, creditRequests.status, creditNotes.creditRequestId, creditRequests.amount from creditNotes
+    var sql = `select users.name, users.email1, users.id, creditRequests.status, creditNotes.creditRequestId, creditRequests.amount from creditNotes
     LEFT OUTER JOIN users on users.id = creditNotes.customerId
     LEFT OUTER JOIN creditRequests on creditRequests.userId = creditNotes.customerId
     where creditNotes.id =  ${id}`;
@@ -97,9 +97,16 @@ module.exports = {
   editCreditNotesController: async (req, res) => {
     const id = req.params.id;
     const { status, amount, message, updatedBy } = req.body;
+    //console.log(req.body);
     const sel_query = `select creditRequestId from creditNotes where id = ${id}`;
     mysqlconnection.query(sel_query, function (err, result) {
       if (err) throw err;
+      if (status === 4) {
+        const sel_query = `update creditNotes set amount = ${amount} where id = ${id}`;
+        mysqlconnection.query(sel_query, function (err, result) {
+          if (err) throw err;
+        });
+      }
       const updatecreditRequestswuery = `update creditRequests set status = ${status} where id = ${result[0].creditRequestId}`;
       mysqlconnection.query(updatecreditRequestswuery, function (err, results) {
         if (err) throw err;
@@ -109,6 +116,28 @@ module.exports = {
           res.status(200).json({ message: "ok" });
         });
       });
+    });
+  },
+
+  //get credit ballance
+  getcredirballanceCont: async (req, res) => {
+    const id = req.params.id;
+    const dt = `select amount from creditNotes where customerId =${id}`;
+    mysqlconnection.query(dt, function (err, results) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", results });
+    });
+  },
+
+  //update credit ballance
+  updateCreditBallance: async (req, res) => {
+    const id = req.params.id;
+    const { amount } = req.body;
+
+    const dt = `update creditNotes set amount = ${amount} where customerId =${id}`;
+    mysqlconnection.query(dt, function (err, results) {
+      if (err) throw err;
+      res.status(200).json({ message: "amount updated successfully" });
     });
   },
 };
