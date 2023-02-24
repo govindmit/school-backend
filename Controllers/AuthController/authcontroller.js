@@ -38,14 +38,14 @@ module.exports = {
                 },
               });
             } else {
-              res.status(400).send({ message: "invalid credentials" });
+              res.status(400).send({ message: "invalid credentials1" });
             }
           })
           .catch((error) => {
-            res.status(400).send({ message: "invalid credentials" });
+            res.status(400).send({ message: error?.message });
           });
       } else {
-        res.status(400).send({ message: "invalid credentials" });
+        res.status(400).send({ message: "invalid credentials2" });
       }
     });
   },

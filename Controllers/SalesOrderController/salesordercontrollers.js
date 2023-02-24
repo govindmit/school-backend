@@ -15,18 +15,22 @@ module.exports = {
       transactionId,
       orderId,
       createdBy,
+      createdDate,
+      paymentMethod
     } = req.body;
-    if (
-      !amount ||
-      !status ||
-      !userId ||
-      !activityId ||
-      !transactionId ||
-      !createdBy
-    ) {
-      return res.status(400).send({ message: "All field is required" });
-    }
-    var sql = `INSERT INTO sales_order (amount,status,userId,activityId,transactionId,orderId,createdBy)VALUES("${amount}","${status}","${userId}","${activityId}","${transactionId}","${orderId}","${createdBy}")`;
+    // if (
+    //   !amount ||
+    //   !status ||
+    //   !userId ||
+    //   !activityId ||
+    //   !transactionId ||
+    //   !createdBy||
+    //   !createdDate||
+    //   !paymentMethod
+    // ) {
+    //   return res.status(400).send({ message: "All field is required" });
+    // }
+    var sql = `INSERT INTO sales_order (amount,status,userId,activityId,transactionId,orderId,createdBy,createdDate,paymentMethod)VALUES("${amount}","${status}","${userId}","${activityId}","${transactionId}","${orderId}","${createdBy}","${createdDate}","${paymentMethod}")`;
     mysqlconnection.query(sql, async function (err, result) {
       if (err) throw err;
       const queryForCustomerId = `SELECT customerId FROM customers where userId = "${userId}"`;
@@ -38,20 +42,22 @@ module.exports = {
       let transactionDate =  (objectDate.getMonth()+1) + "/" + objectDate.getDate() + "/" + objectDate.getFullYear();
      
       const data ={
-        customerId:customerIdQueryResponse[0].customerId,
+        customerId:customerIdQueryResponse[0]?.customerId,
         transactionDate:transactionDate,
-        itemId:itemId[0].itemID
+        itemId:itemId[0]?.itemID
       }
      
+
         const sageIntacctSalesOrder = await createSalesOrder(data);
         const SalesorderId = sageIntacctSalesOrder._key;
-        const sageIntacctorderID = SalesorderId.split("-")[1];
+        const sageIntacctorderID = SalesorderId?.split("-")[1];
+        console.log("sageIntacctorderID",sageIntacctorderID);
         const updateSql = `UPDATE sales_order SET  transactionId = "${sageIntacctorderID}" WHERE id="${result.insertId}"`
         const updateInvoice = await query(updateSql);
 
       res
         .status(200)
-        .json({ message: "Data inserted successfully", data: result });
+        .json({ message: "Data inserted successfully", data: result,sageIntacctorderID:sageIntacctorderID });
     });
   },
 

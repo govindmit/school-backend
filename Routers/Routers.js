@@ -97,14 +97,14 @@ const {
   GetItemData,
 } = require("../Controllers/InvoiceController/itemController");
 
-
-
 //################  credit notes controllers ########################
 const {
   addCreditNotesController,
   getCreditNotesController,
   getCreditNotesDetailsController,
   editCreditNotesController,
+  getCredirBallanceController,
+  insertAmount,
 } = require("../Controllers/CreditNotes/creditNotesController");
 
 //################        check emails controllers ########################
@@ -174,15 +174,12 @@ router.post(
 
 router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
 
-
 //#############################  SalesOrders routers  ###########################
 router.post("/addSalesOrders", upload.none(), addSalesOrder);
 router.post("/getSalesOrders", getSalesOrder);
 router.get("/getSalesOrdersDetails/:id", getSalesDetails);
 router.put("/editSalesOrders/:id", upload.none(), editSalesOrder);
 router.delete("/deleteSalesOrders/:id", deleteSalesOrder);
-
-                               
 
 //#########################  invoice routers  ###########################
 
@@ -227,14 +224,13 @@ router.delete('/deleteSalesInvoice',deleteSalesInvoice)
 router.get('/getItemsLegacy',getListOfItems);
 router.get('/getFilterItemsLegacy',getListOfItemsByFilter);
 // router.post('/createSageIntacctItem',createSageIntacctItem)
-router.put("/updateSageIntacctItem",updateSageIntacctItem)
-router.delete("/deleteSageIntacctItem",deleteSageIntacctItem)
+router.put("/updateSageIntacctItem", updateSageIntacctItem);
+router.delete("/deleteSageIntacctItem", deleteSageIntacctItem);
 
-router.get('/getSalesOrderLegacy',getListOfSalesOrder);
+router.get("/getSalesOrderLegacy", getListOfSalesOrder);
 // router.post('/createSalesOrder',createSalesOrder)
 // router.put('/updateSalesOrder',updateSalesOrder)
 // router.delete('/deleteSalesOrder',deleteSageIntacctSalesOrder)
-
 
 // router.post('/createIntacctCustomer' ,createIntacctCustomer);
 // router.put('/updateIntacctCustomer' ,updateIntacctCustomer);
@@ -248,6 +244,8 @@ router.get(
   verifyAuthToken,
   getCreditNotesDetailsController
 );
+router.get("/creditballance/:id", verifyAuthToken, getCredirBallanceController);
+router.put("/insertAmount", verifyAuthToken, insertAmount);
 
 //######################### check emails #######################
 router.post("/checkEmails", CheckEmails);
