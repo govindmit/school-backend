@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const mysqlconnection = require("../../DB/db.config.connection");
-const { createIntacctCustomer, deleteIntacctCustomer, updateIntacctCustomer } = require("../../SageIntacctAPIs/CustomerServices");
+const { createIntacctCustomer, deleteIntacctCustomer, updateIntacctCustomer, getListCustomersLegacy } = require("../../SageIntacctAPIs/CustomerServices");
 // const { query } = require("express");
 
 const util = require("util");
@@ -124,9 +124,9 @@ module.exports = {
               var getParentId = "";
               if(parentId > 0){
                   const sqlToGetCustomerid = `select customerId from customers where userId = ${parentId}`
-                   mysqlconnection.query(sqlToGetCustomerid, function (err, result) {
-                   getParentId = result[0].customerId;
-                  });
+                   const result = await query(sqlToGetCustomerid);
+                  
+                  getParentId = result[0].customerId;
               }
               
               const active = status===0?false:true
@@ -253,6 +253,7 @@ module.exports = {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
     });
+    // const customerSchedulerExist = await getListCustomersLegacy();
   },
 
   //get user details controller
@@ -302,15 +303,18 @@ module.exports = {
              const data ={
             customerId:resu[0].customerId,
             customerName:name,
-            active:status === 1 ? true :false,
+            active: true ,
             primaryEmailAddress:email1 ,
             secondaryEmailAddress:  email2 ,
             primaryPhoneNo:phone1 ,
-            secondaryPhoneNo : phone2 ,
+            secondaryPhoneNo : phone2 ? phone2 : "",
             parentCustomerId:  parentIdOfCustomer[0].customerId
            }
      
+           console.log("data =>", data);
           const updateInstacctCustomer = await updateIntacctCustomer(data);
+          console.log("result =>",updateInstacctCustomer);
+
   
       }
 
@@ -330,9 +334,9 @@ module.exports = {
         agegroup ? agegroup : result[0].agegroup
       }, generatedId = "${
         pregeneratedid ? pregeneratedid : result[0].generatedId
-      }", typeId= ${typeId ? typeId : result[0].typeId}, roleId = ${
-        roleId ? roleId : result[0].roleId
-      }, parentId = ${parentId ? parentId : result[0].parentId}, updatedBy = ${
+      }", typeId= ${typeId ? typeId : result[0].typeId}, 
+       
+       parentId = ${parentId ? parentId : result[0].parentId}, updatedBy = ${
         updatedBy ? updatedBy : result[0].updatedBy
       } where id = ${id}`;
       mysqlconnection.query(updt_query, function (err, result) {

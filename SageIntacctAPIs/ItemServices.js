@@ -4,7 +4,7 @@ const util = require("util");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
 
-    getListOfItems : async(req,res)=>{
+    getListOfItems : async()=>{
         try{
 
             let query = new IA.Functions.Common.ReadByQuery();
@@ -14,11 +14,11 @@ module.exports = {
             const result = response.getResult();
             let json_data = result.data;
             isItemsExistInDB(json_data)
-            res.status(200).send(json_data)
+            // res.status(200).send(json_data)
         }catch(error){
-            res.status(400).send({
-                error:error.message
-            })
+            // res.status(400).send({
+            //     error:error.message
+            // })
         }
     },
     getListOfItemsByFilter : async(req,res)=>{
@@ -212,8 +212,20 @@ async function isItemsExistInDB(sageIntacctItems){
                     
                 }else{
                     console.log("Item Not exist in DB =>",sageIntacctItemsId[j]);
-                    const InsertSql = `INSERT INTO items (name,description,price,itemID) VALUES('${item['NAME']}','${item['PODESCRIPTION']}','${item['BASEPRICE']}','${item['ITEMID']}')`;
-                    const insert = await query(InsertSql);
+                    if(item['PRODUCTLINEID'] === ""){
+                        console.log("item insert =>",item['PRODUCTLINEID']);
+                        const InsertSql = `INSERT INTO items (name,description,price,itemID) VALUES('${item['NAME']}','${item['PODESCRIPTION']}','${item['BASEPRICE']}','${item['ITEMID']}')`;
+                        const insert = await query(InsertSql);
+                    }else{
+                        const insertActivityQuery = `INSERT INTO activites (name,type,price,status,shortDescription,description)VALUES("${item['NAME']}","Paid",${item['BASEPRICE']},"${item['STATUS']}","${item['PODESCRIPTION']}","${item['SODESCRIPTION']}")`;
+                        const InsertSql = `INSERT INTO items (name,description,price,itemID) VALUES('${item['NAME']}','${item['PODESCRIPTION']}','${item['BASEPRICE']}','${item['ITEMID']}')`;
+                        const insertitem = await query(InsertSql);
+                        const insertActivity = await query(insertActivityQuery);
+                        const queryForUpdateItem = `UPDATE items SET  activityId = "${insertActivity.insertId}" WHERE itemID="${item['ITEMID']}"`
+                        const updateitem = await query(queryForUpdateItem);
+                        console.log("activity insert =>",item['PRODUCTLINEID']);
+
+                    }
                     
                 }
         }

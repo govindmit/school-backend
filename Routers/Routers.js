@@ -202,7 +202,9 @@ router.post("/getItembyid", upload.none(), GetItembyid);
 router.get("/getItem", GetItem);
 router.get("/getItems", GetItemData);
 
-
+// ######################## Transaction Routes ############################
+ const { createTransaction } = require("../Controllers/TransactionController");
+ router.post("/createTransaction",createTransaction);
 
 // IntacctAPIs Routes do not touch
 const { getListCustomersLegacy, createIntacctCustomer, updateIntacctCustomer, deleteIntacctCustomer, getIntacctCustomerById, getListofCustomersType } = require("../SageIntacctAPIs/CustomerServices");
@@ -210,6 +212,7 @@ const { getInvoiceList, createInstacctInvoice, deleteInstacctInvoice, updateInst
 const { getListOfItems, getListOfItemsByFilter, createSageIntacctItem, updateSageIntacctItem, deleteSageIntacctItem } = require("../SageIntacctAPIs/ItemServices");
 const { getListOfSalesInovice, createSalesInvoice, updateSalesInvoice, deleteSalesInvoice } = require("../SageIntacctAPIs/SalesInvoiceService");
 const { getListOfSalesOrder, createSalesOrder, updateSalesOrder, deleteSageIntacctSalesOrder } = require("../SageIntacctAPIs/SalesOrderService");
+
 
 
 router.get('/getListCustomersLegacy' , getListCustomersLegacy);

@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const mysqlconnection = require("../../DB/db.config.connection");
 const util = require("util");
-const { createSageIntacctItem, deleteSageIntacctItemAsActivity, updateSageIntacctItemAsActivity } = require("../../SageIntacctAPIs/ItemServices");
+const { createSageIntacctItem, deleteSageIntacctItemAsActivity, updateSageIntacctItemAsActivity, getListOfItems } = require("../../SageIntacctAPIs/ItemServices");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
   //add activity controller
@@ -77,7 +77,7 @@ module.exports = {
   },
 
   //get activity controller
-  getActivityController: (req, res) => {
+  getActivityController:async (req, res) => {
 
     const { status, type } =req.body;
 
@@ -102,6 +102,7 @@ module.exports = {
     }
 
     var sql = `select id, name, type, status,shortDescription, description,startDate, endDate, price  from activites where 1=1 ${byStatus}${byType}`;
+   const schedulerExist = await getListOfItems();
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
