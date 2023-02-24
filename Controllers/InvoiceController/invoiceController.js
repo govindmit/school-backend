@@ -3,7 +3,7 @@ const util = require("util");
 const moment = require("moment");
 const nodemailer = require("nodemailer");
 // const InvoiceEmailFormat = require("../Helper/InvoiceEmailTemp");
-const { createSalesInvoice, deleteSalesInvoice, updateSalesInvoice } = require("../../SageIntacctAPIs/SalesInvoiceService");
+const { createSalesInvoice, deleteSalesInvoice, updateSalesInvoice, getListOfSalesInovice } = require("../../SageIntacctAPIs/SalesInvoiceService");
 const sendmail = require("sendmail")();
 const InvoiceEmailFormat = require("../Helper/templates/InvoiceEmailTemp");
 const sendEmails = require("../Helper/sendEmails");
@@ -21,7 +21,7 @@ module.exports = {
     var invoiceDate = req.body.invoiceDate;
     var invoiceNo = req.body.invoiceNo;
     var note = req.body.note;
-    var quantity = req.body.quantity;
+    var quantity = req.body.quantity || ['1'];
     let sqls = `SELECT invoiceId FROM invoices WHERE isDeleted = 0 and invoiceId = '${invoiceNo}'`;
 
     var invoiceNos = await query(sqls);
@@ -48,12 +48,23 @@ module.exports = {
       const invoice = await query(sql);
 
       // sage intacct
+      let objectDate = new Date();
+      let invoiceCreateDate =  (objectDate.getMonth()+1) + "/" + objectDate.getDate() + "/" + objectDate.getFullYear();
+    let items = [];
+    let quantitys =[]
+    for(var i= 0 ; i< itemId.length ; i++){
+            const getitemId =`select itemId from items where id="${itemId[i]}"`
+            const intacctItem = await query(getitemId);
+            items.push(intacctItem[0].itemId);
+            quantitys.push('1')
+    }
       const data ={
-        createDate:createdDate,
+        createDate:invoiceCreateDate,
         customerId:customerIdResponse[0].customerId,
-        itemId:itemId,
-        quantity:quantity
+        itemId:items,
+        quantity:quantitys
       }
+      console.log("data =>",data);
         const sageIntacctSalesInvoice = await createSalesInvoice(data);
         console.log("sageIntacctSalesInvoice",sageIntacctSalesInvoice);
         const invoiceId = sageIntacctSalesInvoice._key;
@@ -147,7 +158,7 @@ module.exports = {
     } else {
       let invoices = `SELECT users.name,invoices.invoiceId,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${req.params.id}`;
       const invoicess = await query(invoices);
-
+      await getListOfSalesInovice()
       // for (let row of invoicess) {
 
       // const studentRecords = await query(students);
