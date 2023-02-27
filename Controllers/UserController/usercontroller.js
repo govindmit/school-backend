@@ -274,6 +274,7 @@ module.exports = {
     });
   },
 
+  //edit user details controller
   editUserController: async (req, res) => {
     const id = req.params.id;
     const {
