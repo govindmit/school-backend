@@ -57,7 +57,6 @@ module.exports = {
 
           var sql = `INSERT INTO items (name,description,price) VALUES('${name}','${description}','${price}')`;
           const item = await query(sql);
-
           const intacctItem = {
             id: item.insertId,
             name: name,
