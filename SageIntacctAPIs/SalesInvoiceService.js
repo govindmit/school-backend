@@ -5,11 +5,10 @@ const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 module.exports = {
     createSalesInvoice : async(data)=>{
         try{
-            const itemIds = data.itemId.split(",");
-            const itemQuantity = data.quantity.split(",")
-
-            console.log("itemIds =>",itemIds);
-            console.log("itemQuantity =>",itemQuantity);
+            // const itemIds = data.itemId.split(",");
+            // const itemQuantity = data.quantity.split(",")
+            const itemIds = data.itemId;
+            const itemQuantity = data.quantity;
             if(itemIds.length != itemQuantity.length){
                 return "please provide the quantity for each item !"
             }
@@ -125,11 +124,12 @@ module.exports = {
             const result = response.getResult();
             let json_data = result.data;
             isSalesInvoiceExistInDB(json_data);
-            res.status(200).send(json_data)
+            // res.status(200).send(json_data)
         }catch(error){
-            res.status(400).send({
-                error:error.message
-            })
+            // res.status(400).send({
+            //     error:error.message
+            // })
+            console.log("Error in invoice scheduler => ",error.message);
         }
     }
 }
@@ -168,7 +168,7 @@ async function isSalesInvoiceExistInDB(sageIntacctInovice){
                     console.log("invoice Already exist in DB =>",sageIntacctinvoicesId[j]);
                     // const updateSql = `UPDATE invoices SET  status = "${invoice['STATE']}",amount="${item['PODESCRIPTION']}",price="${item['BASEPRICE']}" WHERE itemID="${item['ITEMID']}"`
                     var updateSql = `UPDATE invoices SET customerId = '${userID}',invoiceId = '${invoice['DOCNO']}', amount='${invoice['TOTALENTERED']}',status='${invoice['STATE']}' WHERE invoiceId = "${invoice['DOCNO']}"`;
-                     console.log("update",updateSql);
+                    //  console.log("update",updateSql);
                     const update = await query(updateSql);
                     
                     

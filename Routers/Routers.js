@@ -199,52 +199,30 @@ router.post("/getItembyid", upload.none(), GetItembyid);
 router.get("/getItem", GetItem);
 router.get("/getItems", GetItemData);
 
+// ######################## Transaction Routes ############################
+ const { createTransaction } = require("../Controllers/TransactionController");
+ router.post("/createTransaction",createTransaction);
+
 // IntacctAPIs Routes do not touch
-const {
-  getListCustomersLegacy,
-  createIntacctCustomer,
-  updateIntacctCustomer,
-  deleteIntacctCustomer,
-  getIntacctCustomerById,
-  getListofCustomersType,
-} = require("../SageIntacctAPIs/CustomerServices");
-const {
-  getInvoiceList,
-  createInstacctInvoice,
-  deleteInstacctInvoice,
-  updateInstacctInvoice,
-} = require("../SageIntacctAPIs/InvoiceService");
-const {
-  getListOfItems,
-  getListOfItemsByFilter,
-  createSageIntacctItem,
-  updateSageIntacctItem,
-  deleteSageIntacctItem,
-} = require("../SageIntacctAPIs/ItemServices");
-const {
-  getListOfSalesInovice,
-  createSalesInvoice,
-  updateSalesInvoice,
-  deleteSalesInvoice,
-} = require("../SageIntacctAPIs/SalesInvoiceService");
-const {
-  getListOfSalesOrder,
-  createSalesOrder,
-  updateSalesOrder,
-  deleteSageIntacctSalesOrder,
-} = require("../SageIntacctAPIs/SalesOrderService");
+const { getListCustomersLegacy, createIntacctCustomer, updateIntacctCustomer, deleteIntacctCustomer, getIntacctCustomerById, getListofCustomersType } = require("../SageIntacctAPIs/CustomerServices");
+const { getInvoiceList, createInstacctInvoice, deleteInstacctInvoice, updateInstacctInvoice } = require("../SageIntacctAPIs/InvoiceService");
+const { getListOfItems, getListOfItemsByFilter, createSageIntacctItem, updateSageIntacctItem, deleteSageIntacctItem } = require("../SageIntacctAPIs/ItemServices");
+const { getListOfSalesInovice, createSalesInvoice, updateSalesInvoice, deleteSalesInvoice } = require("../SageIntacctAPIs/SalesInvoiceService");
+const { getListOfSalesOrder, createSalesOrder, updateSalesOrder, deleteSageIntacctSalesOrder } = require("../SageIntacctAPIs/SalesOrderService");
 
-router.get("/getListCustomersLegacy", getListCustomersLegacy);
-router.get("/getListCustomersTypeLegacy", getListofCustomersType);
-router.get("/getCustomerByRecordId", getIntacctCustomerById);
 
-router.get("/getInvoiceLegacy", getListOfSalesInovice);
-router.post("/createSalesInvoice", createSalesInvoice);
-router.put("/updateSalesInvoice", updateSalesInvoice);
-router.delete("/deleteSalesInvoice", deleteSalesInvoice);
 
-router.get("/getItemsLegacy", getListOfItems);
-router.get("/getFilterItemsLegacy", getListOfItemsByFilter);
+router.get('/getListCustomersLegacy' , getListCustomersLegacy);
+router.get('/getListCustomersTypeLegacy' , getListofCustomersType);
+router.get('/getCustomerByRecordId',getIntacctCustomerById)
+
+router.get('/getInvoiceLegacy',getListOfSalesInovice);
+router.post('/createSalesInvoice',createSalesInvoice)
+router.put('/updateSalesInvoice',updateSalesInvoice)
+router.delete('/deleteSalesInvoice',deleteSalesInvoice)
+
+router.get('/getItemsLegacy',getListOfItems);
+router.get('/getFilterItemsLegacy',getListOfItemsByFilter);
 // router.post('/createSageIntacctItem',createSageIntacctItem)
 router.put("/updateSageIntacctItem", updateSageIntacctItem);
 router.delete("/deleteSageIntacctItem", deleteSageIntacctItem);

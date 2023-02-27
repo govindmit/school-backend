@@ -261,6 +261,7 @@ module.exports = {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
     });
+    // const customerSchedulerExist = await getListCustomersLegacy();
   },
 
 
@@ -340,9 +341,9 @@ module.exports = {
         agegroup ? agegroup : result[0].agegroup
       }, generatedId = "${
         pregeneratedid ? pregeneratedid : result[0].generatedId
-      }", typeId= ${typeId ? typeId : result[0].typeId}, roleId = ${
-        roleId ? roleId : result[0].roleId
-      }, parentId = ${parentId ? parentId : result[0].parentId}, updatedBy = ${
+      }", typeId= ${typeId ? typeId : result[0].typeId}, 
+       
+       parentId = ${parentId ? parentId : result[0].parentId}, updatedBy = ${
         updatedBy ? updatedBy : result[0].updatedBy
       } where id = ${id}`;
       mysqlconnection.query(updt_query, function (err, result) {

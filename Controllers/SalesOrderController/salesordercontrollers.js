@@ -50,9 +50,12 @@ module.exports = {
         transactionDate:transactionDate,
         itemId:itemId[0]?.itemID
       }
+     
+
         const sageIntacctSalesOrder = await createSalesOrder(data);
         const SalesorderId = sageIntacctSalesOrder._key;
         const sageIntacctorderID = SalesorderId?.split("-")[1];
+        console.log("sageIntacctorderID",sageIntacctorderID);
         const updateSql = `UPDATE sales_order SET  transactionId = "${sageIntacctorderID}" WHERE id="${result.insertId}"`
         const updateInvoice = await query(updateSql);
 
@@ -63,7 +66,7 @@ module.exports = {
         );
       res
         .status(200)
-        .json({ message: "Data inserted successfully", data: result });
+        .json({ message: "Data inserted successfully", data: result,sageIntacctorderID:sageIntacctorderID });
     });
   },
 
