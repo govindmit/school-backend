@@ -4,6 +4,8 @@ const mysqlconnection = require("../../DB/db.config.connection");
 const { createSalesOrder, deleteSageIntacctSalesOrder, updateSalesOrder } = require("../../SageIntacctAPIs/SalesOrderService");
 const util = require("util");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
+const sendEmails = require("../Helper/sendEmails");
+
 module.exports = {
   //add Sales controller
   addSalesOrder: (req, res) => {
@@ -33,6 +35,8 @@ module.exports = {
     var sql = `INSERT INTO sales_order (amount,status,userId,activityId,transactionId,orderId,createdBy,createdDate,paymentMethod)VALUES("${amount}","${status}","${userId}","${activityId}","${transactionId}","${orderId}","${createdBy}","${createdDate}","${paymentMethod}")`;
     mysqlconnection.query(sql, async function (err, result) {
       if (err) throw err;
+      const queryForCustomerEmail = `SELECT email1 FROM users where id = "${userId}"`;
+      const customerEmailResponse = await query(queryForCustomerEmail);
       const queryForCustomerId = `SELECT customerId FROM customers where userId = "${userId}"`;
       const customerIdQueryResponse = await query(queryForCustomerId);
       const queryForItemID = `SELECT itemID FROM items where activityId = "${activityId}"`
@@ -52,6 +56,11 @@ module.exports = {
         const updateSql = `UPDATE sales_order SET  transactionId = "${sageIntacctorderID}" WHERE id="${result.insertId}"`
         const updateInvoice = await query(updateSql);
 
+        sendEmails(
+          customerEmailResponse[0]?.email1,
+          "Your Activity Purchased Successfully From QIS✔",
+          "<p>Activity created</p>"
+        );
       res
         .status(200)
         .json({ message: "Data inserted successfully", data: result });
@@ -71,7 +80,7 @@ module.exports = {
   //get sales details controller
   getSalesDetails: (req, res) => {
     const id = req.params.id;
-    var sql = `SELECT sales_order.id,sales_order.amount,sales_order.status,userId,activityId,transactionId,orderId,sales_order.createdBy,sales_order.isDeleted,users.name as user_name,users.email1 as user_email1,users.email2 as user_email2,users.phone1 as user_phone1,users.phone2 as user_phone2,users.printUs as user_printUs,users.createdAt as user_create_Date,users.contactName as user_contactName,users.roleId as user_roleId,users.typeId as user_typeId,users.parentId as user_parentId,activites.name as activity_name,activites.description as activity_description,activites.shortDescription as activity_shortDescription,activites.type as activity_type,activites.status as activity_status,activites.shortDescription as activity_shortDescription,activites.description as activity_description,activites.startDate as activity_startDate,activites.endDate as activity_endDate,activites.price as activity_price from sales_order INNER JOIN users ON users.id = sales_order.userId INNER JOIN activites ON activites.id = sales_order.activityId where sales_order.id=${id}`;
+    var sql = `SELECT sales_order.id,sales_order.amount,sales_order.paymentMethod,sales_order.createdDate,sales_order.status,userId,activityId,transactionId,orderId,sales_order.createdBy,sales_order.isDeleted,users.name as user_name,users.email1 as user_email1,users.email2 as user_email2,users.phone1 as user_phone1,users.phone2 as user_phone2,users.printUs as user_printUs,users.createdAt as user_create_Date,users.contactName as user_contactName,users.roleId as user_roleId,users.typeId as user_typeId,users.parentId as user_parentId,activites.name as activity_name,activites.description as activity_description,activites.shortDescription as activity_shortDescription,activites.type as activity_type,activites.status as activity_status,activites.shortDescription as activity_shortDescription,activites.description as activity_description,activites.startDate as activity_startDate,activites.endDate as activity_endDate,activites.price as activity_price from sales_order INNER JOIN users ON users.id = sales_order.userId INNER JOIN activites ON activites.id = sales_order.activityId where sales_order.id=${id}`;
 
     mysqlconnection.query(sql, function (err, result) {
       if (err) {
