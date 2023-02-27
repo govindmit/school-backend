@@ -150,7 +150,7 @@ module.exports = {
   insertAmount: async (req, res) => {
     const { customerId, Amount, amountMode } = req.body;
     if (Amount > 0) {
-      const query = `insert into  creditNotes(customerId,amount,amountMode)values(${customerId},${Amount},${amountMode})`;
+      const query = `insert into creditNotes(customerId,amount,amountMode)values(${customerId},${Amount},${amountMode})`;
       mysqlconnection.query(query, function (err, results) {
         if (err) throw err;
         res.status(200).json({ message: "amount debited successfully" });

@@ -8,8 +8,8 @@ const sendEmails = (emailTo, emailSub, emailMsg) => {
       port: process.env.SMTP_PORT,
       secure: false, // true for 465, false for other ports
       auth: {
-        user: process.env.SMTP_AUTH_USER, // generated ethereal user
-        pass: process.env.SMTP_AUTH_PASS, // generated ethereal password
+        user: "govind.mangoitsolutions@gmail.com", // generated ethereal user
+        pass: "cI1J58ZNPKRxadQz", // generated ethereal password
       },
     });
     // send mail with defined transport object

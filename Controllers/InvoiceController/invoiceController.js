@@ -3,7 +3,12 @@ const util = require("util");
 const moment = require("moment");
 const nodemailer = require("nodemailer");
 // const InvoiceEmailFormat = require("../Helper/InvoiceEmailTemp");
-const { createSalesInvoice, deleteSalesInvoice, updateSalesInvoice, getListOfSalesInovice } = require("../../SageIntacctAPIs/SalesInvoiceService");
+const {
+  createSalesInvoice,
+  deleteSalesInvoice,
+  updateSalesInvoice,
+  getListOfSalesInovice,
+} = require("../../SageIntacctAPIs/SalesInvoiceService");
 const sendmail = require("sendmail")();
 const InvoiceEmailFormat = require("../Helper/templates/InvoiceEmailTemp");
 const sendEmails = require("../Helper/sendEmails");
@@ -21,7 +26,7 @@ module.exports = {
     var invoiceDate = req.body.invoiceDate;
     var invoiceNo = req.body.invoiceNo;
     var note = req.body.note;
-    var quantity = req.body.quantity || ['1'];
+    var quantity = req.body.quantity || ["1"];
     let sqls = `SELECT invoiceId FROM invoices WHERE isDeleted = 0 and invoiceId = '${invoiceNo}'`;
 
     var invoiceNos = await query(sqls);
@@ -43,34 +48,40 @@ module.exports = {
         .send({ message: "please enter unique invoice no" });
     } else {
       var sql = `INSERT INTO invoices (customerId,amount,itemId,status,createdDate,createdBy,invoiceDate,invoiceId) VALUES('${customerId}','${amount}','${itemId}','${status}','${createdDate}','${createdBy}','${invoiceDate}','${invoiceNo}')`;
-      const getCustomerIDQuery = `select customerId from customers where userId = "${customerId}"`
+      const getCustomerIDQuery = `select customerId from customers where userId = "${customerId}"`;
       const customerIdResponse = await query(getCustomerIDQuery);
       const invoice = await query(sql);
 
       // sage intacct
       let objectDate = new Date();
-      let invoiceCreateDate =  (objectDate.getMonth()+1) + "/" + objectDate.getDate() + "/" + objectDate.getFullYear();
-    let items = [];
-    let quantitys =[]
-    for(var i= 0 ; i< itemId.length ; i++){
-            const getitemId =`select itemId from items where id="${itemId[i]}"`
-            const intacctItem = await query(getitemId);
-            items.push(intacctItem[0].itemId);
-            quantitys.push('1')
-    }
-      const data ={
-        createDate:invoiceCreateDate,
-        customerId:customerIdResponse[0].customerId,
-        itemId:items,
-        quantity:quantitys
+      let invoiceCreateDate =
+        objectDate.getMonth() +
+        1 +
+        "/" +
+        objectDate.getDate() +
+        "/" +
+        objectDate.getFullYear();
+      let items = [];
+      let quantitys = [];
+      for (var i = 0; i < itemId.length; i++) {
+        const getitemId = `select itemId from items where id="${itemId[i]}"`;
+        const intacctItem = await query(getitemId);
+        items.push(intacctItem[0].itemId);
+        quantitys.push("1");
       }
-      console.log("data =>",data);
-        const sageIntacctSalesInvoice = await createSalesInvoice(data);
-        console.log("sageIntacctSalesInvoice",sageIntacctSalesInvoice);
-        const invoiceId = sageIntacctSalesInvoice._key;
-        const sageIntacctInvoiceID = invoiceId.split("-")[1];
-        const updateSql = `UPDATE invoices SET  invoiceId = "${sageIntacctInvoiceID}" WHERE id="${invoice.insertId}"`
-        const updateInvoice = await query(updateSql);
+      const data = {
+        createDate: invoiceCreateDate,
+        customerId: customerIdResponse[0].customerId,
+        itemId: items,
+        quantity: quantitys,
+      };
+      console.log("data =>", data);
+      const sageIntacctSalesInvoice = await createSalesInvoice(data);
+      console.log("sageIntacctSalesInvoice", sageIntacctSalesInvoice);
+      const invoiceId = sageIntacctSalesInvoice._key;
+      const sageIntacctInvoiceID = invoiceId.split("-")[1];
+      const updateSql = `UPDATE invoices SET  invoiceId = "${sageIntacctInvoiceID}" WHERE id="${invoice.insertId}"`;
+      const updateInvoice = await query(updateSql);
 
       // var sqls = `UPDATE invoices SET  invoiceId='INV000${invoice.insertId}' WHERE id = ${invoice.insertId}`;
       // const updateInvoice = await query(sqls);
@@ -158,7 +169,7 @@ module.exports = {
     } else {
       let invoices = `SELECT users.name,invoices.invoiceId,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${req.params.id}`;
       const invoicess = await query(invoices);
-      await getListOfSalesInovice()
+      await getListOfSalesInovice();
       // for (let row of invoicess) {
 
       // const studentRecords = await query(students);
@@ -199,10 +210,10 @@ module.exports = {
   editInvoice: async (req, res) => {
     let sqls = `SELECT invoices.amount,invoices.customerId,invoices.status,invoices.createdBy,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId ,invoiceId FROM invoices WHERE isDeleted = 0 and invoices.id = ${req.params.id}`;
     const invoice = await query(sqls);
-    console.log("invoice",invoice);
-    if(invoice.length === 0){
-      res.status(201).send({message:"invoice not found !"})
-      return 
+    console.log("invoice", invoice);
+    if (invoice.length === 0) {
+      res.status(201).send({ message: "invoice not found !" });
+      return;
     }
     // const { note } = req.body;
     const {
@@ -218,7 +229,6 @@ module.exports = {
       status,
     } = req.body;
 
-    
     let customerIds = customerId;
     let amounts = amount ? amount : invoice[0]?.amount;
     let createdDates = createdDate ? createdDate : invoice[0]?.createdDate;
@@ -229,27 +239,29 @@ module.exports = {
     let updatedBys = updatedBy;
     let invoiceNos = invoiceNo ? invoiceNo : invoice[0].invoiceId;
     let statuss = status;
-    let quantity = req.body.quantity
-     var sql = `UPDATE invoices SET customerId = '${customerIds}',invoiceId = '${invoiceNos}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',updatedAt='${updatedAts}',updatedBy='${updatedBys}',status='${statuss}' WHERE id = ${req.params.id}`;
+    let quantity = req.body.quantity;
+    var sql = `UPDATE invoices SET customerId = '${customerIds}',invoiceId = '${invoiceNos}', amount='${amounts}',itemId ='${itemIds}', createdDate='${createdDates}',invoiceDate='${invoiceDates}',createdBy='${createdBys}',updatedAt='${updatedAts}',updatedBy='${updatedBys}',status='${statuss}' WHERE id = ${req.params.id}`;
     const invoices = await query(sql);
-    const getCustomerIDQuery = `select customerId from customers where userId = "${customerId}"`
+    const getCustomerIDQuery = `select customerId from customers where userId = "${customerId}"`;
     const customerIdResponse = await query(getCustomerIDQuery);
-    console.log("customerIdResponse[0].customerId =>",customerIdResponse[0].customerId);
+    console.log(
+      "customerIdResponse[0].customerId =>",
+      customerIdResponse[0].customerId
+    );
 
-
-    var InvoiceSql = `SELECT invoiceId FROM invoices where id=${req.params.id};`
+    var InvoiceSql = `SELECT invoiceId FROM invoices where id=${req.params.id};`;
     const sageIntacctInvoiveId = await query(InvoiceSql);
-    console.log("sageIntacctInvoiveId =>",sageIntacctInvoiveId);
-    const invoiceID =sageIntacctInvoiveId[0]['invoiceId']
+    console.log("sageIntacctInvoiveId =>", sageIntacctInvoiveId);
+    const invoiceID = sageIntacctInvoiveId[0]["invoiceId"];
 
     const data = {
-      invoiceID : invoiceID,
-      dueDate:req.body.dueDate ? req.body.dueDate :'02/24/2027',
-      customerId:customerIdResponse[0].customerId,
-      state: status==="paid"?"Closed":"pending",
-      itemId:itemId,
-      quantity:quantity
-    }
+      invoiceID: invoiceID,
+      dueDate: req.body.dueDate ? req.body.dueDate : "02/24/2027",
+      customerId: customerIdResponse[0].customerId,
+      state: status === "paid" ? "Closed" : "pending",
+      itemId: itemId,
+      quantity: quantity,
+    };
     const sageIntacctInvoice = await updateSalesInvoice(data);
     res.send(invoices);
   },
@@ -276,10 +288,10 @@ module.exports = {
     }
     var sqls = `UPDATE invoices SET isDeleted='1',deletedBy='${userId}',deletedDate='${currentDate}' WHERE id = ${req.params.id}`;
     const updateInvoice = await query(sqls);
-   
-    var InvoiceSql = `SELECT invoiceId FROM invoices where id=${req.params.id};`
+
+    var InvoiceSql = `SELECT invoiceId FROM invoices where id=${req.params.id};`;
     const sageIntacctInvoiveId = await query(InvoiceSql);
-    const invoiceID =sageIntacctInvoiveId[0]['invoiceId']
+    const invoiceID = sageIntacctInvoiveId[0]["invoiceId"];
     const deletedInvoice = await deleteSalesInvoice(invoiceID);
     res.status(200).json({ message: "Deleted Successfully" });
   },
@@ -297,11 +309,11 @@ module.exports = {
   getInvoiceByUserId: async (req, res) => {
     let date = moment(new Date()).format("DD/MM/YYYY");
     if (req.query.key == "close") {
-      let sql = `SELECT invoices.amount,invoices.invoiceId,invoices.isDeleted,invoices.customerId,invoices.status,invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND status ='paid' AND isDeleted = 0 ORDER BY invoiceDate DESC LIMIT 2 `;
+      let sql = `SELECT invoices.amount,invoices.invoiceId,invoices.isDeleted,invoices.customerId,invoices.status,invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND status ='paid' AND isDeleted = 0 ORDER BY invoiceDate DESC`;
       const invoice = await query(sql);
       res.send(invoice);
     } else {
-      let sql = `SELECT invoices.amount,invoices.invoiceId,invoices.status,invoices.customerId,invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND isDeleted = 0 AND status = 'pending' ORDER BY invoiceDate DESC LIMIT 2`;
+      let sql = `SELECT invoices.amount,invoices.invoiceId,invoices.status,invoices.customerId,invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND isDeleted = 0 AND status = 'pending' ORDER BY invoiceDate DESC`;
       const invoice = await query(sql);
       res.send(invoice);
     }
