@@ -5,7 +5,7 @@ const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
 const {client,IA} = require('./IntacctClient')
 module.exports = {
 
-getListCustomersLegacy : async (req, res)=>{
+getListCustomersLegacy : async ()=>{
     try{
 
         let query = new IA.Functions.Common.ReadByQuery();
@@ -15,11 +15,12 @@ getListCustomersLegacy : async (req, res)=>{
         const result = response.getResult();
         let json_data = result.data;
         isCustomersExistInPortalDB(json_data)
-        res.status(200).send(json_data)
+        // res.status(200).send(json_data)
     }catch(error){
-        res.status(400).send({
-            error:error.message
-        })
+        // res.status(400).send({
+        //     error:error.message
+        // })
+        console.log("Error in customer scheduler =>",error?.message);
     }
        
 
@@ -140,7 +141,7 @@ async function  isCustomersExistInPortalDB (SageIntacctCustomers){
         for(var i=0 ; i< SageIntacctCustomers.length ; i++){
             sgaeIntacctCustomers.push(SageIntacctCustomers[i]['CUSTOMERID']);
         }
-       console.log("sgaeIntacctCustomers =>",sgaeIntacctCustomers.length);
+       console.log("sgaeIntacctCustomers =>",sgaeIntacctCustomers);
 
         for(var k=0 ; k < sgaeIntacctCustomers.length ; k++){
        console.log(sgaeIntacctCustomers[k],"sgaeIntacctCustomers =>",dbCustomersId.includes(sgaeIntacctCustomers[k]));
@@ -211,7 +212,7 @@ async function  isCustomersExistInPortalDB (SageIntacctCustomers){
                
                const customerExistSql = `SELECT * FROM users where email1="${email1}";`
                const  customerExist = await query(customerExistSql);
-               console.log("customerExist =>",customerExist);     
+            //    console.log("customerExist =>",customerExist);     
               if(!customerExist.length > 0){
                         const insert_user = `INSERT INTO users (name,email1,email2,phone1,phone2,contactName,status,typeId,createdBy,updatedBy)
                 VALUES(
@@ -222,7 +223,7 @@ async function  isCustomersExistInPortalDB (SageIntacctCustomers){
                      ${phone2 ? phone2 : 0},
                     "${contactName ? contactName : ""}",
                      ${status === 'active' ? 1 :0}, 
-                     ${typeId ? typeId : 0},
+                     ${0} ,
                      ${createdBy ? createdBy : 1}, 
                      ${updatedBy ? updatedBy : 1}
                      )`;
