@@ -58,7 +58,7 @@ module.exports = {
       BycustomerId = "";
     }
 
-    var sqlquery = `select creditRequests.id, users.name, users.email1, creditRequests.status, creditRequests.amount, activites.name
+    var sqlquery = `select creditRequests.id, users.name as "customerName", users.email1, creditRequests.status, creditRequests.amount, activites.name
     from creditRequests
     LEFT outer join users on users.id = creditRequests.userId
     LEFT outer join activites on activites.id = creditRequests.activityId
