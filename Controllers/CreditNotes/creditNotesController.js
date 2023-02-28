@@ -134,17 +134,20 @@ module.exports = {
     const id = req.params.id;
     const credit_ballance = `select sum(amount) as "creditAmount" from creditNotes where amountMode = 1 and  customerId = ${id}`;
     const debit_ballance = `select sum(amount) as "debitAmount" from creditNotes where amountMode = 0 and  customerId = ${id}`;
+   const getCreditRequestQuery = `select creditRequestId from creditNotes where customerId =${id}`;
     const creditamt = await query(credit_ballance);
     const debitamt = await query(debit_ballance);
+    const getCreditRequestQueryResponse = await query(getCreditRequestQuery);
     const creditAmount = creditamt[0].creditAmount;
     const debitAmount = debitamt[0].debitAmount;
     const creditBal = creditAmount - debitAmount;
     if (creditBal) {
-      res.status(200).json({ message: "ok", creditBal: creditBal });
+      res.status(200).json({ message: "ok", creditBal: creditBal ,CreditRequestId:getCreditRequestQueryResponse[0].creditRequestId});
     } else {
       res.status(200).json({ message: "ok", creditBal: 0 });
     }
   },
+
 
   //insert amount
   insertAmount: async (req, res) => {
