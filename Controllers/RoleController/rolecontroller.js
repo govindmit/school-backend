@@ -22,9 +22,10 @@ module.exports = {
       }
     });
   },
+
   //get role controller
   getRoleController: (req, res) => {
-    var sql = `select id, name from roles`;
+    var sql = `select id, name from roles where id !=1 and id !=2`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });

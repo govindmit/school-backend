@@ -71,13 +71,12 @@ module.exports = {
         "Your Activity Purchased Successfully From QIS✔",
         "<p>Activity created</p>"
       );
-      res
-        .status(200)
-        .json({
-          message: "Data inserted successfully",
-          data: result,
-          sageIntacctorderID: sageIntacctorderID,
-        });
+
+      res.status(200).json({
+        message: "Data inserted successfully",
+        data: result,
+        sageIntacctorderID: sageIntacctorderID,
+      });
     });
   },
 
