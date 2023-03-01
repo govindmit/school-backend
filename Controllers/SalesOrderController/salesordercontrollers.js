@@ -6,13 +6,16 @@ const {
   deleteSageIntacctSalesOrder,
   updateSalesOrder,
 } = require("../../SageIntacctAPIs/SalesOrderService");
+const moment = require("moment");
+const sendmail = require("sendmail")();
+const SalesTemplate = require("../Helper/templates/SalesOrderTemplete");
+const sendEmails = require("../Helper/sendEmails");
 const util = require("util");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
-const sendEmails = require("../Helper/sendEmails");
 
 module.exports = {
   //add Sales controller
-  addSalesOrder: (req, res) => {
+  addSalesOrder: async (req, res) => {
     const {
       amount,
       status,
@@ -34,15 +37,24 @@ module.exports = {
     // ) {
     //   return res.status(400).send({ message: "All field is required" });
     // }
+    let salesId="";
     var sql = `INSERT INTO sales_order (amount,status,userId,activityId,transactionId,orderId,createdBy)VALUES("${amount}","${status}","${userId}","${activityId}","${transactionId}","${orderId}","${createdBy}")`;
     mysqlconnection.query(sql, async function (err, result) {
       if (err) throw err;
       const queryForCustomerEmail = `SELECT email1 FROM users where id = "${userId}"`;
       const customerEmailResponse = await query(queryForCustomerEmail);
+
+      const queryForCustomeName = `SELECT name,email1 FROM users where id = "${userId}"`;
+      const customerNameResponse = await query(queryForCustomeName);
+      
       const queryForCustomerId = `SELECT customerId FROM customers where userId = "${userId}"`;
       const customerIdQueryResponse = await query(queryForCustomerId);
+      
       const queryForItemID = `SELECT itemID FROM items where activityId = "${activityId}"`;
       const itemId = await query(queryForItemID);
+      
+      const activityidd = `SELECT name,price FROM items where activityId = "${activityId}"`;
+      const activityData = await query(activityidd);
 
       let objectDate = new Date();
       let transactionDate =
@@ -58,7 +70,6 @@ module.exports = {
         transactionDate: transactionDate,
         itemId: itemId[0]?.itemID,
       };
-
       const sageIntacctSalesOrder = await createSalesOrder(data);
       const SalesorderId = sageIntacctSalesOrder._key;
       const sageIntacctorderID = SalesorderId?.split("-")[1];
@@ -66,19 +77,30 @@ module.exports = {
       const updateSql = `UPDATE sales_order SET  transactionId = "${sageIntacctorderID}" WHERE id="${result.insertId}"`;
       const updateInvoice = await query(updateSql);
 
-      sendEmails(
-        customerEmailResponse[0]?.email1,
-        "Your Activity Purchased Successfully From QIS✔",
-        "<p>Activity created</p>"
-      );
+      let todaynewdate=moment(new Date()).format("MMM DD, YYYY");
+
+      const newData={
+        userName:customerNameResponse[0]?.name,
+        userEmail:customerNameResponse[0]?.email1,
+        activityName:activityData[0]?.name,
+        activityprice:activityData[0]?.price,
+        transactionIdd:transactionId,
+        datee:todaynewdate
+      }
+
+      const hh = await SalesTemplate(newData)
+      if(result){
+          sendEmails(customerNameResponse[0]?.email1, "Sales Order Details From QIS✔", hh);
+        }
+      
       res
-        .status(200)
+      .status(200)
         .json({
           message: "Data inserted successfully",
           data: result,
           sageIntacctorderID: sageIntacctorderID,
         });
-    });
+      });
   },
 
   //get activity controller

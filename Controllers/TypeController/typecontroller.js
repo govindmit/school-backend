@@ -25,7 +25,11 @@ module.exports = {
 
   //get type controller
   getTypeController: (req, res) => {
-    var sqlquery = `select types.id, types.name from types where isDeleted = 0`;
+    var sqlquery = `select t.id, t.name,
+    count(u.id) as user_count
+    from types as t
+    left join users as u on t.id = u.typeId
+    group by t.id, t.name;`;
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
@@ -57,6 +61,21 @@ module.exports = {
   },
 
   //edit type controller
+  TypeEditController: (req, res) => {
+    const id = req.params.id;
+    const { name } = req.body;
+    var sql = `update types set name = "${name}" where id = ${id}`;
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) throw err;
+      if (result.affectedRows === 1) {
+        res
+          .status(200)
+          .json({ message: "Data updated successfully", responce: result });
+      }
+    });
+  },
+
+  // find  type controller
   TypeEditController: (req, res) => {
     const id = req.params.id;
     const { name } = req.body;

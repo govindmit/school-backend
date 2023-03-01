@@ -1,15 +1,12 @@
 const mysqlconnection = require("../../DB/db.config.connection");
 const util = require("util");
 const moment = require("moment");
-const nodemailer = require("nodemailer");
-// const InvoiceEmailFormat = require("../Helper/InvoiceEmailTemp");
 const {
   createSalesInvoice,
   deleteSalesInvoice,
   updateSalesInvoice,
   getListOfSalesInovice,
 } = require("../../SageIntacctAPIs/SalesInvoiceService");
-const sendmail = require("sendmail")();
 const InvoiceEmailFormat = require("../Helper/templates/InvoiceEmailTemp");
 const sendEmails = require("../Helper/sendEmails");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
@@ -27,6 +24,7 @@ module.exports = {
     var invoiceNo = req.body.invoiceNo;
     var note = req.body.note;
     var quantity = req.body.quantity || ["1"];
+
     let sqls = `SELECT invoiceId FROM invoices WHERE isDeleted = 0 and invoiceId = '${invoiceNo}'`;
 
     var invoiceNos = await query(sqls);
@@ -85,11 +83,12 @@ module.exports = {
 
       // var sqls = `UPDATE invoices SET  invoiceId='INV000${invoice.insertId}' WHERE id = ${invoice.insertId}`;
       // const updateInvoice = await query(sqls);
-      let sqld = `SELECT users.name,items.name as itemname,items.description,invoices.amount,invoices.status,invoices.invoiceId,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${invoice.insertId}`;
+      let sqld = `SELECT users.name, users.email1, items.name as itemname,items.description,invoices.amount,invoices.status,invoices.invoiceId,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${invoice.insertId}`;
       const Getinvoice = await query(sqld);
+
       const hh = await InvoiceEmailFormat(Getinvoice);
       if (invoice && status === "pending") {
-        sendEmails("sj2585097@gmail.com", "Invoice Details Link From QIS✔", hh);
+        sendEmails(Getinvoice[0].email1, "Invoice Details Link From QIS✔", hh);
         res
           .status(200)
           .json({ message: "Invoice created successfully", data: invoice });
@@ -301,7 +300,7 @@ module.exports = {
     let sqld = `SELECT users.name,users.email1,items.description,items.name,invoices.amount,invoices.status,invoices.invoiceId, invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${req.params.id}`;
     const Getinvoice = await query(sqld);
     const hh = await InvoiceEmailFormat(Getinvoice);
-    sendEmails("sj2585097@gmail.com", "Invoice Details From QIS✔", hh);
+    sendEmails(Getinvoice[0].email1, "Invoice Details From QIS✔", hh);
     res.status(200).json({ message: "send invoice email successfully" });
   },
 
