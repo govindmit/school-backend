@@ -201,7 +201,7 @@ module.exports = {
 
   //get users controller
   getUserController: async (req, res) => {
-    const { status, customerType, contactName, number, sorting, ParentId } =
+    const { status, customerType, contactName, number, sorting, ParentId,typeId,agegroup } =
       req.body;
 
     let bystatus = "";
@@ -216,6 +216,11 @@ module.exports = {
     let bycontactName = "";
     if (contactName) {
       bycontactName = ` and contactName = "${contactName}"`;
+    }
+
+    let bytypeId = "";
+    if (typeId) {
+      bytypeId = ` and typeId = "${typeId}"`;
     }
 
     let bynumber = "";
@@ -241,6 +246,11 @@ module.exports = {
       bycustType = ` and typeId = ${customerType}`;
     }
 
+    let ageGroup = "";
+    if (agegroup) {
+      ageGroup = ` and agegroup = ${agegroup}`;
+    }
+
     let ByparentId = "";
     if (ParentId) {
       ByparentId = ` and users.parentId  = ${ParentId}`;
@@ -248,15 +258,14 @@ module.exports = {
       ByparentId = "";
     }
 
-    var sqlquery = `select users.id, roles.id as "roleId", customers.customerId, parents.parentId as 'GeneratedParentId', users.parentId, users.name, users.email1, users.email2, 
+    var sqlquery = `select users.id, roles.id as "roleId", customers.customerId,users.typeId, parents.parentId as 'GeneratedParentId', users.parentId, users.name, users.email1, users.email2, 
     users.phone1, users.phone2, types.name as "CustomerType", users.contactName,
     users.status, users.printUs, roles.name as "UserRole" from users 
     LEFT outer join roles on roles.id = users.roleId 
     LEFT outer join types on types.id = users.typeId 
     left outer join customers on customers.userId = users.id 
     left outer join parents on parents.userId = users.id 
-    where users.isDeleted = 0 ${bystatus}${bycontactName}${bynumber}${bycustType}${ByparentId}${bysorting}`;
-
+    where users.isDeleted = 0 ${bystatus}${bycontactName}${bynumber}${bycustType}${ByparentId}${bysorting}${bytypeId}${ageGroup}`;
     mysqlconnection.query(sqlquery, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
