@@ -134,10 +134,12 @@ module.exports = {
     const id = req.params.id;
     const credit_ballance = `select sum(amount) as "creditAmount" from creditNotes where amountMode = 1 and  customerId = ${id}`;
     const debit_ballance = `select sum(amount) as "debitAmount" from creditNotes where amountMode = 0 and  customerId = ${id}`;
-   const getCreditRequestQuery = `select creditRequestId from creditNotes where customerId =${id}`;
+    // const getCreditRequestQuery = `select creditRequestId from creditNotes where customerId =${id}`;
+    const getCreditRequestQuery = `(select * from creditNotes where amountMode = '1' and customerId = ${id}) order by id desc`;
     const creditamt = await query(credit_ballance);
     const debitamt = await query(debit_ballance);
     const getCreditRequestQueryResponse = await query(getCreditRequestQuery);
+    console.log("getCreditRequestQueryResponse =>",getCreditRequestQueryResponse);
     const creditAmount = creditamt[0].creditAmount;
     const debitAmount = debitamt[0].debitAmount;
     const creditBal = creditAmount - debitAmount;
