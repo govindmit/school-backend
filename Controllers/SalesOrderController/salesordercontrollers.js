@@ -6,6 +6,7 @@ const {
   deleteSageIntacctSalesOrder,
   updateSalesOrder,
 } = require("../../SageIntacctAPIs/SalesOrderService");
+const moment = require("moment");
 const sendmail = require("sendmail")();
 const SalesTemplate = require("../Helper/templates/SalesOrderTemplete");
 const sendEmails = require("../Helper/sendEmails");
@@ -76,6 +77,7 @@ module.exports = {
       const updateSql = `UPDATE sales_order SET  transactionId = "${sageIntacctorderID}" WHERE id="${result.insertId}"`;
       const updateInvoice = await query(updateSql);
 
+      let todaynewdate=moment(new Date()).format("MMM DD, YYYY");
 
       const newData={
         userName:customerNameResponse[0]?.name,
@@ -83,13 +85,12 @@ module.exports = {
         activityName:activityData[0]?.name,
         activityprice:activityData[0]?.price,
         transactionIdd:transactionId,
-        datee:new Date()
+        datee:todaynewdate
       }
-      console.log('newDatanewDatanewData',newData);
+
       const hh = await SalesTemplate(newData)
       if(result){
-          // console.log('#################',hh);
-          sendEmails("sj2585097@gmail.com", "Sales Details Link From QIS✔", hh);
+          sendEmails(customerNameResponse[0]?.email1, "Sales Order Details From QIS✔", hh);
         }
       
       res

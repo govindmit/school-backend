@@ -1,7 +1,5 @@
-const sendmail = require("sendmail")();
 
 const SalesTemplate = (getsalesData) => {
-    console.log('@@@@@@@@@@@@@@!!!!',getsalesData);
   return `<style type="text/css" rel="stylesheet" media="all">
   /* Base ------------------------------ */
 
@@ -431,12 +429,139 @@ const SalesTemplate = (getsalesData) => {
   </style>
 <![endif]-->
 </head>
-
 <body>
-  <span class="preheader">This is an invoice for your purchase on {{ purchase_date }}. Please submit payment by {{ due_date }}</span>
+  <span class="preheader">This is an sales order for your purchase on ${ getsalesData?.datee }.</span>
   <table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
-        <td>Varun</td>
+      <td align="center">
+        <table class="email-content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="email-masthead">
+              <a href="https://example.com" class="f-fallback email-masthead_name">
+              ${getsalesData?.userName}
+            </a>
+            </td>
+          </tr>
+          <!-- Email Body -->
+          <tr>
+            <td class="email-body" width="570" cellpadding="0" cellspacing="0">
+              <table class="email-body_inner" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
+                <!-- Body content -->
+                <tr>
+                  <td class="content-cell">
+                    <div class="f-fallback">
+                      <h1>Hi ${getsalesData?.userName}
+                      </h1>
+                      <p>Thanks for using ${getsalesData?.userName}. This is an sales order for your recent purchase.</p>
+                      <table class="attributes" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                        <tr>
+                          <td class="attributes_content">
+                            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                              <tr>
+                                <td class="attributes_item">
+                                  <span class="f-fallback">
+            <strong>Amount :</strong> ${getsalesData?.activityprice}
+          </span>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td class="attributes_item">
+                                  <span class="f-fallback">
+            <!--<strong>Due By:</strong> ${getsalesData?.datee}-->
+          </span>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                      <!-- Action -->
+                      <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                        <tr>
+                          <td align="center">
+                            <!-- Border based button
+         https://litmus.com/blog/a-guide-to-bulletproof-buttons-in-email-design -->
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
+                              <tr>
+                                <!--<td align="center">-->
+                                <!--  <a href="{{action_url}}" class="f-fallback button button--green" target="_blank">Pay Invoice</a>-->
+                                <!--</td>-->
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                      <table class="purchase" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td>
+                            <!--<h3></h3>-->
+                          </td>
+                          <td>
+                            <h3 class="align-right">Date : ${getsalesData?.datee}</h3>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td colspan="2">
+                            <table class="purchase_content" width="100%" cellpadding="0" cellspacing="0">
+                              <tr>
+                                <th class="purchase_heading" align="left">
+                                  <p class="f-fallback">Activity Name</p>
+                                </th>
+                                <th class="purchase_heading" align="right">
+                                  <p class="f-fallback">Amount</p>
+                                </th>
+                              </tr>
+                              <tr>
+                                <td width="80%" class="purchase_item"><span class="f-fallback">${getsalesData?.activityName}</span></td>
+                                <td class="align-right" width="20%" class="purchase_item"><span class="f-fallback">${getsalesData?.activityprice}</span></td>
+                              </tr>
+                              <tr>
+                                <td width="80%" class="purchase_footer" valign="middle">
+                                  <p class="f-fallback purchase_total purchase_total--label">Total</p>
+                                </td>
+                                <td width="20%" class="purchase_footer" valign="middle">
+                                  <p class="f-fallback purchase_total">${getsalesData?.activityprice}</p>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                      <p>If you have any questions about this invoice, simply reply to this email or reach out to our <a href="{{support_url}}">support team</a> for help.</p>
+                      <p>Cheers,
+                        <br>The [Product Name] team</p>
+                      <!-- Sub copy -->
+                      <table class="body-sub" role="presentation">
+                        <tr>
+                          <td>
+                            <p class="f-fallback sub">If you’re having trouble with the button above, copy and paste the URL below into your web browser.</p>
+                            <p class="f-fallback sub">action_url</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table class="email-footer" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                  <td class="content-cell" align="center">
+                    <p class="f-fallback sub align-center">
+                      [Company Name, LLC]
+                      <br>1234 Street Rd.
+                      <br>Suite 1234
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
     </tr>
   </table>
 </body>`;
