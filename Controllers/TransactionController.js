@@ -6,7 +6,7 @@ module.exports = {
     try{
         console.log("body =>",req.body);
         const { totalAmount,paidAmount,transactionId,amexorderId,paymentMethod,idForPayment,creditNotesId} = req.body;
-        if (!totalAmount || !paidAmount || !transactionId ||  !amexorderId || !paymentMethod || !idForPayment) {
+        if (!transactionId ||  !amexorderId || !paymentMethod || !idForPayment) {
            res.status(400).send({ message: "All field is required" });
            return
         }
@@ -48,7 +48,4 @@ module.exports = {
     }
 
   },
-
-
-
-};
+}
