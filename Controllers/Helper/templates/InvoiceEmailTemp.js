@@ -1,5 +1,3 @@
-const sendmail = require("sendmail")();
-
 const InvoiceEmailFormat = (Getinvoice) => {
   return `<style type="text/css" rel="stylesheet" media="all">
   /* Base ------------------------------ */
