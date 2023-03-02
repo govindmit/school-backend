@@ -371,7 +371,7 @@ module.exports = {
   //delete user controller
   deleteUserController: (req, res) => {
     const id = req.params.id;
-    var sql = `delete from users where id = ${id}`;
+    // var sql = `delete from users where id = ${id}`;
 
     var sqlquery = `SELECT * FROM customers where userId = ${id}`;
 
