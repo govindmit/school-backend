@@ -199,8 +199,12 @@ router.get("/getItem", GetItem);
 router.get("/getItems", GetItemData);
 
 // ######################## Transaction Routes ############################
-const { createTransaction } = require("../Controllers/TransactionController");
-router.post("/createTransaction", createTransaction);
+ const { createTransaction } = require("../Controllers/TransactionController");
+ router.post("/createTransaction",createTransaction);
+ 
+ // #################### Dash Board Route ##################
+ const { calculateDataForDashboard } = require("../Controllers/DashBoardController");
+router.get('/dashboardData',verifyAuthToken,calculateDataForDashboard)
 
 // IntacctAPIs Routes do not touch
 const {
