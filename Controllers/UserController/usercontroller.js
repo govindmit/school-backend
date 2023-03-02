@@ -5,11 +5,8 @@ const {
   deleteIntacctCustomer,
   updateIntacctCustomer,
 } = require("../../SageIntacctAPIs/CustomerServices");
-// const { query } = require("express");
-
 const util = require("util");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
-const sendmail = require("sendmail")();
 const ResetEmailFormat = require("../Helper/templates/ResetEmailTemp");
 const sendEmails = require("../Helper/sendEmails");
 module.exports = {
@@ -30,29 +27,29 @@ module.exports = {
       userRole,
       createdBy,
       previlegs,
+      useraddress,
       agegroup,
-      generatedId,
-      updatedBy,
+      attentionto,
     } = req.body;
+
     const user_permition = req.body.previlegs;
     const per = JSON.stringify({ user_permition });
-
+    const addr = JSON.stringify(useraddress);
     var customerId;
     var recordNo;
 
     //check email query
     const check_email_query = `select id, email1 from users where email1 = "${email1}"`;
     //insert query
-    const insert_query = `INSERT INTO users (name,email1,email2,phone1,phone2,printUs,contactName,status,agegroup,generatedId,roleId,typeId,parentId,createdBy,updatedBy)VALUES("${name}", "${email1}",
-    "${email2 ? email2 : ""}",${phone1}, ${phone2 ? phone2 : 0}, "${
+    const insert_query = `INSERT INTO users (name,email1,email2,phone1,phone2,printUs,contactName,status,agegroup,roleId,typeId,parentId,createdBy)VALUES("${name}", "${email1}","${
+      email2 ? email2 : ""
+    }",${phone1}, ${phone2 ? phone2 : 0},"${
       contactName ? contactName : ""
     }", "${printUs ? printUs : ""}", ${status ? status : 0}, ${
       agegroup ? agegroup : 0
-    }, "${generatedId ? generatedId : ""}", ${roleId ? roleId : 2}, ${
-      typeId ? typeId : 0
-    }, ${parentId ? parentId : 0}, ${createdBy ? createdBy : 1}, ${
-      updatedBy ? updatedBy : 1
-    })`;
+    }, ${roleId ? roleId : 2}, ${typeId ? typeId : 0}, ${
+      parentId ? parentId : 0
+    }, ${createdBy ? createdBy : 1})`;
 
     mysqlconnection.query(check_email_query, function (err, result) {
       if (err) throw err;
@@ -69,6 +66,7 @@ module.exports = {
               );
               const dt = ResetEmailFormat(resetPasswordtoken);
               const insert_permition = `INSERT INTO metaOptions (userId,previlegs)VALUES(${responce.insertId},'${per}')`;
+              console.log(insert_permition);
               mysqlconnection.query(insert_permition, function (err, responce) {
                 if (err) throw err;
                 sendEmails(email1, "Reset Password Link From QIS✔", dt);
@@ -124,6 +122,10 @@ module.exports = {
           //create customer
           mysqlconnection.query(insert_query, async function (err, responce) {
             if (err) throw err;
+            const insertmeta = `insert into metaOptions(userId, keyname, value)values(${responce.insertId},"Address",'${addr}')`;
+            mysqlconnection.query(insertmeta, function (err, result) {
+              if (err) throw err;
+            });
             if (responce) {
               //create customer
               var getParentId = "";
@@ -136,7 +138,6 @@ module.exports = {
                   }
                 );
               }
-
               const active = status === 0 ? false : true;
               const data = {
                 name,
@@ -276,7 +277,7 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id, users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, agegroup, users.createdAt, generatedId, roles.name as "role", roles.id as "roleId", metaOptions.previlegs as "userPrevilegs" from users LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
+    var sql = `select users.id,users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, agegroup, users.createdAt, generatedId, roles.name as "role", roles.id as "roleId", metaOptions.previlegs as "userPrevilegs", metaOptions.value as "address" from users LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
