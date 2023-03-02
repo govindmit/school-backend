@@ -4,6 +4,8 @@ const mysqlconnection = require("../../DB/db.config.connection");
 const ResetEmailFormat = require("../Helper/templates/ResetEmailTemp");
 const Passdsetconformationemail = require("../Helper/templates/Passdsetconformationemail");
 const sendEmails = require("../Helper/sendEmails");
+const moment = require("moment");
+const ComposerTemplate = require("../Helper/templates/composerTemplate");
 module.exports = {
   // user login controller
   userlogincontroller: (req, res) => {
@@ -109,5 +111,25 @@ module.exports = {
     } catch (err) {
       return res.status(400).send({ message: "Link Experied" });
     }
+  },
+
+  sendComposerMailcontroller: async (req, res) => {
+    const { composer, subject, descontent } = req.body;
+    let todaynewdate = moment(new Date()).format("MMM DD, YYYY");
+
+    for (i = 0; i < composer.length; i++) {
+      const newData = {
+        subject: subject,
+        descontent: descontent,
+        name: composer[i]?.name,
+        date: todaynewdate,
+      };
+
+      const mailsend = await ComposerTemplate(newData);
+      sendEmails(composer[i]?.email1, subject, mailsend);
+    }
+    res.status(200).json({
+      message: "Composer mail send successfully",
+    });
   },
 };

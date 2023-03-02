@@ -57,6 +57,7 @@ const {
   userlogincontroller,
   forgotpasswordcontroller,
   resetpasswordcontroller,
+  sendComposerMailcontroller,
 } = require("../Controllers/AuthController/authcontroller");
 
 //################        activities controllers      #########
@@ -150,6 +151,10 @@ router.put("/updatestudent/:id", editstudentcontroller);
 router.post("/userlogin", verifyAuthToken, userlogincontroller);
 router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
 router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
+
+router.post("/sendcomposer", sendComposerMailcontroller);
+
+
 
 //#############################  activities routers  ###########################
 router.post("/getActivity", verifyAuthToken, getActivityController);
