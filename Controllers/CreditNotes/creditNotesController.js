@@ -139,17 +139,23 @@ module.exports = {
     const creditamt = await query(credit_ballance);
     const debitamt = await query(debit_ballance);
     const getCreditRequestQueryResponse = await query(getCreditRequestQuery);
-    console.log("getCreditRequestQueryResponse =>",getCreditRequestQueryResponse);
+    console.log(
+      "getCreditRequestQueryResponse =>",
+      getCreditRequestQueryResponse
+    );
     const creditAmount = creditamt[0].creditAmount;
     const debitAmount = debitamt[0].debitAmount;
     const creditBal = creditAmount - debitAmount;
     if (creditBal) {
-      res.status(200).json({ message: "ok", creditBal: creditBal ,CreditRequestId:getCreditRequestQueryResponse[0].creditRequestId});
+      res.status(200).json({
+        message: "ok",
+        creditBal: creditBal,
+        CreditRequestId: getCreditRequestQueryResponse[0].creditRequestId,
+      });
     } else {
       res.status(200).json({ message: "ok", creditBal: 0 });
     }
   },
-
 
   //insert amount
   insertAmount: async (req, res) => {
@@ -161,5 +167,15 @@ module.exports = {
         res.status(200).json({ message: "amount debited successfully" });
       });
     }
+  },
+
+  //insert amount
+  getCredirBallanceByUserController: async (req, res) => {
+    const query = `SELECT creditNotes.id, creditNotes.createdAt, creditNotes.amount, creditRequests.status FROM creditNotes
+    left outer join creditRequests on creditRequests.id = creditNotes.creditRequestId where customerId = ${req.params.id}`;
+    mysqlconnection.query(query, function (err, results) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: results });
+    });
   },
 };
