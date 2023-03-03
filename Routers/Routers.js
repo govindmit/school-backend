@@ -291,6 +291,12 @@ router.get(
   verifyAuthToken,
   getCredirBallanceByUserController
 );
+router.get(
+  "/creditballance/:id",
+  verifyAuthToken,
+  getCredirBallanceController
+);
+
 router.put("/insertAmount", verifyAuthToken, insertAmount);
 
 //######################### check emails #######################
