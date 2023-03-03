@@ -320,6 +320,7 @@ module.exports = {
 
   //get invoice by user id
   getInvoiceByUser: async (req, res) => {
+    console.log(req.body);
     let sql = `SELECT invoices.id as invid, invoices.amount,invoices.invoiceId,invoices.status,invoices.customerId, invoices.itemId,invoices.createdDate, invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND isDeleted = 0  ORDER BY invoiceDate DESC`;
     const invoice = await query(sql);
     res.send(invoice);

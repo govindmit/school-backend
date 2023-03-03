@@ -153,10 +153,7 @@ router.put("/updatestudent/:id", editstudentcontroller);
 router.post("/userlogin", verifyAuthToken, userlogincontroller);
 router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
 router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
-
 router.post("/sendcomposer", sendComposerMailcontroller);
-
-
 
 //#############################  activities routers  ###########################
 router.post("/getActivity", verifyAuthToken, getActivityController);
@@ -289,6 +286,7 @@ router.get(
   verifyAuthToken,
   getCredirBallanceByUserController
 );
+router.get("/creditballance/:id", verifyAuthToken, getCredirBallanceController);
 router.put("/insertAmount", verifyAuthToken, insertAmount);
 
 //######################### check emails #######################
