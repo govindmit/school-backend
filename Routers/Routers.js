@@ -87,6 +87,7 @@ const {
   getInvoiceByUserId,
   getInvoiceNo,
   editInvoice,
+  getInvoiceByUser,
 } = require("../Controllers/InvoiceController/invoiceController");
 
 //################  items controllers ########################
@@ -105,6 +106,7 @@ const {
   editCreditNotesController,
   getCredirBallanceController,
   insertAmount,
+  getCredirBallanceByUserController,
 } = require("../Controllers/CreditNotes/creditNotesController");
 
 //################        check emails controllers ########################
@@ -190,6 +192,7 @@ router.post("/editInvoice/:id", upload.none(), editInvoice);
 
 router.get("/sendInvoiceEmail/:id", SendInvoiceEmail);
 router.get("/getInvoicebyUser/:id", getInvoiceByUserId);
+router.post("/getInvoicebyUser/:id", getInvoiceByUser);
 router.get("/getInvoiceNo", getInvoiceNo);
 
 //############################ Item routers ############################
@@ -199,12 +202,14 @@ router.get("/getItem", GetItem);
 router.get("/getItems", GetItemData);
 
 // ######################## Transaction Routes ############################
- const { createTransaction } = require("../Controllers/TransactionController");
- router.post("/createTransaction",createTransaction);
- 
- // #################### Dash Board Route ##################
- const { calculateDataForDashboard } = require("../Controllers/DashBoardController");
-router.get('/dashboardData',verifyAuthToken,calculateDataForDashboard)
+const { createTransaction } = require("../Controllers/TransactionController");
+router.post("/createTransaction", createTransaction);
+
+// #################### Dash Board Route ##################
+const {
+  calculateDataForDashboard,
+} = require("../Controllers/DashBoardController");
+router.get("/dashboardData", verifyAuthToken, calculateDataForDashboard);
 
 // IntacctAPIs Routes do not touch
 const {
@@ -273,7 +278,12 @@ router.get(
   verifyAuthToken,
   getCreditNotesDetailsController
 );
-router.get("/creditballance/:id", verifyAuthToken, getCredirBallanceController);
+router.put("/insertAmount", verifyAuthToken, insertAmount);
+router.get(
+  "/creditballanceByUser/:id",
+  verifyAuthToken,
+  getCredirBallanceByUserController
+);
 router.put("/insertAmount", verifyAuthToken, insertAmount);
 
 //######################### check emails #######################
