@@ -37,7 +37,7 @@ module.exports = {
     // ) {
     //   return res.status(400).send({ message: "All field is required" });
     // }
-    let salesId="";
+    let salesId = "";
     var sql = `INSERT INTO sales_order (amount,status,userId,activityId,transactionId,orderId,createdBy)VALUES("${amount}","${status}","${userId}","${activityId}","${transactionId}","${orderId}","${createdBy}")`;
     mysqlconnection.query(sql, async function (err, result) {
       if (err) throw err;
@@ -46,13 +46,13 @@ module.exports = {
 
       const queryForCustomeName = `SELECT name,email1 FROM users where id = "${userId}"`;
       const customerNameResponse = await query(queryForCustomeName);
-      
+
       const queryForCustomerId = `SELECT customerId FROM customers where userId = "${userId}"`;
       const customerIdQueryResponse = await query(queryForCustomerId);
-      
+
       const queryForItemID = `SELECT itemID FROM items where activityId = "${activityId}"`;
       const itemId = await query(queryForItemID);
-      
+
       const activityidd = `SELECT name,price FROM items where activityId = "${activityId}"`;
       const activityData = await query(activityidd);
 
@@ -77,30 +77,32 @@ module.exports = {
       const updateSql = `UPDATE sales_order SET  transactionId = "${sageIntacctorderID}" WHERE id="${result.insertId}"`;
       const updateInvoice = await query(updateSql);
 
-      let todaynewdate=moment(new Date()).format("MMM DD, YYYY");
+      let todaynewdate = moment(new Date()).format("MMM DD, YYYY");
 
-      const newData={
-        userName:customerNameResponse[0]?.name,
-        userEmail:customerNameResponse[0]?.email1,
-        activityName:activityData[0]?.name,
-        activityprice:activityData[0]?.price,
-        transactionIdd:transactionId,
-        datee:todaynewdate
+      const newData = {
+        userName: customerNameResponse[0]?.name,
+        userEmail: customerNameResponse[0]?.email1,
+        activityName: activityData[0]?.name,
+        activityprice: activityData[0]?.price,
+        transactionIdd: transactionId,
+        datee: todaynewdate,
+      };
+
+      const hh = await SalesTemplate(newData);
+      if (result) {
+        sendEmails(
+          customerNameResponse[0]?.email1,
+          "Sales Order Details From QIS✔",
+          hh
+        );
       }
 
-      const hh = await SalesTemplate(newData)
-      if(result){
-          sendEmails(customerNameResponse[0]?.email1, "Sales Order Details From QIS✔", hh);
-        }
-      
-      res
-      .status(200)
-        .json({
-          message: "Data inserted successfully",
-          data: result,
-          sageIntacctorderID: sageIntacctorderID,
-        });
+      res.status(200).json({
+        message: "Data inserted successfully",
+        data: result,
+        sageIntacctorderID: sageIntacctorderID,
       });
+    });
   },
 
   //get activity controller
@@ -116,6 +118,19 @@ module.exports = {
   getSalesDetails: (req, res) => {
     const id = req.params.id;
     var sql = `SELECT sales_order.id,sales_order.amount,sales_order.status,userId,activityId,orderId,sales_order.createdBy,sales_order.isDeleted,users.name as user_name,users.email1 as user_email1,users.email2 as user_email2,users.phone1 as user_phone1,users.phone2 as user_phone2,users.printUs as user_printUs,users.createdAt as user_create_Date,users.contactName as user_contactName,users.roleId as user_roleId,users.typeId as user_typeId,users.parentId as user_parentId,activites.name as activity_name,activites.description as activity_description,activites.shortDescription as activity_shortDescription,activites.type as activity_type,activites.status as activity_status,activites.shortDescription as activity_shortDescription,activites.description as activity_description,activites.startDate as activity_startDate,activites.endDate as activity_endDate,activites.price as activity_price,transaction.transactionId,transaction.invoiceId as transaction_invoiceId,transaction.paymentMethod as transaction_paymentMethod,transaction.totalAmount as transaction_amount,transaction.paidAmount as transaction_paidAmount ,transaction.amex_order_Id as transaction_amex_order_Id from sales_order INNER JOIN users ON users.id = sales_order.userId INNER JOIN activites ON activites.id = sales_order.activityId INNER JOIN transaction ON transaction.sales_order_Id = sales_order.id where sales_order.id=${id}`;
+
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) {
+        res.status(400).json({ message: "something went wrong", data: result });
+      } else {
+        res.status(200).json({ message: "ok", data: result });
+      }
+    });
+  },
+
+  getActivityViewSales: (req, res) => {
+    const id = req.params.id;
+    var sql = `SELECT activites.name as activity_name,sales_order.status as sales_status,activites.price as activity_price,sales_order.createdAt as createDate FROM student_portal.sales_order INNER JOIN activites ON activites.id = sales_order.activityId where userId=${id} ORDER BY sales_order.createdAt desc`;
 
     mysqlconnection.query(sql, function (err, result) {
       if (err) {

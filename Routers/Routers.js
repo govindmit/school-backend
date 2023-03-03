@@ -74,6 +74,7 @@ const {
   addSalesOrder,
   getSalesOrder,
   getSalesDetails,
+  getActivityViewSales,
   editSalesOrder,
   deleteSalesOrder,
 } = require("../Controllers/SalesOrderController/salesordercontrollers");
@@ -182,6 +183,7 @@ router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
 router.post("/addSalesOrders", upload.none(), addSalesOrder);
 router.post("/getSalesOrders", getSalesOrder);
 router.get("/getSalesOrdersDetails/:id", getSalesDetails);
+router.get("/getactivitybyuserid/:id", getActivityViewSales);
 router.put("/editSalesOrders/:id", upload.none(), editSalesOrder);
 router.delete("/deleteSalesOrders/:id", deleteSalesOrder);
 
