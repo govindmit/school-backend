@@ -303,12 +303,14 @@ module.exports = {
       updatedBy,
       agegroup,
       pregeneratedid,
+      useraddress,
     } = req.body;
 
     const user_permition = req.body.previlegs;
     const per = JSON.stringify({ user_permition });
+    const addr = JSON.stringify(useraddress);
 
-    let sql = `select id, name, email1, email2, phone1, phone2, roleId, typeId, parentId, contactName, printUs, status, generatedId, agegroup, updatedBy from users where id=${id}`;
+    let sql = `select id, name, email1, email2, phone1, phone2, roleId, typeId, parentId, contactName, printUs, status, agegroup, updatedBy from users where id=${id}`;
     mysqlconnection.query(sql, async function (err, result) {
       console.log(id,"result =>", result);
 
@@ -331,7 +333,6 @@ module.exports = {
               secondaryPhoneNo: phone2,
               // parentCustomerId: parentIdOfCustomer[0].customerId,
             };
-
             const updateInstacctCustomer = await updateIntacctCustomer(data);
           }
         }
@@ -347,18 +348,15 @@ module.exports = {
         contactName ? contactName : result[0].contactName
       }",printUs = "${printUs ? printUs : result[0].printUs}", status= ${
         status ? status : 0
-      } , agegroup = ${
-        agegroup ? agegroup : result[0].agegroup
-      }, generatedId = "${
-        pregeneratedid ? pregeneratedid : result[0].generatedId
-      }", typeId= ${typeId ? typeId : result[0].typeId}, 
-       
+      } , agegroup = ${agegroup ? agegroup : result[0].agegroup}, typeId= ${
+        typeId ? typeId : result[0].typeId
+      }, 
        parentId = ${parentId ? parentId : result[0].parentId}, updatedBy = ${
         updatedBy ? updatedBy : result[0].updatedBy
       } where id = ${id}`;
       mysqlconnection.query(updt_query, function (err, result) {
         if (err) throw err;
-        const update_permition = `update metaOptions set previlegs ='${per}' where userId = ${id}`;
+        const update_permition = `update metaOptions set previlegs ='${per}', value = '${addr}' where userId = ${id}`;
         mysqlconnection.query(update_permition, function (err, responce) {
           if (err) throw err;
           res.status(200).send({
