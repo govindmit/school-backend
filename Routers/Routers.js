@@ -77,6 +77,7 @@ const {
   getActivityViewSales,
   editSalesOrder,
   deleteSalesOrder,
+  getSalesOrderByUserId,
 } = require("../Controllers/SalesOrderController/salesordercontrollers");
 
 //################        invoice controllers      #########
@@ -109,6 +110,7 @@ const {
   getCredirBallanceController,
   insertAmount,
   getCredirBallanceByUserController,
+  getCreditReqByuserController,
 } = require("../Controllers/CreditNotes/creditNotesController");
 
 //################        check emails controllers ########################
@@ -185,6 +187,7 @@ router.get("/getSalesOrdersDetails/:id", getSalesDetails);
 router.get("/getactivitybyuserid/:id", getActivityViewSales);
 router.put("/editSalesOrders/:id", upload.none(), editSalesOrder);
 router.delete("/deleteSalesOrders/:id", deleteSalesOrder);
+router.get("/getSalesOrdersByUser/:id", verifyAuthToken, getSalesOrderByUserId);
 
 //#########################  invoice routers  ###########################
 
@@ -289,8 +292,12 @@ router.get(
   getCredirBallanceByUserController
 );
 router.get("/creditballance/:id", verifyAuthToken, getCredirBallanceController);
-
 router.put("/insertAmount", verifyAuthToken, insertAmount);
+router.get(
+  "/getCreditReqByuser/:id",
+  verifyAuthToken,
+  getCreditReqByuserController
+);
 
 //######################### check emails #######################
 router.post("/checkEmails", CheckEmails);

@@ -190,4 +190,15 @@ module.exports = {
         .json({ message: "Data deleted successfully", response: result });
     });
   },
+  //get sales order by user id
+  getSalesOrderByUserId: (req, res) => {
+    const user_id = req.params.id;
+    var sql = `SELECT sales_order.id, sales_order.userId, sales_order.activityId,  sales_order.amount, sales_order.status,
+     activites.name as activity_name from sales_order
+       INNER JOIN activites ON activites.id = sales_order.activityId where sales_order.userId = ${user_id} `;
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
+    });
+  },
 };
