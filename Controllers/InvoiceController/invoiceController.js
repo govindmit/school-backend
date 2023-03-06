@@ -324,4 +324,12 @@ module.exports = {
     const invoice = await query(sql);
     res.send(invoice);
   },
+
+
+  getPendingInvoice: async (req, res) => {
+    let sql = `SELECT invoices.id as invid, invoices.amount,invoices.invoiceId,invoices.status,invoices.customerId, invoices.itemId,invoices.createdDate, invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND isDeleted = 0  AND status="pending"`;
+    const invoice = await query(sql);
+    res.send(invoice);
+  },
+
 };

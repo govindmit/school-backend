@@ -9,6 +9,7 @@ const {
   getListOfItems,
 } = require("../../SageIntacctAPIs/ItemServices");
 const query = util.promisify(mysqlconnection.query).bind(mysqlconnection);
+
 module.exports = {
   //add activity controller
   addActivityController: (req, res) => {

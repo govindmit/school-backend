@@ -90,6 +90,7 @@ const {
   getInvoiceNo,
   editInvoice,
   getInvoiceByUser,
+  getPendingInvoice
 } = require("../Controllers/InvoiceController/invoiceController");
 
 //################  items controllers ########################
@@ -200,6 +201,7 @@ router.post("/editInvoice/:id", upload.none(), editInvoice);
 router.get("/sendInvoiceEmail/:id", SendInvoiceEmail);
 router.get("/getInvoicebyUser/:id", getInvoiceByUserId);
 router.post("/getInvoicebyUser/:id", getInvoiceByUser);
+router.post("/getPendingInvoices/:id", getPendingInvoice);
 router.get("/getInvoiceNo", getInvoiceNo);
 
 //############################ Item routers ############################
