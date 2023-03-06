@@ -312,15 +312,15 @@ module.exports = {
 
     let sql = `select id, name, email1, email2, phone1, phone2, roleId, typeId, parentId, contactName, printUs, status, agegroup, updatedBy from users where id=${id}`;
     mysqlconnection.query(sql, async function (err, result) {
-      console.log("result =>", result);
+      console.log(id,"result =>", result);
 
       if (err) throw err;
       const customerquery = `select customerId from customers where userId = ${id}`;
-      const parentquery = `select customerId from customers where userId = ${parentId}`;
+      // const parentquery = `select customerId from customers where userId = ${parentId}`;
       const customerData = mysqlconnection.query(
         customerquery,
         async function (err, resu) {
-          const parentIdOfCustomer = await query(parentquery);
+          // const parentIdOfCustomer = await query(parentquery);
 
           if (result) {
             const data = {
@@ -331,7 +331,7 @@ module.exports = {
               secondaryEmailAddress: email2,
               primaryPhoneNo: phone1,
               secondaryPhoneNo: phone2,
-              parentCustomerId: parentIdOfCustomer[0].customerId,
+              // parentCustomerId: parentIdOfCustomer[0].customerId,
             };
             const updateInstacctCustomer = await updateIntacctCustomer(data);
           }
