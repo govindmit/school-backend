@@ -72,7 +72,7 @@ module.exports = {
   //get credit notes details controller
   getCreditNotesDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select creditRequests.id as "creditReqId", users.name, users.email1, users.id as "customerId", creditRequests.status,creditRequests.amount, activites.name as "activityname" from creditRequests
+    var sql = `select creditRequests.id as "creditReqId", users.name, users.email1, users.createdAt, users.id as "customerId", creditRequests.status,creditRequests.amount, activites.name as "activityname" from creditRequests
     LEFT OUTER JOIN users on users.id = creditRequests.userId
     LEFT OUTER JOIN activites on activites.id = creditRequests.activityId
     where creditRequests.id = ${id}`;
@@ -176,6 +176,17 @@ module.exports = {
     mysqlconnection.query(query, function (err, results) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: results });
+    });
+  },
+
+  //get cedit req by user id
+  getCreditReqByuserController: (req, res) => {
+    const id = req.params.id;
+    var sql = `select creditRequests.id, creditRequests.amount, creditRequests.status, activites.name
+    from creditRequests left outer join activites on activites.id = creditRequests.activityId where userId = ${id}`;
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
     });
   },
 };

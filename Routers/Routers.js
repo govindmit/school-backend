@@ -77,6 +77,7 @@ const {
   getActivityViewSales,
   editSalesOrder,
   deleteSalesOrder,
+  getSalesOrderByUserId,
 } = require("../Controllers/SalesOrderController/salesordercontrollers");
 
 //################        invoice controllers      #########
@@ -110,6 +111,7 @@ const {
   getCredirBallanceController,
   insertAmount,
   getCredirBallanceByUserController,
+  getCreditReqByuserController,
 } = require("../Controllers/CreditNotes/creditNotesController");
 
 //################        check emails controllers ########################
@@ -155,10 +157,7 @@ router.put("/updatestudent/:id", editstudentcontroller);
 router.post("/userlogin", verifyAuthToken, userlogincontroller);
 router.post("/forgotpassword", verifyAuthToken, forgotpasswordcontroller);
 router.post("/resetpassword", verifyAuthToken, resetpasswordcontroller);
-
 router.post("/sendcomposer", sendComposerMailcontroller);
-
-
 
 //#############################  activities routers  ###########################
 router.post("/getActivity", verifyAuthToken, getActivityController);
@@ -189,6 +188,7 @@ router.get("/getSalesOrdersDetails/:id", getSalesDetails);
 router.get("/getactivitybyuserid/:id", getActivityViewSales);
 router.put("/editSalesOrders/:id", upload.none(), editSalesOrder);
 router.delete("/deleteSalesOrders/:id", deleteSalesOrder);
+router.get("/getSalesOrdersByUser/:id", verifyAuthToken, getSalesOrderByUserId);
 
 //#########################  invoice routers  ###########################
 
@@ -293,13 +293,13 @@ router.get(
   verifyAuthToken,
   getCredirBallanceByUserController
 );
-router.get(
-  "/creditballance/:id",
-  verifyAuthToken,
-  getCredirBallanceController
-);
-
+router.get("/creditballance/:id", verifyAuthToken, getCredirBallanceController);
 router.put("/insertAmount", verifyAuthToken, insertAmount);
+router.get(
+  "/getCreditReqByuser/:id",
+  verifyAuthToken,
+  getCreditReqByuserController
+);
 
 //######################### check emails #######################
 router.post("/checkEmails", CheckEmails);

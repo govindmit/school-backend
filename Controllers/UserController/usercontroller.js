@@ -56,6 +56,7 @@ module.exports = {
       if (result.length > 0) {
         return res.status(400).send({ message: "Email1 already registered." });
       } else {
+        
         if (userRole === "user") {
           mysqlconnection.query(insert_query, function (err, responce) {
             if (err) throw err;

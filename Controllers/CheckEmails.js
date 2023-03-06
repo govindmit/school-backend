@@ -8,7 +8,11 @@ module.exports = {
       process.env.JWT_SECRET_KEY
     );
     const dt = await ResetEmailFormat(resetPasswordtoken);
-    sendEmails("sj2585097@gmail.com", "Testing Qatar School Emails ✔", dt);
-    res.status(200).json({ message: "Email sent" });
+    const resp = sendEmails(
+      "govind.mangoitsolutions@gmail.com",
+      "Testing Qatar School Emails ✔",
+      dt
+    );
+    res.status(200).json({ message: "Email sent - res = " + resp });
   },
 };
