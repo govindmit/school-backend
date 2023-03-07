@@ -22,8 +22,12 @@ module.exports = {
         const creditRequestMsgquery = `INSERT INTO creditRequestMsg (message,senderId,receiverId,creditReqId)VALUES("${message}",${userId},0,${result.insertId})`;
         mysqlconnection.query(creditRequestMsgquery, function (err, rest) {
           if (err) throw err;
-          res.status(200).send({
-            message: "credit request created successfully.",
+          const updetsales_order = `update sales_order set isRequested = 1 where sales_order.id =${salesOrderId}`;
+          mysqlconnection.query(updetsales_order, function (err, result) {
+            if (err) throw err;
+            res.status(200).send({
+              message: "credit request created successfully.",
+            });
           });
         });
       }
@@ -70,18 +74,22 @@ module.exports = {
   },
 
   //get credit notes details controller
-  getCreditNotesDetailsController: (req, res) => {
+  getCreditNotesDetailsController: async (req, res) => {
     const id = req.params.id;
     var sql = `select creditRequests.id as "creditReqId", users.name, users.email1, users.createdAt, users.id as "customerId", creditRequests.status,creditRequests.amount, activites.name as "activityname" from creditRequests
     LEFT OUTER JOIN users on users.id = creditRequests.userId
     LEFT OUTER JOIN activites on activites.id = creditRequests.activityId
     where creditRequests.id = ${id}`;
-    mysqlconnection.query(sql, function (err, result) {
+    mysqlconnection.query(sql, async function (err, result) {
       if (err) throw err;
       const dtmsg = `select message from creditRequestMsg where creditReqId = ${id}`;
+      const approvalamtauery = `select creditNotes.createdAt, creditNotes.amount from creditNotes where creditRequestId = ${id}`;
+      const appramt = await query(approvalamtauery);
       mysqlconnection.query(dtmsg, function (err, results) {
         if (err) throw err;
-        res.status(200).json({ message: "ok", data: { result, results } });
+        res
+          .status(200)
+          .json({ message: "ok", data: { result, results, appramt } });
       });
     });
   },
