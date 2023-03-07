@@ -287,7 +287,6 @@ router.get(
   verifyAuthToken,
   getCreditNotesDetailsController
 );
-router.put("/insertAmount", verifyAuthToken, insertAmount);
 router.get(
   "/creditballanceByUser/:id",
   verifyAuthToken,
