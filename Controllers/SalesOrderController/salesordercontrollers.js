@@ -73,7 +73,7 @@ module.exports = {
       const sageIntacctSalesOrder = await createSalesOrder(data);
       const SalesorderId = sageIntacctSalesOrder._key;
       const sageIntacctorderID = SalesorderId?.split("-")[1];
-      console.log("sageIntacctorderID", sageIntacctorderID);
+      console.log(SalesorderId,"sageIntacctorderID", sageIntacctorderID);
       const updateSql = `UPDATE sales_order SET  transactionId = "${sageIntacctorderID}" WHERE id="${result.insertId}"`;
       const updateInvoice = await query(updateSql);
 
