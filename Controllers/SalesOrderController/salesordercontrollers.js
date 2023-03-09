@@ -117,7 +117,7 @@ module.exports = {
   //get sales details controller
   getSalesDetails: (req, res) => {
     const id = req.params.id;
-    var sql = `SELECT sales_order.id,sales_order.amount,sales_order.status,userId,activityId,orderId,sales_order.createdBy,sales_order.isDeleted,users.name as user_name,users.email1 as user_email1,users.email2 as user_email2,users.phone1 as user_phone1,users.phone2 as user_phone2,users.printUs as user_printUs,users.createdAt as user_create_Date,users.contactName as user_contactName,users.roleId as user_roleId,users.typeId as user_typeId,users.parentId as user_parentId,activites.name as activity_name,activites.description as activity_description,activites.shortDescription as activity_shortDescription,activites.type as activity_type,activites.status as activity_status,activites.shortDescription as activity_shortDescription,activites.description as activity_description,activites.startDate as activity_startDate,activites.endDate as activity_endDate,activites.price as activity_price,transaction.transactionId,transaction.invoiceId as transaction_invoiceId,transaction.paymentMethod as transaction_paymentMethod,transaction.totalAmount as transaction_amount,transaction.paidAmount as transaction_paidAmount ,transaction.amex_order_Id as transaction_amex_order_Id from sales_order INNER JOIN users ON users.id = sales_order.userId INNER JOIN activites ON activites.id = sales_order.activityId INNER JOIN transaction ON transaction.sales_order_Id = sales_order.id where sales_order.id=${id}`;
+    var sql = `SELECT sales_order.id,sales_order.amount,sales_order.status,sales_order.isRequested,userId,activityId,orderId,sales_order.createdBy,sales_order.isDeleted,users.name as user_name,users.email1 as user_email1,users.email2 as user_email2,users.phone1 as user_phone1,users.phone2 as user_phone2,users.printUs as user_printUs,users.createdAt as user_create_Date,users.contactName as user_contactName,users.roleId as user_roleId,users.typeId as user_typeId,users.parentId as user_parentId,activites.name as activity_name,activites.description as activity_description,activites.shortDescription as activity_shortDescription,activites.type as activity_type,activites.status as activity_status,activites.shortDescription as activity_shortDescription,activites.description as activity_description,activites.startDate as activity_startDate,activites.endDate as activity_endDate,activites.price as activity_price,transaction.transactionId,transaction.invoiceId as transaction_invoiceId,transaction.paymentMethod as transaction_paymentMethod,transaction.totalAmount as transaction_amount,transaction.paidAmount as transaction_paidAmount ,transaction.amex_order_Id as transaction_amex_order_Id from sales_order INNER JOIN users ON users.id = sales_order.userId INNER JOIN activites ON activites.id = sales_order.activityId INNER JOIN transaction ON transaction.sales_order_Id = sales_order.id where sales_order.id=${id}`;
 
     mysqlconnection.query(sql, function (err, result) {
       if (err) {
@@ -190,11 +190,12 @@ module.exports = {
         .json({ message: "Data deleted successfully", response: result });
     });
   },
+
   //get sales order by user id
   getSalesOrderByUserId: (req, res) => {
     const user_id = req.params.id;
     var sql = `SELECT sales_order.id, sales_order.userId, sales_order.activityId,  sales_order.amount, sales_order.status,
-     activites.name as activity_name from sales_order
+    sales_order.isRequested ,activites.name as activity_name from sales_order
        INNER JOIN activites ON activites.id = sales_order.activityId where sales_order.userId = ${user_id} `;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
