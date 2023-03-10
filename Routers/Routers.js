@@ -69,6 +69,12 @@ const {
   addActivityController,
 } = require("../Controllers/Activities/activitiescontrollers");
 
+//################        logs controllers      #########
+const {
+  addActivityLogsController,
+  getActivityLogsController,
+} =  require("../Controllers/logs/activitylogsController");
+
 //################    salesordercontrollers      #########
 const {
   addSalesOrder,
@@ -180,6 +186,24 @@ router.post(
 );
 
 router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
+
+//#############################  logs routers  ###########################
+router.post("/getlogsactivity", verifyAuthToken, getActivityLogsController);
+
+// router.get(
+//   "/getActivityDetails/:id",
+//   verifyAuthToken,
+//   getActivityDetailsController
+// );
+
+router.post(
+  "/addlogsactivity",
+  upload.none(),
+  verifyAuthToken,
+  addActivityLogsController
+);
+
+
 
 //#############################  SalesOrders routers  ###########################
 router.post("/addSalesOrders", upload.none(), addSalesOrder);

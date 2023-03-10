@@ -62,7 +62,7 @@ module.exports = {
       BycustomerId = "";
     }
 
-    var sqlquery = `select creditRequests.id, users.name as "customerName", users.email1, creditRequests.status, creditRequests.amount, activites.name
+    var sqlquery = `select creditRequests.id, users.name as "customerName", users.email1, creditRequests.status, creditRequests.amount,creditRequests.salesOrderId,creditRequests.invoiceId,creditRequests.createdAt,creditRequests.is_complete, activites.name
     from creditRequests
     LEFT outer join users on users.id = creditRequests.userId
     LEFT outer join activites on activites.id = creditRequests.activityId
@@ -119,7 +119,7 @@ module.exports = {
       });
     }
     if (status === 4) {
-      const updatecreditRequestswuery = `update creditRequests set status = ${status} where id = ${id}`;
+      const updatecreditRequestswuery = `update creditRequests set status = ${status}, is_complete = 1 where id = ${id}`;
       mysqlconnection.query(updatecreditRequestswuery, function (err, result) {
         if (err) throw err;
         const creditRequestMsgquery = `INSERT INTO creditRequestMsg (message,senderId,receiverId,creditReqId)VALUES("${message}",0,${updatedBy},${id})`;

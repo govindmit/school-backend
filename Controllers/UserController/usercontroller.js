@@ -70,6 +70,7 @@ module.exports = {
                 if (err) throw err;
                 sendEmails(email1, "Reset Password Link From QIS✔", dt);
                 res.status(200).send({
+                  data:responce,
                   message: "User Registration successfully.",
                 });
               });
@@ -108,6 +109,7 @@ module.exports = {
                     mysqlconnection.query(updtparnt, function (err, result) {
                       if (err) throw err;
                       res.status(200).json({
+                        data:result,
                         msg1: "Parent Registration successfully.",
                       });
                     });
@@ -183,6 +185,7 @@ module.exports = {
                               dt
                             );
                             res.status(200).send({
+                              data:custResult,
                               message: "Customer Registration successfully.",
                             });
                           }
