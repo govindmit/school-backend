@@ -87,7 +87,6 @@ module.exports = {
         transactionIdd: transactionId,
         datee: todaynewdate,
       };
-
       const hh = await SalesTemplate(newData);
       if (result) {
         sendEmails(
