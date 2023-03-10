@@ -14,6 +14,7 @@ module.exports = {
   //create invoice
   CreateInvoice: async (req, res) => {
     const body = req.body;
+    console.log("body =>",body);
     var customerId = req.body.customerId;
     var amount = req.body.amount;
     var itemId = req.body.itemId;
@@ -62,8 +63,10 @@ module.exports = {
       let items = [];
       let quantitys = [];
       for (var i = 0; i < itemId.length; i++) {
+        console.log("itemId[i] => ",itemId[i]);
         const getitemId = `select itemId from items where id="${itemId[i]}"`;
         const intacctItem = await query(getitemId);
+        console.log("intacctItem =>",intacctItem);
         items.push(intacctItem[0].itemId);
         quantitys.push("1");
       }
@@ -96,7 +99,12 @@ module.exports = {
         res
           .status(200)
           .json({ message: "Invoice created successfully", data: invoice });
-      } else {
+      } else  if (invoice && status === "paid"){
+        res
+        .status(200)
+        .json({ message: "Invoice created successfully", data: invoice });
+        
+      }else{
         res.status(400).json({ message: "something went wrong" });
       }
     }

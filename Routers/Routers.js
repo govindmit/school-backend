@@ -234,6 +234,8 @@ const {
   createInstacctInvoice,
   deleteInstacctInvoice,
   updateInstacctInvoice,
+  getListARPayments,
+  getARInvoiceRecordNumber,
 } = require("../SageIntacctAPIs/InvoiceService");
 const {
   getListOfItems,
@@ -254,6 +256,7 @@ const {
   updateSalesOrder,
   deleteSageIntacctSalesOrder,
 } = require("../SageIntacctAPIs/SalesOrderService");
+const { createpaymentAndApplyOnARInvoice } = require("../SageIntacctAPIs/PaymentServices");
 
 router.get("/getListCustomersLegacy", getListCustomersLegacy);
 router.get("/getListCustomersTypeLegacy", getListofCustomersType);
@@ -271,6 +274,11 @@ router.put("/updateSageIntacctItem", updateSageIntacctItem);
 router.delete("/deleteSageIntacctItem", deleteSageIntacctItem);
 
 router.get("/getSalesOrderLegacy", getListOfSalesOrder);
+
+router.get('/AccountsReceivable/getARInvoice',getInvoiceList)
+router.get('/AccountsReceivable/getARInvoiceRecordNo',getARInvoiceRecordNumber)
+router.get('/AccountsReceivable/getARPayment',getListARPayments);
+router.post("/AccountsReceivable/applyPayment",createpaymentAndApplyOnARInvoice)
 // router.post('/createSalesOrder',createSalesOrder)
 // router.put('/updateSalesOrder',updateSalesOrder)
 // router.delete('/deleteSalesOrder',deleteSageIntacctSalesOrder)

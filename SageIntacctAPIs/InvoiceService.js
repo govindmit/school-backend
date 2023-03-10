@@ -1,6 +1,48 @@
 
 const {client,IA} = require('./IntacctClient')
 module.exports = {
+    createInstacctInvoice: async(req,res)=>{
+        try{
+            
+            let record = new IA.Functions.AccountsReceivable.InvoiceCreate();
+            record.customerId = '10003'
+            record.description = "Test invoice "
+            record.dueDate= new Date("9/2/2025");
+    
+           
+            let line1 = new IA.Functions.AccountsReceivable.InvoiceLineCreate();
+            // line1.lineNo = 1
+            // line1.itemId = "CSS1006";
+            // line1.memo =" test"
+            
+            console.log("invoice 4 ");
+            // line1.lineItem.glAccountNumber = 10100
+            // line1.lineItem.transactionAmount = 500.60
+            console.log("invoice 5");
+            
+    
+              record.lines = [
+                line1,
+            ];
+           
+    
+            // create.transactionDate = new Date();
+            // create.transactionCurrency = 'US'
+            console.log("record =>",record);
+            const createResponse = await client.execute(record).catch((error)=>{
+                console.log("error =>",error.message);
+                res.send(error.message)
+            })
+           
+    
+            const createResult = createResponse.getResult();
+            console.log("createResult => ",createResult);
+            res.send(createResult)
+        }catch(error){
+            return error.message
+        }
+    },
+
     getInvoiceList : async(req,res)=>{
         try{
 
@@ -21,49 +63,14 @@ module.exports = {
             const result = response.getResult();
             let json_data = result.data;
             res.status(200).send(json_data);
+
+
+         
+
+
+
         }catch(error){
             res.status(400).send({message:error.message});
-        }
-    },
-    createInstacctInvoice: async(req,res)=>{
-        try{
-            
-            let record = new IA.Functions.AccountsReceivable.InvoiceCreate();
-            record.customerId = '10003'
-            record.description = "Test invoice "
-            record.dueDate= new Date("9/2/2025");
-
-           
-            let line1 = new IA.Functions.AccountsReceivable.InvoiceLineCreate();
-            // line1.lineNo = 1
-            // line1.itemId = "CSS1006";
-            // line1.memo =" test"
-            
-            console.log("invoice 4 ");
-            // line1.lineItem.glAccountNumber = 10100
-            // line1.lineItem.transactionAmount = 500.60
-            console.log("invoice 5");
-            
-
-              record.lines = [
-                line1,
-            ];
-           
-
-            // create.transactionDate = new Date();
-            // create.transactionCurrency = 'US'
-            console.log("record =>",record);
-            const createResponse = await client.execute(record).catch((error)=>{
-                console.log("error =>",error.message);
-                res.send(error.message)
-            })
-           
-
-            const createResult = createResponse.getResult();
-            console.log("createResult => ",createResult);
-            res.send(createResult)
-        }catch(error){
-            return error.message
         }
     },
 
@@ -101,6 +108,45 @@ module.exports = {
              res.send(deleteResult)
         }catch(error){
             res.send(error.message)
+        }
+    },
+
+
+getARInvoiceRecordNumber : async(req,res)=>{
+    try{
+        let query = new IA.Functions.Common.NewQuery.Query();
+        query.fromObject = "ARINVOICE";
+        let fields = [
+                         new IA.Functions.Common.NewQuery.QuerySelect.Field('RECORDNO'),
+                        //  new IA.Functions.Common.NewQuery.QuerySelect.Field('RECORDNO'),
+                         
+                     ]
+        let filter = new IA.Functions.Common.NewQuery.QueryFilter.Filter('RECORDID').equalTo("IN0074");
+        query.selectFields = fields;
+        query.pageSize = 100;
+        query.filter = filter;
+        const response = await client.execute(query);
+        const result = response.getResult();
+        let json_data = result.data[0];
+        res.status(200).send(json_data)
+    }catch(error){
+        res.status(400).send({message:error.message})
+    }
+},
+
+    getListARPayments : async(req,res)=>{
+        try{
+            let query = new IA.Functions.Common.ReadByQuery();
+            query.objectName = "ARPYMT"; // Keep the count to just 1 for the example
+            query.pageSize = 100;
+            const response = await client.execute(query);
+            const result = response.getResult();
+            let json_data = result.data;
+            res.status(200).send(json_data);
+        }catch(error){
+            res.status(400).send({
+                message:error.message
+            })
         }
     }
 }
