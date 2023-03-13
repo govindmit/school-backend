@@ -18,6 +18,7 @@ module.exports = {
             record.transactionDate = new Date(data.createDate);//"2/15/2023"
             record.dueDate = new Date("02/24/2025");
             record.customerId = data.customerId; //10003
+            record.summaryRecordNo = "12345"
             var lines = [];
                
                 for(var i=0 ; i<itemIds.length ; i++){
@@ -123,8 +124,8 @@ module.exports = {
             const response = await client.execute(query);
             const result = response.getResult();
             let json_data = result.data;
-            isSalesInvoiceExistInDB(json_data);
-            // res.status(200).send(json_data)
+            // isSalesInvoiceExistInDB(json_data);
+            res.status(200).send(json_data)
         }catch(error){
             // res.status(400).send({
             //     error:error.message
