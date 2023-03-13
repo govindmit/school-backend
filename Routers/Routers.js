@@ -73,7 +73,7 @@ const {
 const {
   addActivityLogsController,
   getActivityLogsController,
-} =  require("../Controllers/logs/activitylogsController");
+} =  require("../Controllers/logsDetailsController/activitylogsController");
 
 //################    salesordercontrollers      #########
 const {
@@ -189,13 +189,6 @@ router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
 
 //#############################  logs routers  ###########################
 router.post("/getlogsactivity", verifyAuthToken, getActivityLogsController);
-
-// router.get(
-//   "/getActivityDetails/:id",
-//   verifyAuthToken,
-//   getActivityDetailsController
-// );
-
 router.post(
   "/addlogsactivity",
   upload.none(),
