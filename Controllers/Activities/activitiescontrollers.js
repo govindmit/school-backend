@@ -104,8 +104,10 @@ module.exports = {
       byType = "";
     }
 
-    var sql = `select id, name, type, status,shortDescription, description,startDate, endDate, price  from activites where 1=1 ${byStatus}${byType}`;
-   const schedulerExist = await getListOfItems();
+    // var sql = `select id, name, type, status,shortDescription, description,startDate, endDate, price  from activites where 1=1 ${byStatus}${byType}`;
+    var sql = `select activites.id , activites.name, activites.type, activites.status,shortDescription, activites.description,startDate, endDate, activites.price,items.itemId ,items.id as Iid,items.price as Iprice,items.description as Idescription ,items.name as Iname,items.activityId  from activites,items where items.activityId = activites.id and  1=1 ${byStatus}${byType} `;
+  
+    //  const schedulerExist = await getListOfItems();
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
