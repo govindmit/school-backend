@@ -113,6 +113,47 @@ module.exports = {
     });
   },
 
+  getReport: (req, res) => {
+    
+    var startDate = req.body.startDate;
+    var endDate = req.body.endDate;
+    var customer = "";
+    var email = "";
+    var date = "";
+    var invoiceid = "";
+    var receipt = "";
+    var paymentMethod = "";
+   
+    if (startDate && endDate) {
+      date = `AND sales_order.createdAt BETWEEN '${startDate}' AND '${endDate}'`;
+    }
+    if (startDate && endDate && req.body.status) {
+      date = `AND sales_order.createdAt BETWEEN '${startDate}' AND '${endDate}'`;
+    }
+    if (req.body.invoiceid) {
+      invoiceid = `AND transaction.invoiceId = ${req.body.invoiceid}`;
+    }
+    if (req.body.receipt) {
+      receipt = `AND transaction.refrenceId = ${req.body.receipt}`;
+    }
+    if (req.body.customer) {
+      customer = `AND users.name IN ("${req.body.customer}")`;
+    }
+    if (req.body.paymentMethod) {
+      paymentMethod = `AND transaction.paymentMethod = "${req.body.paymentMethod}"`;
+    }
+
+    var sql = `SELECT sales_order.id,transaction.refrenceId as receiptId,transaction.transactionId as transactionId,transaction.invoiceId as invoiceId,transaction.paymentMethod as paymentMethod,sales_order.amount,sales_order.createdAt, users.name as customer_name,users.email1 as customer_email,activites.name as activity_name from sales_order INNER JOIN users ON users.id = sales_order.userId INNER JOIN activites ON activites.id = sales_order.activityId INNER JOIN transaction ON sales_order_Id = sales_order.id where 1=1 ${date} ${email} ${customer} ${invoiceid} ${receipt} ${paymentMethod}`;
+    
+    mysqlconnection.query(sql, function (err, result) {
+      if (err) throw err;
+      res.status(200).json({ message: "ok", data: result });
+    });
+  },
+
+
+
+
   //get sales details controller
   getSalesDetails: (req, res) => {
     const id = req.params.id;

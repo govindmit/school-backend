@@ -70,7 +70,7 @@ module.exports = {
         sendEmails(email1, "Reset Password Link From QIS✔", dt);
         res
           .status(200)
-          .json({ msg: "Link send successfully for reset password" });
+          .json({ msg: "Link send successfully for reset password",data:result });
       } else {
         res.status(401).json({ message: "Email Not Registred" });
       }
