@@ -166,7 +166,7 @@ module.exports = {
 
       res.status(200).json({ data: invoice });
     } else {
-      let invoices = `SELECT users.name,invoices.invoiceId,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${req.params.id}`;
+      let invoices = `SELECT users.name,invoices.invoiceId,invoices.amount,invoices.customerId,invoices.status,invoices.id,invoices.createdDate,invoices.invoiceDate,invoices.itemId, invoices.isRequested FROM invoices INNER JOIN users ON invoices.customerId = users.id INNER JOIN items ON invoices.itemId = items.id WHERE invoices.id = ${req.params.id}`;
       const invoicess = await query(invoices);
       await getListOfSalesInovice();
       // for (let row of invoicess) {
@@ -354,16 +354,15 @@ module.exports = {
     } else {
       bydate = "";
     }
-    let sql = `SELECT invoices.id as invid, invoices.amount,invoices.invoiceId,invoices.status,invoices.customerId, invoices.itemId,invoices.createdDate, invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND isDeleted = 0 and invoices.status !='draft' ${bystatus} ${byamount} ${byinvoiceid} ${bydate} ${bysorting} `;
+    let sql = `SELECT invoices.id as invid, invoices.amount,invoices.invoiceId,invoices.status,invoices.customerId, invoices.itemId,invoices.createdDate, invoices.invoiceDate,invoices.id,invoices.itemId, invoices.isRequested FROM invoices WHERE customerId =${req.params.id} AND isDeleted = 0 and invoices.status !='draft' ${bystatus} ${byamount} ${byinvoiceid} ${bydate} ${bysorting} `;
     const invoice = await query(sql);
     res.send(invoice);
   },
 
-
+  //get pending invoices
   getPendingInvoice: async (req, res) => {
     let sql = `SELECT invoices.id as invid, invoices.amount,invoices.invoiceId,invoices.status,invoices.customerId, invoices.itemId,invoices.createdDate, invoices.invoiceDate,invoices.id,invoices.itemId FROM invoices WHERE customerId =${req.params.id} AND isDeleted = 0  AND status="pending"`;
     const invoice = await query(sql);
     res.send(invoice);
   },
-
 };

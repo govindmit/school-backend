@@ -445,4 +445,9 @@ module.exports = {
       res.status(200).json({ message: "ok", data: result });
     });
   },
+
+  //send user emails
+  SendUserEmailController: (req, res) => {
+    res.status(200).json({ message: "ok" });
+  },
 };

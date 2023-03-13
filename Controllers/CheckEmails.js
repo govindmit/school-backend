@@ -9,7 +9,7 @@ module.exports = {
     );
     const dt = await ResetEmailFormat(resetPasswordtoken);
     const resp = sendEmails(
-      "govind.mangoitsolutions@gmail.com",
+      "sj2585097@gmail.com",
       "Testing Qatar School Emails ✔",
       dt
     );

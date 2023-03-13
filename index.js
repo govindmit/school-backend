@@ -1,4 +1,5 @@
 const express = require("express");
+const nodeCron = require("node-cron");
 const app = express();
 const body_parser = require("body-parser");
 const cors = require("cors");
@@ -18,6 +19,10 @@ const PORT = process.env.PORT || 5003;
 
 app.get("/", (req, res) => {
   res.send("working fine..");
+});
+
+const job = nodeCron.schedule("30 20 * * * *", () => {
+  console.log(new Date().toLocaleString());
 });
 
 //create server

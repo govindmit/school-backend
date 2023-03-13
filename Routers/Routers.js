@@ -43,6 +43,7 @@ const {
   GetUserByPidController,
   GetUserByMultipleIdController,
   GetLastInsertIdController,
+  SendUserEmailController,
 } = require("../Controllers/UserController/usercontroller");
 
 //############  Student controller  ##########################
@@ -91,7 +92,7 @@ const {
   getInvoiceNo,
   editInvoice,
   getInvoiceByUser,
-  getPendingInvoice
+  getPendingInvoice,
 } = require("../Controllers/InvoiceController/invoiceController");
 
 //################  items controllers ########################
@@ -147,6 +148,7 @@ router.get(
   GetUserByMultipleIdController
 );
 router.get("/getLastInsertId", verifyAuthToken, GetLastInsertIdController);
+router.post("/sendUserEmail", verifyAuthToken, SendUserEmailController);
 
 //##############################  students routes   ############################
 router.post("/addstudent", upload.none(), addstudentcontroller);

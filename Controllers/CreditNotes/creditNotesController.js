@@ -11,24 +11,40 @@ module.exports = {
       amount,
       activityId,
       salesOrderId,
+      invoiceId,
       createdBy,
       message,
     } = req.body;
     //insert query
-    const creditRequestsquery = `INSERT INTO creditRequests (userId,salesOrderId,status,amount,createdBy,activityId)VALUES(${userId},${salesOrderId},${status},${amount},${createdBy},${activityId})`;
+    const creditRequestsquery = `INSERT INTO creditRequests (userId,salesOrderId,invoiceId,status,amount,createdBy,activityId)VALUES(${userId},${
+      salesOrderId === 0 ? 0 : salesOrderId
+    },${
+      invoiceId === 0 ? 0 : invoiceId
+    },${status},${amount},${createdBy},"${activityId}")`;
     mysqlconnection.query(creditRequestsquery, function (err, result) {
       if (err) throw err;
       if (result) {
         const creditRequestMsgquery = `INSERT INTO creditRequestMsg (message,senderId,receiverId,creditReqId)VALUES("${message}",${userId},0,${result.insertId})`;
         mysqlconnection.query(creditRequestMsgquery, function (err, rest) {
           if (err) throw err;
-          const updetsales_order = `update sales_order set isRequested = 1 where sales_order.id =${salesOrderId}`;
-          mysqlconnection.query(updetsales_order, function (err, result) {
-            if (err) throw err;
-            res.status(200).send({
-              message: "credit request created successfully.",
+          if (salesOrderId > 0) {
+            const updetsales_order = `update sales_order set isRequested = 1 where sales_order.id =${salesOrderId}`;
+            mysqlconnection.query(updetsales_order, function (err, result) {
+              if (err) throw err;
+              res.status(200).send({
+                message: "credit request created successfully.",
+              });
             });
-          });
+          }
+          if (invoiceId > 0) {
+            const updetinvoices = `update invoices set isRequested = 1 where invoices.id =${invoiceId}`;
+            mysqlconnection.query(updetinvoices, function (err, result) {
+              if (err) throw err;
+              res.status(200).send({
+                message: "credit request created successfully.",
+              });
+            });
+          }
         });
       }
     });
@@ -62,7 +78,7 @@ module.exports = {
       BycustomerId = "";
     }
 
-    var sqlquery = `select creditRequests.id, users.name as "customerName", users.email1, creditRequests.status, creditRequests.amount, activites.name
+    var sqlquery = `select creditRequests.id, users.name as "customerName", users.email1, creditRequests.status, creditRequests.amount, creditRequests.salesOrderId,creditRequests.invoiceId,activites.name
     from creditRequests
     LEFT outer join users on users.id = creditRequests.userId
     LEFT outer join activites on activites.id = creditRequests.activityId
@@ -76,7 +92,7 @@ module.exports = {
   //get credit notes details controller
   getCreditNotesDetailsController: async (req, res) => {
     const id = req.params.id;
-    var sql = `select creditRequests.id as "creditReqId", users.name, users.email1, users.createdAt, users.id as "customerId", creditRequests.status,creditRequests.amount, activites.name as "activityname" from creditRequests
+    var sql = `select creditRequests.id as "creditReqId", users.name, users.email1, users.createdAt, users.id as "customerId", creditRequests.status,creditRequests.amount, creditRequests.invoiceId, creditRequests.salesOrderid, activites.name as "activityname" from creditRequests
     LEFT OUTER JOIN users on users.id = creditRequests.userId
     LEFT OUTER JOIN activites on activites.id = creditRequests.activityId
     where creditRequests.id = ${id}`;
@@ -105,10 +121,13 @@ module.exports = {
       customerId,
       amountMode,
       creditRequestId,
+      salesOrderId,
+      invoiceId,
+      approvedBy,
     } = req.body;
 
     if (status < 4) {
-      const updatecreditRequestswuery = `update creditRequests set status = ${status} where id = ${id}`;
+      const updatecreditRequestswuery = `update creditRequests set status = ${status}, approvedBy = ${approvedBy} where id = ${id}`;
       mysqlconnection.query(updatecreditRequestswuery, function (err, result) {
         if (err) throw err;
         const creditRequestMsgquery = `INSERT INTO creditRequestMsg (message,senderId,receiverId,creditReqId)VALUES("${message}",0,${updatedBy},${id})`;
@@ -119,7 +138,7 @@ module.exports = {
       });
     }
     if (status === 4) {
-      const updatecreditRequestswuery = `update creditRequests set status = ${status} where id = ${id}`;
+      const updatecreditRequestswuery = `update creditRequests set status = ${status}, is_complete = 1 where id = ${id}`;
       mysqlconnection.query(updatecreditRequestswuery, function (err, result) {
         if (err) throw err;
         const creditRequestMsgquery = `INSERT INTO creditRequestMsg (message,senderId,receiverId,creditReqId)VALUES("${message}",0,${updatedBy},${id})`;
@@ -128,9 +147,24 @@ module.exports = {
           const sel_query = `insert into creditNotes (customerId,amount,amountMode,creditRequestId)values(${customerId},${amount},${amountMode},${creditRequestId})`;
           mysqlconnection.query(sel_query, function (err, resultt) {
             if (err) throw err;
-            res
-              .status(200)
-              .json({ message: "credit ballance debited successfully" });
+            if (salesOrderId > 0) {
+              const updetsales_order = `update sales_order set isRequested = 2 where sales_order.id =${salesOrderId}`;
+              mysqlconnection.query(updetsales_order, function (err, result) {
+                if (err) throw err;
+                res
+                  .status(200)
+                  .json({ message: "credit ballance debited successfully" });
+              });
+            }
+            if (invoiceId > 0) {
+              const updetinvoices = `update invoices set isRequested = 2 where invoices.id =${invoiceId}`;
+              mysqlconnection.query(updetinvoices, function (err, result) {
+                if (err) throw err;
+                res
+                  .status(200)
+                  .json({ message: "credit ballance debited successfully" });
+              });
+            }
           });
         });
       });
@@ -177,7 +211,7 @@ module.exports = {
     }
   },
 
-  //insert amount
+  //get cedit req by user id
   getCredirBallanceByUserController: async (req, res) => {
     const query = `SELECT creditNotes.id, creditNotes.createdAt, creditNotes.amount, creditRequests.status FROM creditNotes
     left outer join creditRequests on creditRequests.id = creditNotes.creditRequestId where customerId = ${req.params.id}`;
@@ -190,8 +224,9 @@ module.exports = {
   //get cedit req by user id
   getCreditReqByuserController: (req, res) => {
     const id = req.params.id;
-    var sql = `select creditRequests.id, creditRequests.amount, creditRequests.status, activites.name
-    from creditRequests left outer join activites on activites.id = creditRequests.activityId where userId = ${id}`;
+    var sql = `select creditRequests.id, creditRequests.amount, creditRequests.status,creditRequests.salesOrderId, creditRequests.invoiceId, activites.name,
+    items.name as "item_name" from creditRequests left outer join activites on activites.id = creditRequests.activityId
+    left outer join items on items .id = creditRequests.activityId where userId = ${id}`;
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });
