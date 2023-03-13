@@ -276,7 +276,7 @@ router.delete("/deleteSageIntacctItem", deleteSageIntacctItem);
 router.get("/getSalesOrderLegacy", getListOfSalesOrder);
 
 router.get('/AccountsReceivable/getARInvoice',getInvoiceList)
-router.get('/AccountsReceivable/getARInvoiceRecordNo',getARInvoiceRecordNumber)
+router.post('/AccountsReceivable/getARInvoiceRecordNo',getARInvoiceRecordNumber)
 router.get('/AccountsReceivable/getARPayment',getListARPayments);
 router.post("/AccountsReceivable/applyPayment",createpaymentAndApplyOnARInvoice)
 // router.post('/createSalesOrder',createSalesOrder)

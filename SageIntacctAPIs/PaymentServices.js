@@ -2,33 +2,37 @@ const {client,IA} = require('./IntacctClient')
 module.exports = {
     createpaymentAndApplyOnARInvoice : async(req,res)=>{
         try{
+            const body = req.body;
+            const {customerId,amount,ARinvoiceRecordNumber,referenceNumber,ARpaymentMethod} = body;
+            if(!customerId || !amount || !ARinvoiceRecordNumber || !referenceNumber || !ARpaymentMethod){
+                res.status(201).send({message:"fileds are missing"});
+                return ;
+            }
             let objectDate = new Date();
-            let CreateDate =
-              objectDate.getMonth() +
-              1 +
-              "/" +
-              objectDate.getDate() +
-              "/" +
-              objectDate.getFullYear();
-            console.log("new Date(CreateDate) =>",new Date(CreateDate));
-            console.log("new Date =>",new Date("6/30/2016"));
+            let CreateDate = objectDate.getMonth() +  1 +  "/" + objectDate.getDate() +"/" + objectDate.getFullYear();
+            // const record = new IA.Functions.AccountsReceivable.ArPaymentCreate();
+            // record.customerId = "10381";
+            // record.transactionPaymentAmount = 500.00;
+            // record.receivedDate = new Date(CreateDate);
+            // record.paymentMethod = "EFT";
+            // record.bankAccountId = "100_SVB";
+            // record.overpaymentLocationId = "100";
+            // record.referenceNumber = "123456789";
+            // const applyToRecordA = new IA.Functions.AccountsReceivable.ArPaymentItem();
+            // applyToRecordA.applyToRecordId = 1352;
+            // applyToRecordA.amountToApply = 75.00;
 
             const record = new IA.Functions.AccountsReceivable.ArPaymentCreate();
-            record.customerId = "10381";
-            record.transactionPaymentAmount = 500.00;
-            // record.receivedDate = new Date("6/30/2016");
+            record.customerId = customerId;
+            record.transactionPaymentAmount = amount;
             record.receivedDate = new Date(CreateDate);
-            record.paymentMethod = "EFT";
+            record.paymentMethod = ARpaymentMethod;
             record.bankAccountId = "100_SVB";
-            // record.undepositedFundsGlAccountNo = "10100";
-            // record.summaryRecordNo = 12345;
-            // record.overpaymentLocationId = "100--US";
-            // record.overpaymentDepartmentId = "CS";
-            
-            record.referenceNumber = "123456789";
+            record.overpaymentLocationId = "100";
+            record.referenceNumber = referenceNumber;
             const applyToRecordA = new IA.Functions.AccountsReceivable.ArPaymentItem();
-            applyToRecordA.applyToRecordId = 1352;
-            applyToRecordA.amountToApply = 75.00;
+            applyToRecordA.applyToRecordId = ARinvoiceRecordNumber;
+            applyToRecordA.amountToApply = amount;
             record.applyToTransactions = [
                 applyToRecordA
             ];
@@ -37,7 +41,7 @@ module.exports = {
                 res.send(result)
 
             }).catch(error=>{
-                console.log("error =>",error);
+               
                 res.send(error)
             });
             // const result = response.getResult();

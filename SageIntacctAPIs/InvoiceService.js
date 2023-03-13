@@ -112,27 +112,33 @@ module.exports = {
     },
 
 
-getARInvoiceRecordNumber : async(req,res)=>{
-    try{
-        let query = new IA.Functions.Common.NewQuery.Query();
-        query.fromObject = "ARINVOICE";
-        let fields = [
-                         new IA.Functions.Common.NewQuery.QuerySelect.Field('RECORDNO'),
-                        //  new IA.Functions.Common.NewQuery.QuerySelect.Field('RECORDNO'),
-                         
-                     ]
-        let filter = new IA.Functions.Common.NewQuery.QueryFilter.Filter('RECORDID').equalTo("IN0074");
-        query.selectFields = fields;
-        query.pageSize = 100;
-        query.filter = filter;
-        const response = await client.execute(query);
-        const result = response.getResult();
-        let json_data = result.data[0];
-        res.status(200).send(json_data)
-    }catch(error){
-        res.status(400).send({message:error.message})
-    }
-},
+    getARInvoiceRecordNumber : async(req,res)=>{
+        try{
+            const { arInvoiceId } = req.body ;
+            console.log("ARInvoiceId =>",arInvoiceId);
+            if(!arInvoiceId){
+                res.status(201).send({message:"AR Inovice ID is required !"});
+                return
+            }
+            let query = new IA.Functions.Common.NewQuery.Query();
+            query.fromObject = "ARINVOICE";
+            let fields = [
+                            new IA.Functions.Common.NewQuery.QuerySelect.Field('RECORDNO'),
+                            //  new IA.Functions.Common.NewQuery.QuerySelect.Field('RECORDNO'),
+                            
+                        ]
+            let filter = new IA.Functions.Common.NewQuery.QueryFilter.Filter('RECORDID').equalTo(arInvoiceId);
+            query.selectFields = fields;
+            query.pageSize = 100;
+            query.filter = filter;
+            const response = await client.execute(query);
+            const result = response.getResult();
+            let json_data = result.data[0];
+            res.status(200).send(json_data)
+        }catch(error){
+            res.status(400).send({message:error.message})
+        }
+    },
 
     getListARPayments : async(req,res)=>{
         try{
