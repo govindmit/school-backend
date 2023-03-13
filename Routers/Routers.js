@@ -79,6 +79,7 @@ const {
 const {
   addSalesOrder,
   getSalesOrder,
+  getReport,
   getSalesDetails,
   getActivityViewSales,
   editSalesOrder,
@@ -201,6 +202,7 @@ router.post(
 //#############################  SalesOrders routers  ###########################
 router.post("/addSalesOrders", upload.none(), addSalesOrder);
 router.post("/getSalesOrders", getSalesOrder);
+router.post("/getReports", getReport);
 router.get("/getSalesOrdersDetails/:id", getSalesDetails);
 router.get("/getactivitybyuserid/:id", getActivityViewSales);
 router.put("/editSalesOrders/:id", upload.none(), editSalesOrder);
