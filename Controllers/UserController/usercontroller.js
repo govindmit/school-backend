@@ -70,6 +70,7 @@ module.exports = {
                 if (err) throw err;
                 sendEmails(email1, "Reset Password Link From QIS✔", dt);
                 res.status(200).send({
+                  data:responce,
                   message: "User Registration successfully.",
                 });
               });
@@ -108,6 +109,7 @@ module.exports = {
                     mysqlconnection.query(updtparnt, function (err, result) {
                       if (err) throw err;
                       res.status(200).json({
+                        data:result,
                         msg1: "Parent Registration successfully.",
                       });
                     });
@@ -183,6 +185,7 @@ module.exports = {
                               dt
                             );
                             res.status(200).send({
+                              data:custResult,
                               message: "Customer Registration successfully.",
                             });
                           }
@@ -284,7 +287,9 @@ module.exports = {
   //get user details controller
   getUserDetailsController: (req, res) => {
     const id = req.params.id;
-    var sql = `select users.id,users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, agegroup, users.createdAt, generatedId, users.attentionTo, roles.name as "role", roles.id as "roleId", metaOptions.previlegs as "userPrevilegs", metaOptions.value as "address" from users LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
+    // var sql = `select users.id,users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, agegroup, users.createdAt, generatedId, users.attentionTo, roles.name as "role", roles.id as "roleId", metaOptions.previlegs as "userPrevilegs", metaOptions.value as "address" from users LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
+    var sql = `select users.id,users.parentId, users.name, users.email1, users.email2, users.phone1, users.phone2, users.typeId, users.contactName, users.printUs as printus, users.status, agegroup, users.createdAt, generatedId, users.attentionTo, roles.name as "role", roles.id as "roleId", metaOptions.previlegs as "userPrevilegs", metaOptions.value as "address",customers.customerId as sageCustomerId from users left outer join customers on customers.userId=users.id LEFT outer join roles on roles.id = users.roleId left outer join metaOptions on metaOptions.userId = users.id where users.id = ${id}`;
+   
     mysqlconnection.query(sql, function (err, result) {
       if (err) throw err;
       res.status(200).json({ message: "ok", data: result });

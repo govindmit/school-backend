@@ -70,6 +70,12 @@ const {
   addActivityController,
 } = require("../Controllers/Activities/activitiescontrollers");
 
+//################        logs controllers      #########
+const {
+  addActivityLogsController,
+  getActivityLogsController,
+} =  require("../Controllers/logsDetailsController/activitylogsController");
+
 //################    salesordercontrollers      #########
 const {
   addSalesOrder,
@@ -183,6 +189,17 @@ router.post(
 
 router.delete("/deleteActivity/:id", verifyAuthToken, deleteActivityController);
 
+//#############################  logs routers  ###########################
+router.post("/getlogsactivity", verifyAuthToken, getActivityLogsController);
+router.post(
+  "/addlogsactivity",
+  upload.none(),
+  verifyAuthToken,
+  addActivityLogsController
+);
+
+
+
 //#############################  SalesOrders routers  ###########################
 router.post("/addSalesOrders", upload.none(), addSalesOrder);
 router.post("/getSalesOrders", getSalesOrder);
@@ -236,6 +253,8 @@ const {
   createInstacctInvoice,
   deleteInstacctInvoice,
   updateInstacctInvoice,
+  getListARPayments,
+  getARInvoiceRecordNumber,
 } = require("../SageIntacctAPIs/InvoiceService");
 const {
   getListOfItems,
@@ -256,6 +275,7 @@ const {
   updateSalesOrder,
   deleteSageIntacctSalesOrder,
 } = require("../SageIntacctAPIs/SalesOrderService");
+const { createpaymentAndApplyOnARInvoice } = require("../SageIntacctAPIs/PaymentServices");
 
 router.get("/getListCustomersLegacy", getListCustomersLegacy);
 router.get("/getListCustomersTypeLegacy", getListofCustomersType);
@@ -273,6 +293,11 @@ router.put("/updateSageIntacctItem", updateSageIntacctItem);
 router.delete("/deleteSageIntacctItem", deleteSageIntacctItem);
 
 router.get("/getSalesOrderLegacy", getListOfSalesOrder);
+
+router.get('/AccountsReceivable/getARInvoice',getInvoiceList)
+router.post('/AccountsReceivable/getARInvoiceRecordNo',getARInvoiceRecordNumber)
+router.get('/AccountsReceivable/getARPayment',getListARPayments);
+router.post("/AccountsReceivable/applyPayment",createpaymentAndApplyOnARInvoice)
 // router.post('/createSalesOrder',createSalesOrder)
 // router.put('/updateSalesOrder',updateSalesOrder)
 // router.delete('/deleteSalesOrder',deleteSageIntacctSalesOrder)
